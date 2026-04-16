@@ -233,25 +233,19 @@
     </div>
     <div class="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-4 text-xs text-amber-800 space-y-1">
       <p><strong>📌 录入说明：</strong></p>
-      <p>每行一个CDK码，保存后点「⚡ 一键分配」时可设置每人分几个。系统按报名通过顺序自动分组。</p>
-      <p>例如：通过了 4 人，每人 3 个，需粘贴 12 个CDK。</p>
-    </div>
-    <div class="flex items-center gap-3 mb-3 bg-gray-50 rounded-xl px-3 py-2.5">
-      <label class="text-xs font-semibold text-gray-600 whitespace-nowrap">每人分配数量：</label>
-      <input type="number" id="cdkPerPerson" value="3" min="1" max="20" class="w-20 text-center font-bold text-gray-800" oninput="updateCDKCount()" style="border:1.5px solid #e5e7eb;border-radius:8px;padding:5px 8px;" />
-      <span class="text-xs text-gray-400">个CDK / 人</span>
+      <p>每行一个CDK码，支持随时修改。保存后在「⚡ 一键分配」中设置每人分几个再执行分配。</p>
     </div>
     <div class="mb-3">
       <div class="flex items-center justify-between mb-1">
         <label class="text-xs font-semibold text-gray-500">批量粘贴CDK（每行一个）</label>
         <span id="cdkCountHint" class="text-xs text-gray-400"></span>
       </div>
-      <textarea id="batchCDKText" rows="12" placeholder="CDK-XXXX-YYYY-ZZZZ&#10;CDK-XXXX-YYYY-ZZZZ&#10;CDK-XXXX-YYYY-ZZZZ&#10;..." class="font-mono text-xs" oninput="updateCDKCount()"></textarea>
+      <textarea id="batchCDKText" rows="14" placeholder="CDK-XXXX-YYYY-ZZZZ&#10;CDK-XXXX-YYYY-ZZZZ&#10;CDK-XXXX-YYYY-ZZZZ&#10;..." class="font-mono text-xs" oninput="updateCDKCount()"></textarea>
     </div>
     <div id="cdkPreviewInfo" class="text-xs text-gray-500 mb-3"></div>
     <div class="flex gap-3">
       <button class="btn-secondary flex-1" onclick="closeModal('batchCDKModal')">取消</button>
-      <button class="btn-primary flex-1" onclick="saveBatchCDK()">保存到CDK池</button>
+      <button class="btn-primary flex-1" onclick="saveBatchCDK()">💾 保存到CDK池</button>
     </div>
   </div>
 </div>
@@ -806,26 +800,19 @@ function loadCDKPane() {
 
 // ---- BATCH CDK ----
 function openBatchCDKModal() {
-  document.getElementById('batchCDKText').value = '';
-  document.getElementById('cdkCountHint').textContent = '';
-  document.getElementById('cdkPreviewInfo').textContent = '';
+  const taskId = document.getElementById('cdkTaskSelect').value;
+  const existing = (cachedDB.cdkPools && cachedDB.cdkPools[taskId]) || [];
+  // 加载已有CDK，支持重新编辑
+  document.getElementById('batchCDKText').value = existing.join('\n');
+  document.getElementById('cdkCountHint').textContent = existing.length ? `已有 ${existing.length} 个` : '';
+  document.getElementById('cdkPreviewInfo').textContent = existing.length ? `当前CDK池已有 ${existing.length} 个，可直接修改后保存。` : '';
   document.getElementById('batchCDKModal').classList.remove('hidden');
 }
 function updateCDKCount() {
-  const lines   = document.getElementById('batchCDKText').value.split('\n').map(l=>l.trim()).filter(Boolean);
-  const perPerson = parseInt(document.getElementById('cdkPerPerson').value)||3;
-  const taskId  = document.getElementById('cdkTaskSelect').value;
-  const db      = cachedDB;
-  const approved = db.signups.filter(s=>s.taskId===taskId&&s.makerStatus==='approved').length;
-  const need    = approved * perPerson;
+  const lines  = document.getElementById('batchCDKText').value.split('\n').map(l=>l.trim()).filter(Boolean);
   document.getElementById('cdkCountHint').textContent = `已输入 ${lines.length} 个`;
   const info = document.getElementById('cdkPreviewInfo');
-  if (lines.length>0) {
-    const enough = lines.length >= need;
-    info.innerHTML = `当前通过 <strong>${approved}</strong> 人，每人 <strong>${perPerson}</strong> 个，共需 <strong>${need}</strong> 个CDK。
-      已输入 <strong>${lines.length}</strong> 个。
-      ${enough?`<span class="text-green-600 font-semibold">数量充足 ✅，可一键分配</span>`:`<span class="text-amber-600 font-semibold">数量不足，还差 ${need-lines.length} 个</span>`}`;
-  } else { info.textContent=''; }
+  info.textContent = lines.length > 0 ? `共 ${lines.length} 个CDK，保存后在「一键分配」中设置每人数量。` : '';
 }
 async function saveBatchCDK() {
   const lines   = document.getElementById('batchCDKText').value.split('\n').map(l=>l.trim()).filter(Boolean);
