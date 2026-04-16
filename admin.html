@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>运营后台 · 单主机游戏推广</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<!-- SheetJS for Excel export -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- JSZip for bundling screenshots + Excel -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<!-- FileSaver for zip download -->
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<!-- ExcelJS for image-embedded Excel -->
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script src="api.js?v=1776325528"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+  .badge-pending  { background:#fef3c7;color:#92400e; }
+  .badge-approved { background:#d1fae5;color:#065f46; }
+  .badge-rejected { background:#fee2e2;color:#991b1b; }
+  textarea,input[type=text],input[type=url],input[type=date],input[type=password],select {
+    border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 13px;width:100%;
+    outline:none;transition:border .2s;font-size:14px;box-sizing:border-box;
+  }
+  input:focus,select:focus,textarea:focus { border-color:#e63e6d; }
+  .btn-primary  { background:#e63e6d;color:white;border-radius:9px;padding:9px 20px;font-weight:600;cursor:pointer;transition:background .2s;border:none; }
+  .btn-primary:hover { background:#c52d5a; }
+  .btn-secondary{ background:#f3f4f6;color:#374151;border-radius:9px;padding:9px 20px;font-weight:600;cursor:pointer;border:none; }
+  .btn-secondary:hover { background:#e5e7eb; }
+  .btn-green    { background:#10b981;color:white;border-radius:7px;padding:5px 14px;font-size:13px;cursor:pointer;border:none; }
+  .btn-green:hover { background:#059669; }
+  .btn-red      { background:#ef4444;color:white;border-radius:7px;padding:5px 14px;font-size:13px;cursor:pointer;border:none; }
+  .btn-red:hover { background:#dc2626; }
+  .btn-purple   { background:#7c3aed;color:white;border-radius:9px;padding:9px 20px;font-weight:600;cursor:pointer;border:none; }
+  .btn-purple:hover { background:#6d28d9; }
+  .btn-teal     { background:#0d9488;color:white;border-radius:9px;padding:9px 20px;font-weight:600;cursor:pointer;border:none; }
+  .btn-teal:hover { background:#0f766e; }
+  .section-tab  { padding:7px 18px;border-radius:99px;cursor:pointer;font-size:14px;transition:all .15s;border:none;background:transparent;color:#374151; }
+  .section-tab.active { background:#e63e6d;color:white; }
+  .modal-backdrop { background:rgba(0,0,0,.45); }
+  ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-thumb { background:#d1d5db;border-radius:3px; }
+  .card { background:white;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:20px; }
+  .stat-card { background:white;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:16px 20px;text-align:center; }
+  .img-thumb { width:60px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;cursor:pointer; }
+  .cdk-mono { font-family:'Courier New',monospace;background:#f0fdf4;border:1px solid #bbf7d0;
+    border-radius:8px;padding:6px 12px;font-size:12px;color:#065f46;letter-spacing:.04em;display:inline-block;word-break:break-all; }
+  .tr-hover:hover { background:#f9fafb; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- HEADER -->
+<div class="bg-white shadow-sm sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="creator.html" class="text-gray-400 hover:text-gray-700 text-sm">← 返回</a>
+      <div class="w-px h-4 bg-gray-200"></div>
+      <span class="text-xl">🎛️</span>
+      <span class="font-bold text-gray-800">运营后台</span>
+      <span class="text-xs text-gray-400 hidden sm:inline">· 发任务 / 审名单 / 分CDK / 收数据</span>
+    </div>
+    <button class="btn-secondary text-sm py-2 px-4" onclick="exportFullReport()">📋 导出完整报告</button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="max-w-6xl mx-auto px-4 mt-5">
+  <div id="statsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5"></div>
+</div>
+
+<!-- TABS -->
+<div class="bg-white border-b border-gray-100 sticky top-[52px] z-30">
+  <div class="max-w-6xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto">
+    <button onclick="showTab('overview')" id="tab-overview" class="section-tab active whitespace-nowrap">📋 任务总览</button>
+    <button onclick="showTab('publish')"  id="tab-publish"  class="section-tab whitespace-nowrap">➕ 发布任务</button>
+    <button onclick="showTab('signups')"  id="tab-signups"  class="section-tab whitespace-nowrap">👥 报名管理</button>
+    <button onclick="showTab('cdk')"      id="tab-cdk"      class="section-tab whitespace-nowrap">🎮 CDK分配</button>
+    <button onclick="showTab('content')"  id="tab-content"  class="section-tab whitespace-nowrap">📦 数据跟进</button>
+    <button onclick="showTab('qrcode')"   id="tab-qrcode"   class="section-tab whitespace-nowrap">🔗 招募链接</button>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="max-w-6xl mx-auto px-4 py-6">
+
+  <!-- OVERVIEW -->
+  <div id="pane-overview" class="space-y-4"><div id="overviewList"></div></div>
+
+  <!-- PUBLISH -->
+  <div id="pane-publish" class="hidden">
+    <div class="card mb-4">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-base">📋</span>
+        <h4 class="font-bold text-gray-700">粘贴 Brief 自动填入</h4>
+        <span class="text-xs text-gray-400">粘贴厂商发来的文字，自动识别各字段</span>
+      </div>
+      <textarea id="autoPasteBox" rows="5" placeholder="把厂商发来的游戏信息粘贴到这里，点击「识别填入」自动解析..." class="text-xs"></textarea>
+      <div class="flex justify-end mt-2 gap-2">
+        <button class="btn-secondary text-sm py-2 px-4" onclick="document.getElementById('autoPasteBox').value=''">清空</button>
+        <button class="btn-purple text-sm py-2 px-4" onclick="autoParseBrief()">✨ 识别填入</button>
+      </div>
+      <div id="autoParseResult" class="hidden mt-2 text-xs bg-green-50 border border-green-200 rounded-xl px-3 py-2 text-green-700"></div>
+    </div>
+    <div class="card">
+      <h3 class="text-lg font-bold text-gray-800 mb-5">📝 发布推广任务</h3>
+      <div class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label class="block text-sm font-medium text-gray-700 mb-1">游戏名称 <span class="text-red-500">*</span></label>
+            <input type="text" id="f_gameName" placeholder="例如：女吊" /></div>
+          <div><label class="block text-sm font-medium text-gray-700 mb-1">游戏类型</label>
+            <input type="text" id="f_gameType" placeholder="例如：双人联机解谜" /></div>
+        </div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">一句话亮点 <span class="text-red-500">*</span></label>
+          <input type="text" id="f_highlight" placeholder="例如：吴越民俗微恐双人联机" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">🎁 任务奖励 <span class="text-red-500">*</span></label>
+          <input type="text" id="f_reward" placeholder="例如：每人赠送3个CDK；或：CDK + 周边礼包一份" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">游戏链接</label>
+          <input type="url" id="f_gameLink" placeholder="https://store.steampowered.com/..." /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">游戏简介</label>
+          <textarea id="f_desc" rows="3" placeholder="详细介绍游戏背景、玩法特色..."></textarea></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">内容要求</label>
+          <textarea id="f_req" rows="3" placeholder="例如：需要两台电脑联机体验，内容需在上线日后释出..."></textarea></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label class="block text-sm font-medium text-gray-700 mb-1">📢 内容释出时间 <span class="text-gray-400 font-normal">（可开始直播/发布内容的时间）</span></label>
+            <input type="text" id="f_releaseStart" placeholder="例如：4月18日中午12点后" /></div>
+          <div><label class="block text-sm font-medium text-gray-700 mb-1">⏰ 数据提交截止时间 <span class="text-gray-400 font-normal">（最晚上传数据的时间）</span></label>
+            <input type="text" id="f_submitDeadline" placeholder="例如：4月25日23:59" /></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div><label class="block text-sm font-medium text-gray-700 mb-1">招募类型</label>
+            <select id="f_recruitType">
+              <option value="不限">不限（博主 + 主播）</option>
+              <option value="博主">仅博主</option>
+              <option value="主播">仅主播</option>
+            </select></div>
+          <div><label class="block text-sm font-medium text-gray-700 mb-1">名额上限</label>
+            <input type="text" id="f_maxSignup" placeholder="不填则无限制" /></div>
+          <div><label class="block text-sm font-medium text-gray-700 mb-1">报名截止日期 <span class="text-red-500">*</span></label>
+            <input type="date" id="f_deadline" /></div>
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button class="btn-secondary" onclick="resetPublishForm()">重置</button>
+          <button class="btn-primary" onclick="publishTask()">🚀 立即发布</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNUPS -->
+  <div id="pane-signups" class="hidden space-y-4">
+    <div class="card">
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-xs font-medium text-gray-500 mb-1">选择任务</label>
+          <select id="signupTaskSelect" onchange="loadSignups()"></select>
+        </div>
+        <div class="flex gap-2 items-end pb-1 flex-wrap">
+          <button class="btn-teal text-sm py-2 px-4" onclick="exportSignupExcel()">📊 导出 Excel</button>
+          <button class="btn-primary text-sm py-2 px-4" onclick="batchApproveSignups()">✅ 批量通过</button>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 flex-wrap">
+      <button onclick="filterSignups('all')"      id="sf-all"      class="section-tab active text-sm">全部</button>
+      <button onclick="filterSignups('pending')"  id="sf-pending"  class="section-tab text-sm">⏳ 待审核</button>
+      <button onclick="filterSignups('approved')" id="sf-approved" class="section-tab text-sm">✅ 已通过</button>
+      <button onclick="filterSignups('rejected')" id="sf-rejected" class="section-tab text-sm">❌ 已拒绝</button>
+    </div>
+    <div id="signupList"></div>
+  </div>
+
+  <!-- CDK -->
+  <div id="pane-cdk" class="hidden space-y-4">
+    <div class="card">
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-xs font-medium text-gray-500 mb-1">选择任务</label>
+          <select id="cdkTaskSelect" onchange="loadCDKPane()"></select>
+        </div>
+        <div class="flex gap-2 flex-wrap items-end pb-1">
+          <button class="btn-purple" onclick="openBatchCDKModal()">📋 批量录入CDK</button>
+          <button class="btn-green" onclick="autoDistributeCDK()" id="btnAutoDistrib">⚡ 一键分配</button>
+        </div>
+      </div>
+    </div>
+    <!-- CDK pool status -->
+    <div id="cdkPoolStatus"></div>
+    <div id="cdkList"></div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="pane-content" class="hidden space-y-4">
+    <div class="card">
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-xs font-medium text-gray-500 mb-1">选择任务</label>
+          <select id="contentTaskSelect" onchange="loadContentPane()"></select>
+        </div>
+        <div class="flex gap-2 flex-wrap items-end pb-1">
+          <button class="btn-teal text-sm py-2 px-4" onclick="exportContentExcel()">📊 导出 Excel</button>
+        </div>
+      </div>
+    </div>
+    <!-- 跟进看板：已通过报名但未提交内容 -->
+    <div id="contentFollowUp"></div>
+    <!-- 已提交内容列表 -->
+    <div id="contentList"></div>
+  </div>
+
+  <!-- QRCODE -->
+  <div id="pane-qrcode" class="hidden space-y-4">
+    <div class="card">
+      <label class="block text-xs font-medium text-gray-500 mb-1">选择任务</label>
+      <select id="qrTaskSelect" onchange="renderQR()"></select>
+      <p class="text-xs text-gray-400 mt-2">👇 选择任务后，生成该任务的专属报名链接 / 二维码，发给主播或博主扫码报名</p>
+    </div>
+    <div id="qrList" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed top-4 right-4 text-white px-5 py-3 rounded-xl text-sm shadow-xl z-[9999] opacity-0 transition-opacity duration-300 pointer-events-none" style="background:#1f2937"></div>
+
+<!-- ===== BATCH CDK MODAL ===== -->
+<div id="batchCDKModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-6 w-[560px] max-h-[90vh] overflow-y-auto shadow-xl">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-bold text-gray-800">📋 批量录入 CDK</h3>
+      <button onclick="closeModal('batchCDKModal')" class="text-gray-300 hover:text-gray-500 text-2xl leading-none">×</button>
+    </div>
+    <div class="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-4 text-xs text-amber-800 space-y-1">
+      <p><strong>📌 录入说明：</strong></p>
+      <p>每行一个CDK码，保存后点「⚡ 一键分配」时可设置每人分几个。系统按报名通过顺序自动分组。</p>
+      <p>例如：通过了 4 人，每人 3 个，需粘贴 12 个CDK。</p>
+    </div>
+    <div class="flex items-center gap-3 mb-3 bg-gray-50 rounded-xl px-3 py-2.5">
+      <label class="text-xs font-semibold text-gray-600 whitespace-nowrap">每人分配数量：</label>
+      <input type="number" id="cdkPerPerson" value="3" min="1" max="20" class="w-20 text-center font-bold text-gray-800" oninput="updateCDKCount()" style="border:1.5px solid #e5e7eb;border-radius:8px;padding:5px 8px;" />
+      <span class="text-xs text-gray-400">个CDK / 人</span>
+    </div>
+    <div class="mb-3">
+      <div class="flex items-center justify-between mb-1">
+        <label class="text-xs font-semibold text-gray-500">批量粘贴CDK（每行一个）</label>
+        <span id="cdkCountHint" class="text-xs text-gray-400"></span>
+      </div>
+      <textarea id="batchCDKText" rows="12" placeholder="CDK-XXXX-YYYY-ZZZZ&#10;CDK-XXXX-YYYY-ZZZZ&#10;CDK-XXXX-YYYY-ZZZZ&#10;..." class="font-mono text-xs" oninput="updateCDKCount()"></textarea>
+    </div>
+    <div id="cdkPreviewInfo" class="text-xs text-gray-500 mb-3"></div>
+    <div class="flex gap-3">
+      <button class="btn-secondary flex-1" onclick="closeModal('batchCDKModal')">取消</button>
+      <button class="btn-primary flex-1" onclick="saveBatchCDK()">保存到CDK池</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DISTRIBUTE CDK MODAL ===== -->
+<div id="distribModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-6 w-[400px] shadow-xl">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-gray-800">⚡ 一键分配 CDK</h3>
+      <button onclick="closeModal('distribModal')" class="text-gray-300 hover:text-gray-500 text-2xl leading-none">×</button>
+    </div>
+    <div class="bg-gray-50 rounded-xl p-3 mb-4 text-sm text-gray-600 space-y-1">
+      <div>已通过人数：<strong id="distrib_approved" class="text-gray-800"></strong> 人</div>
+      <div>CDK池总量：<strong id="distrib_poolSize" class="text-gray-800"></strong> 个</div>
+    </div>
+    <div class="mb-4">
+      <label class="block text-sm font-semibold text-gray-700 mb-2">每人分配数量</label>
+      <div class="flex items-center gap-3">
+        <input type="number" id="distrib_perPerson" value="3" min="1" max="20"
+          class="w-24 text-center text-xl font-bold text-gray-800"
+          style="border:2px solid #e63e6d;border-radius:10px;padding:8px;"
+          oninput="_updateDistribPreview()" />
+        <span class="text-sm text-gray-500">个 CDK / 人</span>
+      </div>
+    </div>
+    <div id="distrib_preview" class="text-xs text-gray-500 bg-gray-50 rounded-xl px-3 py-2.5 mb-5"></div>
+    <div class="flex gap-3">
+      <button class="btn-secondary flex-1" onclick="closeModal('distribModal')">取消</button>
+      <button class="btn-primary flex-1" onclick="doDistributeCDK()">确认分配</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDIT TASK MODAL ===== -->
+<div id="editTaskModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-6 w-[560px] max-h-[92vh] overflow-y-auto shadow-xl">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-gray-800">✏️ 编辑任务</h3>
+      <button onclick="closeModal('editTaskModal')" class="text-gray-300 hover:text-gray-500 text-2xl leading-none">×</button>
+    </div>
+    <input type="hidden" id="et_id" />
+    <div class="space-y-3">
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs text-gray-500 font-semibold mb-1 block">游戏名称 *</label><input type="text" id="et_gameName" /></div>
+        <div><label class="text-xs text-gray-500 font-semibold mb-1 block">游戏类型</label><input type="text" id="et_gameType" /></div>
+      </div>
+      <div><label class="text-xs text-gray-500 font-semibold mb-1 block">一句话亮点 *</label><input type="text" id="et_highlight" /></div>
+      <div><label class="text-xs text-gray-500 font-semibold mb-1 block">🎁 任务奖励 *</label><input type="text" id="et_reward" placeholder="例如：每人赠送3个CDK；或：CDK + 周边礼包一份" /></div>
+      <div><label class="text-xs text-gray-500 font-semibold mb-1 block">游戏链接</label><input type="url" id="et_gameLink" /></div>
+      <div><label class="text-xs text-gray-500 font-semibold mb-1 block">游戏简介</label><textarea id="et_desc" rows="2"></textarea></div>
+      <div><label class="text-xs text-gray-500 font-semibold mb-1 block">内容要求</label><textarea id="et_req" rows="2"></textarea></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs text-gray-500 font-semibold mb-1 block">📢 内容释出时间</label><input type="text" id="et_releaseStart" placeholder="例如：4月18日中午12点后" /></div>
+        <div><label class="text-xs text-gray-500 font-semibold mb-1 block">⏰ 数据提交截止时间</label><input type="text" id="et_submitDeadline" placeholder="例如：4月25日23:59" /></div>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div><label class="text-xs text-gray-500 font-semibold mb-1 block">招募类型</label>
+          <select id="et_recruitType"><option value="不限">不限</option><option value="博主">仅博主</option><option value="主播">仅主播</option></select></div>
+        <div><label class="text-xs text-gray-500 font-semibold mb-1 block">名额上限</label><input type="text" id="et_maxSignup" /></div>
+        <div><label class="text-xs text-gray-500 font-semibold mb-1 block">截止日期</label><input type="date" id="et_deadline" /></div>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-5">
+      <button class="btn-secondary flex-1" onclick="closeModal('editTaskModal')">取消</button>
+      <button class="btn-primary flex-1" onclick="saveEditTask()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMAGE PREVIEW MODAL -->
+<div id="imgModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-[100] hidden" onclick="if(event.target===this)closeModal('imgModal')">
+  <div class="relative max-w-3xl max-h-[90vh] p-2" onclick="event.stopPropagation()">
+    <img id="imgModalSrc" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl object-contain" />
+    <div class="absolute top-2 right-2 flex gap-2">
+      <button id="imgModalDl" class="bg-white rounded-full px-3 h-8 text-gray-600 shadow text-xs font-semibold">⬇ 下载</button>
+      <button class="bg-white rounded-full w-8 h-8 text-gray-600 shadow text-lg leading-8" onclick="closeModal('imgModal')">×</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// DB 函数由 api.js 提供（loadDB / saveDB / cachedDB）
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function isDeadlinePassed(d) { return d && new Date(d+'T23:59:59') < new Date(); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type==='success'?'#059669':type==='error'?'#dc2626':'#1f2937';
+  t.style.opacity = '1';
+  setTimeout(()=>{ t.style.opacity='0'; }, 2800);
+}
+
+let _currentSignupFilter = 'all';
+
+// ---- INIT ----
+document.addEventListener('DOMContentLoaded', initPage);
+async function initPage() {
+  await loadDB();
+  renderStats();
+  showTab('overview');
+  startSync(db => {
+    cachedDB = db;
+    renderStats();
+    if (document.getElementById('pane-overview') && !document.getElementById('pane-overview').classList.contains('hidden')) renderOverview();
+  });
+}
+
+// ---- STATS ----
+function renderStats() {
+  const db = cachedDB;
+  const tasks    = db.tasks.filter(t=>t.opStatus==='approved').length;
+  const signups  = db.signups.length;
+  const approved = db.signups.filter(s=>s.makerStatus==='approved').length;
+  const contents = db.contents.length;
+  document.getElementById('statsGrid').innerHTML = [
+    { label:'已发布任务', val:tasks,    color:'text-pink-600'   },
+    { label:'总报名人数', val:signups,  color:'text-blue-600'   },
+    { label:'已通过名单', val:approved, color:'text-green-600'  },
+    { label:'已收内容',   val:contents, color:'text-purple-600' },
+  ].map(s=>`<div class="stat-card"><div class="text-3xl font-bold ${s.color}">${s.val}</div><div class="text-xs text-gray-400 mt-1">${s.label}</div></div>`).join('');
+}
+
+// ---- TABS ----
+async function showTab(tab) {
+  ['overview','publish','signups','cdk','content','qrcode'].forEach(t=>{
+    document.getElementById('pane-'+t).classList.add('hidden');
+    document.getElementById('tab-'+t).classList.remove('active');
+  });
+  document.getElementById('pane-'+tab).classList.remove('hidden');
+  document.getElementById('tab-'+tab).classList.add('active');
+  await loadDB();
+  renderStats();
+  if (tab==='overview') renderOverview();
+  if (tab==='signups')  { populateSelects('signupTaskSelect'); loadSignups(); }
+  if (tab==='cdk')      { populateSelects('cdkTaskSelect');    loadCDKPane(); }
+  if (tab==='content')  { populateSelects('contentTaskSelect'); loadContentPane(); }
+  if (tab==='qrcode')   { populateSelects('qrTaskSelect');      renderQR(); }
+}
+
+function populateSelects(id) {
+  const db = cachedDB;
+  const el = document.getElementById(id);
+  if (!el) return;
+  const cur = el.value;
+  // 按发布时间倒序排列，最新任务在最前
+  const sorted = [...db.tasks].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  el.innerHTML = sorted.map(t=>`<option value="${t.id}">${t.gameName}${t.opStatus==='approved'?'':' (草稿)'}</option>`).join('');
+  // 优先保留当前选中；否则默认选最新任务（已是第一个 option）
+  if (cur && [...el.options].some(o=>o.value===cur)) el.value = cur;
+}
+
+// ---- OVERVIEW ----
+function renderOverview() {
+  const db = cachedDB;
+  const el = document.getElementById('overviewList');
+  if (!db.tasks.length) {
+    el.innerHTML = `<div class="text-center text-gray-400 py-16"><div class="text-5xl mb-3">📭</div><p>还没有任务</p><button class="btn-primary mt-4 text-sm" onclick="showTab('publish')">➕ 发布第一个任务</button></div>`;
+    return;
+  }
+  const sortedTasks = [...db.tasks].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  el.innerHTML = sortedTasks.map(t => {
+    const tSignups  = db.signups.filter(s=>s.taskId===t.id);
+    const tApproved = tSignups.filter(s=>s.makerStatus==='approved');
+    const tPending  = tSignups.filter(s=>s.makerStatus==='pending');
+    const tCDK      = tApproved.filter(s=>s.cdkKeys&&s.cdkKeys.length);
+    const tContent  = db.contents.filter(c=>c.taskId===t.id);
+    const passed    = isDeadlinePassed(t.deadline);
+    const statusColor = {approved:'bg-green-100 text-green-700',pending:'bg-amber-100 text-amber-800',rejected:'bg-red-100 text-red-700'};
+    const statusLabel = {approved:'✅ 已发布',pending:'⏳ 草稿',rejected:'❌ 已下架'};
+    // CDK pool count
+    const poolKeys = (db.cdkPools[t.id] || []);
+    const unassigned = poolKeys.filter(k => !db.signups.some(s=>s.cdkKeys&&s.cdkKeys.includes(k)));
+    return `<div class="card mb-4">
+      <div class="flex items-start gap-4 flex-wrap">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            <h3 class="text-lg font-bold text-gray-800">${t.gameName}</h3>
+            ${t.gameType?`<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">${t.gameType}</span>`:''}
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${statusColor[t.opStatus]||'bg-gray-100 text-gray-500'}">${statusLabel[t.opStatus]||t.opStatus}</span>
+            ${passed?`<span class="text-xs bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full">报名已截止</span>`:''}
+          </div>
+          <p class="text-sm font-medium mb-1" style="color:#e63e6d;">✨ ${t.highlight}</p>
+          ${t.reward?`<p class="text-xs text-gray-500 mb-2">🎁 <span class="font-medium">${t.reward}</span></p>`:''}
+          <div class="flex flex-wrap gap-3 text-xs text-gray-500">
+            ${t.releaseStart?`<span>📢 可释出：${t.releaseStart}</span>`:''}
+            ${t.submitDeadline?`<span>⏰ 数据截止：${t.submitDeadline}</span>`:''}
+            <span>📅 报名截止：${t.deadline||'无'}</span>
+            <span>👥 招募：${t.recruitType}</span>
+          </div>
+        </div>
+        <div class="flex gap-3 text-center flex-shrink-0">
+          <div><div class="text-2xl font-bold text-gray-700">${tSignups.length}</div><div class="text-xs text-gray-400">报名</div></div>
+          <div><div class="text-2xl font-bold ${tPending.length?'text-amber-500':'text-gray-300'}">${tPending.length}</div><div class="text-xs text-gray-400">待审</div></div>
+          <div><div class="text-2xl font-bold text-green-600">${tApproved.length}</div><div class="text-xs text-gray-400">通过</div></div>
+          <div><div class="text-2xl font-bold ${poolKeys.length?'text-purple-600':'text-gray-300'}">${poolKeys.length}</div><div class="text-xs text-gray-400">CDK池</div></div>
+          <div><div class="text-2xl font-bold ${tCDK.length===tApproved.length&&tApproved.length?'text-teal-600':'text-gray-300'}">${tCDK.length}</div><div class="text-xs text-gray-400">已分配</div></div>
+          <div><div class="text-2xl font-bold text-blue-600">${tContent.length}</div><div class="text-xs text-gray-400">已交稿</div></div>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4 pt-3 border-t border-gray-100 flex-wrap">
+        <button class="btn-secondary text-xs py-1.5 px-3" onclick="goToSignups('${t.id}')">👥 管理报名</button>
+        <button class="btn-secondary text-xs py-1.5 px-3" onclick="goToCDK('${t.id}')">🎮 分配CDK</button>
+        <button class="btn-secondary text-xs py-1.5 px-3" onclick="goToContent('${t.id}')">📦 查看内容</button>
+        <button class="btn-secondary text-xs py-1.5 px-3" onclick="goToQR('${t.id}')">🔗 招募链接</button>
+        <button class="btn-secondary text-xs py-1.5 px-3" onclick="openEditTask('${t.id}')">✏️ 编辑</button>
+        ${t.opStatus==='approved'
+          ?`<button class="btn-red text-xs py-1.5 px-3" onclick="toggleTaskStatus('${t.id}','rejected')">下架</button>`
+          :`<button class="btn-green text-xs py-1.5 px-3" onclick="toggleTaskStatus('${t.id}','approved')">发布</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleTaskStatus(id, status) {
+  const db = await loadDB();
+  const t  = db.tasks.find(t=>t.id===id);
+  if (t) { t.opStatus=status; await saveDB(db); renderOverview(); renderStats(); showToast(status==='approved'?'任务已发布':'任务已下架','success'); }
+}
+
+// ---- AUTO PARSE BRIEF ----
+function autoParseBrief() {
+  const raw = document.getElementById('autoPasteBox').value.trim();
+  if (!raw) { showToast('请先粘贴内容','error'); return; }
+
+  const filled = [];
+
+  // 逐行解析，支持「字段：值」格式
+  const lines = raw.split('\n').map(l=>l.trim()).filter(Boolean);
+
+  // 多行收集模式
+  let collectMode = null; // 'desc' | 'req'
+  const descLines = [], reqLines = [];
+
+  // 关键字映射
+  const fieldMap = [
+    { keys:['游戏名','游戏名称','游戏'],           id:'f_gameName',        single:true  },
+    { keys:['游戏类型','类型'],                    id:'f_gameType',        single:true  },
+    { keys:['亮点','一句话亮点','简单一句话亮点'], id:'f_highlight',       single:true  },
+    { keys:['游戏链接','链接','steam','store'],     id:'f_gameLink',        single:true  },
+    { keys:['名额','报名数量','数量限制','是否有报名数量限制'], id:'f_maxSignup', single:true },
+    { keys:['创作者类型','招募类型','类型'],        id:'f_recruitType',     single:true  },
+    { keys:['游戏上线时间','上线时间','游戏上线'], id:'_releaseStartNote',  single:true  },
+    { keys:['内容发布.直播释出时间','内容发布','直播释出','内容释出','发布时间','释出时间'], id:'f_releaseStart', single:true },
+    { keys:['数据截止','提交截止','截止时间'],     id:'f_submitDeadline',   single:true  },
+  ];
+
+  // brief / 简介 / 内容需求 / 内容要求 触发多行收集
+  const briefTrigger  = /^(brief|游戏简介|简介|游戏介绍|游戏内容)[：:：]?\s*/i;
+  const reqTrigger    = /^(内容需求|内容要求|约稿要求|内容方向)[：:：]?\s*/i;
+
+  for (let i=0; i<lines.length; i++) {
+    const line = lines[i];
+
+    // 检查是否进入多行收集
+    if (briefTrigger.test(line)) {
+      collectMode = 'desc';
+      const rest = line.replace(briefTrigger,'').trim();
+      if (rest) descLines.push(rest);
+      continue;
+    }
+    if (reqTrigger.test(line)) {
+      collectMode = 'req';
+      const rest = line.replace(reqTrigger,'').trim();
+      if (rest) reqLines.push(rest);
+      continue;
+    }
+
+    // 尝试单行字段解析
+    let matched = false;
+    for (const f of fieldMap) {
+      const pattern = new RegExp(`^(${f.keys.map(k=>k.replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&')).join('|')})[：:：]\\s*(.+)$`, 'i');
+      const m = line.match(pattern);
+      if (m) {
+        let val = m[2].trim();
+        if (f.id === 'f_maxSignup') {
+          val = (val==='无'||val==='不限'||val==='无限制'||val==='0') ? '' : val;
+        }
+        if (f.id === 'f_recruitType') {
+          if (/博主.*主播|主播.*博主|不限|两者|都|全部/.test(val)) val='不限';
+          else if (/主播/.test(val)) val='主播';
+          else if (/博主/.test(val)) val='博主';
+          const el=document.getElementById('f_recruitType');
+          if (el) el.value=val;
+          filled.push(`招募类型：${val}`);
+          matched=true; collectMode=null; break;
+        }
+        if (f.id === '_releaseStartNote') {
+          // 游戏上线时间单独提示，不填入字段
+          filled.push(`游戏上线时间：${val}（供参考，已记录在简介）`);
+          // 把上线时间追加到简介里
+          descLines.unshift(`游戏上线时间：${val}`);
+          matched=true; collectMode=null; break;
+        }
+        if (f.single) {
+          const el=document.getElementById(f.id);
+          if (el) { el.value=val; filled.push(`${f.keys[0]}：${val.slice(0,30)}${val.length>30?'…':''}`); }
+          matched=true; collectMode=null; break;
+        }
+      }
+    }
+    if (matched) continue;
+
+    // 未匹配到字段：追加到当前收集模式
+    if (collectMode==='desc') descLines.push(line);
+    else if (collectMode==='req') reqLines.push(line);
+    // 如果是 URL 且游戏链接为空，自动填入
+    else if (/^https?:\/\//.test(line)) {
+      const el=document.getElementById('f_gameLink');
+      if (el && !el.value) { el.value=line; filled.push(`游戏链接：${line.slice(0,40)}…`); }
+    }
+  }
+
+  // 填入多行字段
+  if (descLines.length) {
+    const el=document.getElementById('f_desc');
+    if (el) { el.value=descLines.join('\n'); filled.push(`游戏简介：${descLines.length}行`); }
+  }
+  if (reqLines.length) {
+    const el=document.getElementById('f_req');
+    if (el) { el.value=reqLines.join('\n'); filled.push(`内容要求：${reqLines.length}行`); }
+  }
+
+  // 结果提示
+  const resultEl=document.getElementById('autoParseResult');
+  if (filled.length) {
+    resultEl.innerHTML=`✅ 已识别并填入 <strong>${filled.length}</strong> 个字段：<br>${filled.map(f=>`· ${f}`).join('<br>')}`;
+    resultEl.classList.remove('hidden');
+    showToast(`识别完成，已填入 ${filled.length} 个字段，请检查并补充剩余项`,'success');
+  } else {
+    resultEl.innerHTML='⚠️ 未识别到有效字段，请检查格式（支持"字段名：值"格式）';
+    resultEl.classList.remove('hidden');
+    showToast('未识别到有效字段','error');
+  }
+}
+
+// ---- PUBLISH ----
+function resetPublishForm() {
+  ['f_gameName','f_gameType','f_highlight','f_reward','f_gameLink','f_desc','f_req','f_releaseStart','f_submitDeadline','f_maxSignup','f_deadline'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  document.getElementById('f_recruitType').value='不限';
+  document.getElementById('autoPasteBox').value='';
+  document.getElementById('autoParseResult').classList.add('hidden');
+}
+async function publishTask() {
+  const gameName  = document.getElementById('f_gameName').value.trim();
+  const highlight = document.getElementById('f_highlight').value.trim();
+  const reward    = document.getElementById('f_reward').value.trim();
+  const deadline  = document.getElementById('f_deadline').value;
+  if (!gameName)  { showToast('请填写游戏名称','error'); return; }
+  if (!highlight) { showToast('请填写一句话亮点','error'); return; }
+  if (!reward)    { showToast('请填写任务奖励','error'); return; }
+  if (!deadline)  { showToast('请设置报名截止日期','error'); return; }
+  const db = await loadDB();
+  db.tasks.push({
+    id:genId(), gameName, highlight, reward, deadline,
+    gameType:       document.getElementById('f_gameType').value.trim(),
+    gameLink:       document.getElementById('f_gameLink').value.trim(),
+    desc:           document.getElementById('f_desc').value.trim(),
+    req:            document.getElementById('f_req').value.trim(),
+    releaseStart:   document.getElementById('f_releaseStart').value.trim(),
+    submitDeadline: document.getElementById('f_submitDeadline').value.trim(),
+    recruitType:    document.getElementById('f_recruitType').value,
+    maxSignup:      document.getElementById('f_maxSignup').value.trim(),
+    status:'active', opStatus:'approved', createdAt:Date.now()
+  });
+  await saveDB(db);
+  resetPublishForm();
+  showToast('任务发布成功！种草官端即可看到 🎉','success');
+  renderStats();
+  showTab('overview');
+}
+
+// ---- EDIT TASK ----
+function openEditTask(id) {
+  const db = cachedDB;
+  const t  = db.tasks.find(t=>t.id===id);
+  if (!t) return;
+  ['id','gameName','gameType','highlight','reward','gameLink','desc','req','releaseStart','submitDeadline','maxSignup','deadline','recruitType'].forEach(k=>{
+    const el = document.getElementById('et_'+k);
+    if (el) el.value = t[k]||'';
+  });
+  document.getElementById('editTaskModal').classList.remove('hidden');
+}
+async function saveEditTask() {
+  const id = document.getElementById('et_id').value;
+  const db = await loadDB();
+  const t  = db.tasks.find(t=>t.id===id);
+  if (!t) return;
+  ['gameName','gameType','highlight','reward','gameLink','desc','req','releaseStart','submitDeadline','maxSignup','deadline','recruitType'].forEach(k=>{
+    const el = document.getElementById('et_'+k);
+    if (el) t[k] = el.value.trim ? el.value.trim() : el.value;
+  });
+  await saveDB(db);
+  closeModal('editTaskModal');
+  showToast('任务已更新','success');
+  renderOverview();
+}
+
+// ---- SIGNUPS ----
+function goToSignups(taskId) { showTab('signups'); document.getElementById('signupTaskSelect').value=taskId; loadSignups(); }
+function filterSignups(f) {
+  _currentSignupFilter = f;
+  ['all','pending','approved','rejected'].forEach(k=>{
+    document.getElementById('sf-'+k).classList.toggle('active',k===f);
+  });
+  loadSignups();
+}
+function loadSignups() {
+  const db = cachedDB;
+  const taskId = document.getElementById('signupTaskSelect').value;
+  let signups  = db.signups.filter(s=>s.taskId===taskId);
+  if (_currentSignupFilter!=='all') signups=signups.filter(s=>s.makerStatus===_currentSignupFilter);
+  const el = document.getElementById('signupList');
+  if (!signups.length) { el.innerHTML=`<div class="card text-center text-gray-400 py-10">暂无报名记录</div>`; return; }
+  el.innerHTML=`<div class="card overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead><tr class="text-xs text-gray-400 border-b border-gray-100">
+        <th class="py-2 px-3 text-left">昵称</th><th class="py-2 px-3 text-left">类型</th>
+        <th class="py-2 px-3 text-left">粉丝数</th><th class="py-2 px-3 text-left">微信号</th>
+        <th class="py-2 px-3 text-left">主页</th>
+        <th class="py-2 px-3 text-left">备注</th><th class="py-2 px-3 text-left">报名时间</th>
+        <th class="py-2 px-3 text-left">状态</th><th class="py-2 px-3 text-center">操作</th>
+      </tr></thead>
+      <tbody>${signups.map(s=>{
+        const badge={pending:'<span class="badge-pending px-2 py-0.5 rounded-full text-xs">待审核</span>',approved:'<span class="badge-approved px-2 py-0.5 rounded-full text-xs">已通过</span>',rejected:'<span class="badge-rejected px-2 py-0.5 rounded-full text-xs">已拒绝</span>'}[s.makerStatus]||'';
+        return `<tr class="border-b border-gray-50 tr-hover">
+          <td class="py-2 px-3 font-semibold">${s.creatorName}</td>
+          <td class="py-2 px-3"><span class="text-xs px-2 py-0.5 rounded-full ${s.creatorType==='主播'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'}">${s.creatorType}</span></td>
+          <td class="py-2 px-3 text-gray-500 text-xs">${s.creatorFans||'-'}</td>
+          <td class="py-2 px-3">${s.creatorWechat?`<span class="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded select-all cursor-pointer" title="点击复制" onclick="copyLink('${s.creatorWechat}')">${s.creatorWechat}</span>`:'<span class="text-gray-300 text-xs">未填写</span>'}</td>
+          <td class="py-2 px-3">${s.creatorProfile?`<a href="${s.creatorProfile}" target="_blank" class="text-blue-500 underline text-xs">主页</a>`:'-'}</td>
+          <td class="py-2 px-3 text-gray-400 max-w-[120px] truncate" title="${s.note||''}">${s.note||'-'}</td>
+          <td class="py-2 px-3 text-xs text-gray-400">${new Date(s.createdAt).toLocaleDateString('zh-CN')}</td>
+          <td class="py-2 px-3">${badge}</td>
+          <td class="py-2 px-3 text-center">
+            ${s.makerStatus==='pending'?`<button class="btn-green mr-1" onclick="reviewSignup('${s.id}','approved')">通过</button><button class="btn-red" onclick="reviewSignup('${s.id}','rejected')">拒绝</button>`:''}
+            ${s.makerStatus==='approved'?`<button class="btn-red" onclick="reviewSignup('${s.id}','rejected')">撤销</button>`:''}
+            ${s.makerStatus==='rejected'?`<button class="btn-green" onclick="reviewSignup('${s.id}','approved')">恢复</button>`:''}
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+}
+
+async function reviewSignup(signupId, decision) {
+  const db = await loadDB();
+  const s  = db.signups.find(s=>s.id===signupId);
+  if (!s) return;
+  s.makerStatus=decision; s.opStatus='approved'; s.status=decision;
+  await saveDB(db); loadSignups(); renderStats();
+  showToast(decision==='approved'?'✅ 已通过':'❌ 已拒绝','success');
+}
+async function batchApproveSignups() {
+  const db = await loadDB();
+  const taskId = document.getElementById('signupTaskSelect').value;
+  let changed=0;
+  db.signups.forEach(s=>{ if(s.taskId===taskId&&s.makerStatus==='pending'){ s.makerStatus='approved';s.opStatus='approved';s.status='approved';changed++; } });
+  await saveDB(db); loadSignups(); renderStats();
+  showToast(`已批量通过 ${changed} 人`,'success');
+}
+
+// ---- EXPORT SIGNUP EXCEL ----
+function exportSignupExcel() {
+  const db = cachedDB;
+  const taskId  = document.getElementById('signupTaskSelect').value;
+  const task    = db.tasks.find(t=>t.id===taskId);
+  const signups = db.signups.filter(s=>s.taskId===taskId);
+  if (!signups.length) { showToast('暂无报名数据','error'); return; }
+  const rows = signups.map((s,i)=>({
+    '序号': i+1,
+    '昵称': s.creatorName,
+    '类型': s.creatorType,
+    '粉丝数': s.creatorFans||'',
+    '微信号': s.creatorWechat||'',
+    '主页链接': s.creatorProfile||'',
+    '备注': s.note||'',
+    '报名状态': {pending:'待审核',approved:'已通过',rejected:'已拒绝'}[s.makerStatus]||s.makerStatus,
+    '报名时间': new Date(s.createdAt).toLocaleString('zh-CN'),
+    'CDK': s.cdkKeys ? s.cdkKeys.join(' / ') : ''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '报名名单');
+  XLSX.writeFile(wb, `报名名单_${task?.gameName||taskId}_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.xlsx`);
+  showToast('Excel 已下载','success');
+}
+
+// ---- CDK ----
+function goToCDK(taskId) { showTab('cdk'); document.getElementById('cdkTaskSelect').value=taskId; loadCDKPane(); }
+
+function loadCDKPane() {
+  const db      = cachedDB;
+  const taskId  = document.getElementById('cdkTaskSelect').value;
+  const approved = db.signups.filter(s=>s.taskId===taskId&&s.makerStatus==='approved');
+  const poolKeys = db.cdkPools[taskId] || [];
+  const assigned = approved.filter(s=>s.cdkKeys&&s.cdkKeys.length);
+  const unassignedCount = approved.length - assigned.length;
+
+  // Pool status bar
+  const pEl = document.getElementById('cdkPoolStatus');
+  pEl.innerHTML = `<div class="card flex flex-wrap gap-4 items-center">
+    <div class="text-center"><div class="text-2xl font-bold text-purple-600">${poolKeys.length}</div><div class="text-xs text-gray-400">CDK池总量</div></div>
+    <div class="text-center"><div class="text-2xl font-bold text-green-600">${approved.length}</div><div class="text-xs text-gray-400">通过人数</div></div>
+    <div class="text-center"><div class="text-2xl font-bold ${unassignedCount>0?'text-amber-500':'text-gray-300'}">${unassignedCount}</div><div class="text-xs text-gray-400">待分配人数</div></div>
+    <div class="text-center"><div class="text-2xl font-bold text-blue-600">${assigned.length}</div><div class="text-xs text-gray-400">已分配</div></div>
+    ${poolKeys.length>0&&unassignedCount>0
+      ?`<div class="ml-auto"><div class="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">需要 ${approved.length*3} 个CDK，CDK池有 ${poolKeys.length} 个${poolKeys.length>=approved.length*3?'，数量充足 ✅':'，<strong>数量不足</strong>，请补录'}</div></div>`
+      :`<div class="ml-auto text-xs text-gray-400">${poolKeys.length===0?'请先批量录入CDK':'分配完成 ✅'}</div>`}
+  </div>`;
+
+  const el = document.getElementById('cdkList');
+  if (!approved.length) { el.innerHTML=`<div class="card text-center text-gray-400 py-10">暂无已通过的报名者，请先在「报名管理」通过名单</div>`; return; }
+  el.innerHTML=`<div class="card overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead><tr class="text-xs text-gray-400 border-b border-gray-100">
+        <th class="py-2 px-3 text-left">昵称</th><th class="py-2 px-3 text-left">类型</th>
+        <th class="py-2 px-3 text-left">粉丝数</th><th class="py-2 px-3 text-left">CDK状态</th>
+        <th class="py-2 px-3 text-left">CDK内容</th>
+      </tr></thead>
+      <tbody>${approved.map(s=>{
+        const hasCDK=s.cdkKeys&&s.cdkKeys.length;
+        return `<tr class="border-b border-gray-50 tr-hover">
+          <td class="py-2 px-3 font-semibold">${s.creatorName}</td>
+          <td class="py-2 px-3"><span class="text-xs px-2 py-0.5 rounded-full ${s.creatorType==='主播'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'}">${s.creatorType}</span></td>
+          <td class="py-2 px-3 text-gray-500">${s.creatorFans||'-'}</td>
+          <td class="py-2 px-3">${hasCDK?`<span class="badge-approved px-2 py-0.5 rounded-full text-xs">已分配</span>`:`<span class="badge-pending px-2 py-0.5 rounded-full text-xs">待分配</span>`}</td>
+          <td class="py-2 px-3">${hasCDK?s.cdkKeys.map(k=>`<span class="cdk-mono mr-1">${k}</span>`).join(''):'<span class="text-gray-300 text-xs">-</span>'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+}
+
+// ---- BATCH CDK ----
+function openBatchCDKModal() {
+  document.getElementById('batchCDKText').value = '';
+  document.getElementById('cdkCountHint').textContent = '';
+  document.getElementById('cdkPreviewInfo').textContent = '';
+  document.getElementById('batchCDKModal').classList.remove('hidden');
+}
+function updateCDKCount() {
+  const lines   = document.getElementById('batchCDKText').value.split('\n').map(l=>l.trim()).filter(Boolean);
+  const perPerson = parseInt(document.getElementById('cdkPerPerson').value)||3;
+  const taskId  = document.getElementById('cdkTaskSelect').value;
+  const db      = cachedDB;
+  const approved = db.signups.filter(s=>s.taskId===taskId&&s.makerStatus==='approved').length;
+  const need    = approved * perPerson;
+  document.getElementById('cdkCountHint').textContent = `已输入 ${lines.length} 个`;
+  const info = document.getElementById('cdkPreviewInfo');
+  if (lines.length>0) {
+    const enough = lines.length >= need;
+    info.innerHTML = `当前通过 <strong>${approved}</strong> 人，每人 <strong>${perPerson}</strong> 个，共需 <strong>${need}</strong> 个CDK。
+      已输入 <strong>${lines.length}</strong> 个。
+      ${enough?`<span class="text-green-600 font-semibold">数量充足 ✅，可一键分配</span>`:`<span class="text-amber-600 font-semibold">数量不足，还差 ${need-lines.length} 个</span>`}`;
+  } else { info.textContent=''; }
+}
+async function saveBatchCDK() {
+  const lines   = document.getElementById('batchCDKText').value.split('\n').map(l=>l.trim()).filter(Boolean);
+  if (!lines.length) { showToast('请输入CDK码','error'); return; }
+  const taskId  = document.getElementById('cdkTaskSelect').value;
+  const db      = await loadDB();
+  if (!db.cdkPools) db.cdkPools = {};
+  db.cdkPools[taskId] = lines;
+  await saveDB(db);
+  closeModal('batchCDKModal');
+  loadCDKPane();
+  showToast(`已保存 ${lines.length} 个CDK到CDK池，点击「一键分配」完成分配`,'success');
+}
+
+// ---- AUTO DISTRIBUTE CDK ----
+function autoDistributeCDK() {
+  const taskId   = document.getElementById('cdkTaskSelect').value;
+  const db       = cachedDB;
+  const pool     = [...(db.cdkPools[taskId]||[])];
+  const approved = db.signups.filter(s=>s.taskId===taskId&&s.makerStatus==='approved');
+  if (!pool.length)    { showToast('CDK池为空，请先批量录入','error'); return; }
+  if (!approved.length){ showToast('暂无已通过的报名者','error'); return; }
+  // 弹出设置每人数量的 modal
+  document.getElementById('distrib_perPerson').value = 3;
+  document.getElementById('distrib_approved').textContent  = approved.length;
+  document.getElementById('distrib_poolSize').textContent  = pool.length;
+  _updateDistribPreview();
+  document.getElementById('distribModal').classList.remove('hidden');
+}
+
+function _updateDistribPreview() {
+  const per     = parseInt(document.getElementById('distrib_perPerson').value)||1;
+  const approved= parseInt(document.getElementById('distrib_approved').textContent)||0;
+  const pool    = parseInt(document.getElementById('distrib_poolSize').textContent)||0;
+  const need    = approved * per;
+  const el      = document.getElementById('distrib_preview');
+  const enough  = pool >= need;
+  el.innerHTML  = `需要 <strong>${need}</strong> 个CDK（${approved}人 × ${per}个），CDK池有 <strong>${pool}</strong> 个。
+    ${enough?`<span class="text-green-600 font-semibold">数量充足 ✅</span>`:`<span class="text-red-600 font-semibold">数量不足，差 ${need-pool} 个</span>`}`;
+}
+
+async function doDistributeCDK() {
+  const taskId   = document.getElementById('cdkTaskSelect').value;
+  const perPerson= parseInt(document.getElementById('distrib_perPerson').value)||1;
+  const db       = await loadDB();
+  const pool     = [...(db.cdkPools[taskId]||[])];
+  const approved = db.signups.filter(s=>s.taskId===taskId&&s.makerStatus==='approved');
+  const needTotal= approved.length * perPerson;
+  if (pool.length < needTotal) {
+    showToast(`CDK数量不足！需要 ${needTotal} 个，当前只有 ${pool.length} 个`,'error'); return;
+  }
+  let idx=0;
+  approved.forEach(s=>{
+    const signup = db.signups.find(x=>x.id===s.id);
+    if (signup && !(signup.cdkKeys&&signup.cdkKeys.length)) {
+      signup.cdkKeys = pool.slice(idx, idx+perPerson);
+      idx += perPerson;
+    }
+  });
+  await saveDB(db);
+  closeModal('distribModal');
+  loadCDKPane();
+  showToast(`✅ 已为 ${approved.length} 人各分配 ${perPerson} 个CDK，种草官端即可查看`,'success');
+}
+
+// ---- CONTENT ----
+function goToContent(taskId) { showTab('content'); document.getElementById('contentTaskSelect').value=taskId; loadContentPane(); }
+function loadContentPane() {
+  const db       = cachedDB;
+  const taskId   = document.getElementById('contentTaskSelect').value;
+  const contents = db.contents.filter(c=>c.taskId===taskId);
+  const approved = db.signups.filter(s=>s.taskId===taskId && s.makerStatus==='approved');
+
+  // ---- 跟进看板 ----
+  const notSubmitted = approved.filter(s => !contents.some(c=>c.creatorName===s.creatorName&&c.creatorType===s.creatorType));
+  const submitted    = approved.filter(s =>  contents.some(c=>c.creatorName===s.creatorName&&c.creatorType===s.creatorType));
+  const fuEl = document.getElementById('contentFollowUp');
+  fuEl.innerHTML = `<div class="card">
+    <div class="flex items-center gap-3 mb-4">
+      <h3 class="font-bold text-gray-800">📋 数据提交跟进</h3>
+      <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">已提交 ${submitted.length}</span>
+      <span class="text-xs ${notSubmitted.length?'bg-red-100 text-red-700':'bg-gray-100 text-gray-400'} px-2 py-0.5 rounded-full font-semibold">未提交 ${notSubmitted.length}</span>
+    </div>
+    ${approved.length===0?`<p class="text-gray-400 text-sm text-center py-4">暂无已通过的报名者</p>`:`
+    <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead><tr class="text-xs text-gray-400 border-b border-gray-100">
+        <th class="py-2 px-3 text-left">昵称</th>
+        <th class="py-2 px-3 text-left">类型</th>
+        <th class="py-2 px-3 text-left">粉丝数</th>
+        <th class="py-2 px-3 text-left">微信号</th>
+        <th class="py-2 px-3 text-left">主页</th>
+        <th class="py-2 px-3 text-left">CDK</th>
+        <th class="py-2 px-3 text-center">提交状态</th>
+      </tr></thead>
+      <tbody>${approved.map(s=>{
+        const hasContent = contents.some(c=>c.creatorName===s.creatorName&&c.creatorType===s.creatorType);
+        const contentObj = contents.find(c=>c.creatorName===s.creatorName&&c.creatorType===s.creatorType);
+        return `<tr class="border-b border-gray-50 tr-hover ${!hasContent?'bg-red-50/30':''}">
+          <td class="py-2 px-3 font-semibold">${s.creatorName}</td>
+          <td class="py-2 px-3"><span class="text-xs px-2 py-0.5 rounded-full ${s.creatorType==='主播'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'}">${s.creatorType}</span></td>
+          <td class="py-2 px-3 text-gray-500 text-xs">${s.creatorFans||'-'}</td>
+          <td class="py-2 px-3">
+            ${s.creatorWechat
+              ?`<span class="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded select-all cursor-pointer" title="点击复制" onclick="copyLink('${s.creatorWechat}')">${s.creatorWechat}</span>`
+              :'<span class="text-gray-300 text-xs">未填写</span>'}
+          </td>
+          <td class="py-2 px-3">${s.creatorProfile?`<a href="${s.creatorProfile}" target="_blank" class="text-blue-500 underline text-xs">主页</a>`:'-'}</td>
+          <td class="py-2 px-3 text-xs">${s.cdkKeys&&s.cdkKeys.length?`<span class="text-green-600">已分配</span>`:'<span class="text-gray-300">待分配</span>'}</td>
+          <td class="py-2 px-3 text-center">
+            ${hasContent
+              ?`<span class="badge-approved px-2 py-0.5 rounded-full text-xs">✅ 已提交<br><span class="text-gray-400 text-[10px]">${new Date(contentObj.createdAt).toLocaleDateString('zh-CN')}</span></span>`
+              :`<span class="badge-rejected px-2 py-0.5 rounded-full text-xs">⏳ 未提交</span>`}
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`}
+  </div>`;
+
+  // ---- 已提交内容列表 ----
+  const el = document.getElementById('contentList');
+  if (!contents.length) { el.innerHTML=`<div class="card text-center text-gray-400 py-6 text-sm">暂无提交内容</div>`; return; }
+  el.innerHTML=`<div class="card overflow-x-auto">
+    <h3 class="font-bold text-gray-800 mb-4">📁 已提交内容明细</h3>
+    <table class="w-full text-sm">
+      <thead><tr class="text-xs text-gray-400 border-b border-gray-100">
+        <th class="py-2 px-3 text-left">昵称</th><th class="py-2 px-3 text-left">类型</th>
+        <th class="py-2 px-3 text-left">粉丝数</th><th class="py-2 px-3 text-left">微信号</th>
+        <th class="py-2 px-3 text-left">主页</th><th class="py-2 px-3 text-left">内容链接</th>
+        <th class="py-2 px-3 text-left">截图</th><th class="py-2 px-3 text-left">提交时间</th>
+      </tr></thead>
+      <tbody>${contents.map(c=>{
+        // 从 signup 取微信号
+        const sig = db.signups.find(s=>s.creatorName===c.creatorName&&s.creatorType===c.creatorType&&s.taskId===taskId);
+        const wechat = sig?.creatorWechat || c.wechat || '';
+        const screenshotHtml=(c.liveshotBase64||c.datashotBase64)
+          ?`<div class="flex gap-1">
+              ${c.liveshotBase64?`<img src="${c.liveshotBase64}" class="img-thumb" title="直播间截图（点击放大）" onclick="showImg(this.src,'${c.creatorName}_直播间截图.png')" />`:''}
+              ${c.datashotBase64?`<img src="${c.datashotBase64}" class="img-thumb" title="数据报告截图（点击放大）" onclick="showImg(this.src,'${c.creatorName}_数据报告截图.png')" />`:''}
+            </div>`:'-';
+        const linkHtml=(c.clip||c.video)?`<a href="${c.clip||c.video}" target="_blank" class="text-blue-500 underline text-xs">${c.clip?'直播切片':'种草视频'}</a>`:'-';
+        return `<tr class="border-b border-gray-50 tr-hover">
+          <td class="py-2 px-3 font-semibold">${c.creatorName}</td>
+          <td class="py-2 px-3"><span class="text-xs px-2 py-0.5 rounded-full ${c.creatorType==='主播'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'}">${c.creatorType}</span></td>
+          <td class="py-2 px-3 text-gray-500 text-xs">${c.fans||'-'}</td>
+          <td class="py-2 px-3">${wechat?`<span class="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded select-all cursor-pointer" title="点击复制" onclick="copyLink('${wechat}')">${wechat}</span>`:'<span class="text-gray-300 text-xs">-</span>'}</td>
+          <td class="py-2 px-3">${c.profile?`<a href="${c.profile}" target="_blank" class="text-blue-500 underline text-xs">主页</a>`:'-'}</td>
+          <td class="py-2 px-3">${linkHtml}</td>
+          <td class="py-2 px-3">${screenshotHtml}</td>
+          <td class="py-2 px-3 text-xs text-gray-400">${new Date(c.createdAt).toLocaleString('zh-CN')}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+}
+
+function showImg(src, name) {
+  document.getElementById('imgModalSrc').src=src;
+  document.getElementById('imgModalDl').onclick=()=>downloadImg(src,name||'截图.png');
+  document.getElementById('imgModal').classList.remove('hidden');
+}
+function downloadImg(src, name) {
+  const a=document.createElement('a'); a.href=src; a.download=name; a.click();
+}
+
+// ---- EXPORT CONTENT EXCEL (with screenshots ZIP) ----
+async function exportContentExcel() {
+  const db       = await loadDB();
+  const taskId   = document.getElementById('contentTaskSelect').value;
+  const task     = db.tasks.find(t=>t.id===taskId);
+  const contents = db.contents.filter(c=>c.taskId===taskId);
+  if (!contents.length) { showToast('暂无内容数据','error'); return; }
+  showToast('正在生成 Excel，请稍候...','info');
+  await _exportContentExcelJS(task, contents, `内容汇总_${task?.gameName||taskId}`);
+}
+
+// 将 base64 dataURL 转为纯 base64 字符串 + 扩展名
+function _parseImgBase64(dataUrl) {
+  if (!dataUrl) return null;
+  const m = dataUrl.match(/^data:image\/(\w+);base64,(.+)$/);
+  if (!m) return null;
+  return { ext: m[1] === 'jpeg' ? 'jpeg' : 'png', b64: m[2] };
+}
+
+async function _exportContentExcelJS(task, contents, filename) {
+  if (typeof ExcelJS === 'undefined') {
+    showToast('ExcelJS 尚未加载，请刷新页面重试','error'); return;
+  }
+  const db = cachedDB;
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('内容数据');
+
+  // 列定义（含图片列宽）
+  const IMG_W = 120; // px 宽
+  const IMG_H = 80;  // px 高
+  ws.columns = [
+    { header:'序号',     key:'no',      width:6  },
+    { header:'昵称',     key:'name',    width:14 },
+    { header:'类型',     key:'type',    width:8  },
+    { header:'粉丝数',   key:'fans',    width:10 },
+    { header:'微信号',   key:'wechat',  width:14 },
+    { header:'主页链接', key:'profile', width:32 },
+    { header:'内容链接', key:'link',    width:32 },
+    { header:'内容类型', key:'ltype',   width:10 },
+    { header:'直播间截图', key:'live',  width:18 },
+    { header:'数据报告截图', key:'data',width:18 },
+    { header:'提交时间', key:'time',    width:20 },
+  ];
+
+  // 表头样式
+  ws.getRow(1).eachCell(cell => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill  = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFE63E6D' } };
+    cell.alignment = { vertical:'middle', horizontal:'center' };
+  });
+  ws.getRow(1).height = 22;
+
+  const IMG_ROW_H = 80; // points（约 80px）
+  const dateStr = new Date().toLocaleDateString('zh-CN');
+
+  for (let i=0; i<contents.length; i++) {
+    const c = contents[i];
+    const sig = db.signups.find(s=>s.creatorName===c.creatorName&&s.creatorType===c.creatorType&&s.taskId===task?.id);
+    const rowNum = i + 2;
+    const row = ws.addRow({
+      no:      i+1,
+      name:    c.creatorName,
+      type:    c.creatorType,
+      fans:    c.fans||'',
+      wechat:  sig?.creatorWechat || '',
+      profile: c.profile||'',
+      link:    c.clip||c.video||'',
+      ltype:   c.clip?'直播切片':'种草视频',
+      live:    c.liveshotBase64  ? '' : '（无截图）',
+      data:    c.datashotBase64  ? '' : '（无截图）',
+      time:    new Date(c.createdAt).toLocaleString('zh-CN'),
+    });
+    row.height = IMG_ROW_H;
+    row.alignment = { vertical:'middle' };
+
+    // 嵌入直播间截图（第9列 = I）
+    const liveImg = _parseImgBase64(c.liveshotBase64);
+    if (liveImg) {
+      const imgId = wb.addImage({ base64: liveImg.b64, extension: liveImg.ext });
+      ws.addImage(imgId, {
+        tl: { col: 8, row: rowNum - 1 },   // 0-indexed: col 8 = I
+        ext: { width: IMG_W, height: IMG_H },
+        editAs: 'oneCell',
+      });
+    }
+    // 嵌入数据报告截图（第10列 = J）
+    const dataImg = _parseImgBase64(c.datashotBase64);
+    if (dataImg) {
+      const imgId = wb.addImage({ base64: dataImg.b64, extension: dataImg.ext });
+      ws.addImage(imgId, {
+        tl: { col: 9, row: rowNum - 1 },   // col 9 = J
+        ext: { width: IMG_W, height: IMG_H },
+        editAs: 'oneCell',
+      });
+    }
+  }
+
+  // 生成并下载
+  const buf  = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `${filename}_${dateStr.replace(/\//g,'-')}.xlsx`);
+  showToast('Excel 已下载（含嵌入截图）✅','success');
+}
+
+// ---- QR CODE ----
+function goToQR(taskId) { showTab('qrcode'); document.getElementById('qrTaskSelect').value=taskId; renderQR(); }
+function renderQR() {
+  const taskId = document.getElementById('qrTaskSelect').value;
+  if (!taskId) return;
+  const db     = cachedDB;
+  const task   = db.tasks.find(t=>t.id===taskId);
+  const gameName = task ? task.gameName : taskId;
+  const base   = window.location.origin + window.location.pathname.replace('admin.html','');
+  const creatorBase = base + 'creator.html';
+  const links  = [
+    { label:'🎙️ 主播专属报名', sub:'仅主播可见', url:`${base}streamer.html?task=${taskId}`, color:'#7c3aed' },
+    { label:'✍️ 博主专属报名',  sub:'仅博主可见', url:`${base}blogger.html?task=${taskId}`,  color:'#2563eb' },
+    { label:'📣 通用入口',      sub:'进入后自选身份', url:`${creatorBase}?task=${taskId}`,  color:'#e63e6d' },
+  ];
+  const el = document.getElementById('qrList');
+  el.innerHTML = links.map((l,i)=>`<div class="card text-center flex flex-col items-center">
+    <p class="font-bold text-gray-800 mb-0.5">${l.label}</p>
+    <p class="text-xs text-gray-400 mb-3">${l.sub}</p>
+    <div id="qr-${i}" class="flex justify-center mb-3"></div>
+    <p class="text-[10px] text-gray-300 break-all mb-3 max-w-full">${l.url}</p>
+    <button class="btn-green text-xs py-1.5 px-4 w-full" onclick="copyLink('${l.url}')">📋 复制链接</button>
+  </div>`).join('');
+  // defer QR generation to ensure DOM is ready
+  setTimeout(()=>{
+    links.forEach((l,i)=>{
+      const qEl = document.getElementById('qr-'+i);
+      if (!qEl) return;
+      qEl.innerHTML='';
+      if (typeof QRCode!=='undefined') {
+        new QRCode(qEl,{text:l.url,width:150,height:150,colorDark:l.color,colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+      } else {
+        qEl.innerHTML=`<div class="text-xs text-gray-400 py-4">QR库加载中，请刷新页面</div>`;
+      }
+    });
+  }, 100);
+}
+function copyLink(url) {
+  // 优先 clipboard API，HTTP 下可能被拦截，fallback 用 textarea trick
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(url).then(()=>showToast('链接已复制 ✅','success')).catch(()=>_fallbackCopy(url));
+  } else { _fallbackCopy(url); }
+}
+function _fallbackCopy(url) {
+  const el = document.createElement('textarea');
+  el.value = url; el.style.position='fixed'; el.style.opacity='0';
+  document.body.appendChild(el); el.focus(); el.select();
+  try { document.execCommand('copy'); showToast('链接已复制 ✅','success'); }
+  catch(e) { prompt('请手动复制链接：', url); }
+  document.body.removeChild(el);
+}
+
+// ---- FULL REPORT (ZIP with screenshots) ----
+async function exportFullReport() {
+  const db = await loadDB();
+  if (!db.tasks.length) { showToast('暂无数据可导出','error'); return; }
+  showToast('正在打包，请稍候...','info');
+  const zip = new JSZip();
+  const wb  = XLSX.utils.book_new();
+
+  db.tasks.forEach(t => {
+    const sigs  = db.signups.filter(s=>s.taskId===t.id);
+    const conts = db.contents.filter(c=>c.taskId===t.id);
+    if (sigs.length) {
+      const rows = sigs.map((s,i)=>({
+        '序号':i+1,'昵称':s.creatorName,'类型':s.creatorType,'粉丝数':s.creatorFans||'',
+        '主页':s.creatorProfile||'','备注':s.note||'',
+        '状态':{pending:'待审核',approved:'已通过',rejected:'已拒绝'}[s.makerStatus]||'',
+        '报名时间':new Date(s.createdAt).toLocaleString('zh-CN'),
+        'CDK':s.cdkKeys?s.cdkKeys.join(' / '):''
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols']=[{wch:5},{wch:12},{wch:8},{wch:10},{wch:30},{wch:16},{wch:8},{wch:20},{wch:36}];
+      XLSX.utils.book_append_sheet(wb, ws, `${t.gameName}_报名`.slice(0,31));
+    }
+    if (conts.length) {
+      const imgFolder = zip.folder(`截图_${t.gameName}`);
+      const rows = conts.map((c,i)=>{
+        let liveName='', dataName='';
+        if (c.liveshotBase64) {
+          liveName=`${i+1}_${c.creatorName}_直播间截图.png`;
+          imgFolder.file(liveName, c.liveshotBase64.replace(/^data:image\/\w+;base64,/,''), {base64:true});
+        }
+        if (c.datashotBase64) {
+          dataName=`${i+1}_${c.creatorName}_数据报告截图.png`;
+          imgFolder.file(dataName, c.datashotBase64.replace(/^data:image\/\w+;base64,/,''), {base64:true});
+        }
+        return {
+          '序号':i+1,'昵称':c.creatorName,'类型':c.creatorType,'粉丝数':c.fans||'',
+          '主页':c.profile||'','内容链接':c.clip||c.video||'',
+          '直播间截图':liveName||'（无）','数据报告截图':dataName||'（无）',
+          '提交时间':new Date(c.createdAt).toLocaleString('zh-CN')
+        };
+      });
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols']=[{wch:5},{wch:12},{wch:8},{wch:10},{wch:28},{wch:28},{wch:24},{wch:24},{wch:20}];
+      XLSX.utils.book_append_sheet(wb, ws, `${t.gameName}_内容`.slice(0,31));
+    }
+  });
+
+  if (wb.SheetNames.length===0) { showToast('暂无数据可导出','error'); return; }
+  const xlsxBuf = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+  zip.file('推广汇总.xlsx', xlsxBuf);
+  zip.file('README.txt', '截图_XXX 文件夹与对应任务的内容表格中「直播间截图」「数据报告截图」列文件名一一对应。');
+  const blob = await zip.generateAsync({type:'blob'});
+  saveAs(blob, `推广完整报告_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.zip`);
+  showToast('完整报告 ZIP 已下载（含所有截图）✅','success');
+}
+
+// Backdrop close
+['batchCDKModal','distribModal','editTaskModal'].forEach(id=>{
+  const el=document.getElementById(id);
+  el&&el.addEventListener('click',e=>{ if(e.target===el) closeModal(id); });
+});
+</script>
+</body>
+</html>
