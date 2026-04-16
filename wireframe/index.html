@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>游戏推广协作平台 · 原型图</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#6366F1',
+        secondary: '#818CF8',
+        cta: '#10B981',
+        surface: '#F5F3FF',
+        ink: '#1E1B4B',
+      },
+      fontFamily: { sans: ['Fira Sans', 'PingFang SC', 'sans-serif'] }
+    }
+  }
+}
+</script>
+<style>
+  * { box-sizing: border-box; }
+  body { background: #F5F3FF; font-family: 'Fira Sans', 'PingFang SC', sans-serif; color: #1E1B4B; }
+
+  /* Annotation styles */
+  .anno { position: absolute; background: #FBBF24; color: #78350F; font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 4px; white-space: nowrap; z-index: 10; pointer-events: none; }
+  .anno-line { position: absolute; border-left: 2px dashed #FBBF24; z-index: 9; pointer-events: none; }
+
+  /* Wireframe card */
+  .wf-card { background: white; border-radius: 12px; border: 1px solid #E0E7FF; box-shadow: 0 2px 8px rgba(99,102,241,.06); }
+
+  /* Flow arrow */
+  .flow-arrow { display: flex; align-items: center; gap: 0; }
+  .flow-arrow::after { content: '→'; font-size: 20px; color: #818CF8; font-weight: 700; margin: 0 12px; }
+
+  /* Screen wrapper */
+  .screen-wrap { position: relative; margin-bottom: 48px; }
+  .screen-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: #6366F1;
+    text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .screen-label::before { content: ''; width: 3px; height: 14px; background: #6366F1; border-radius: 2px; display: inline-block; }
+
+  /* Step bubble */
+  .step-bubble { width: 28px; height: 28px; border-radius: 50%; background: #6366F1; color: white;
+    font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* Status chip */
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+  .chip-yellow { background: #FEF3C7; color: #92400E; }
+  .chip-green  { background: #D1FAE5; color: #065F46; }
+  .chip-red    { background: #FEE2E2; color: #991B1B; }
+  .chip-blue   { background: #DBEAFE; color: #1E40AF; }
+  .chip-purple { background: #EDE9FE; color: #5B21B6; }
+
+  /* Sidebar nav item */
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: 8px;
+    font-size: 14px; font-weight: 500; color: #6B7280; cursor: pointer; transition: all .15s; }
+  .nav-item.active { background: #EDE9FE; color: #6366F1; font-weight: 600; }
+  .nav-item:hover:not(.active) { background: #F5F3FF; color: #6366F1; }
+
+  /* Table */
+  .proto-table th { background: #F5F3FF; font-size: 12px; font-weight: 600; color: #6B7280;
+    padding: 10px 14px; text-align: left; border-bottom: 1px solid #E0E7FF; }
+  .proto-table td { padding: 12px 14px; font-size: 13px; color: #374151; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+  .proto-table tr:last-child td { border-bottom: none; }
+
+  /* Input field */
+  .proto-input { border: 1px solid #E0E7FF; border-radius: 8px; padding: 9px 13px; font-size: 14px;
+    color: #374151; background: white; width: 100%; }
+  .proto-input::placeholder { color: #9CA3AF; }
+  .proto-input.focused { border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
+
+  /* Btn */
+  .btn-p { background: #6366F1; color: white; border-radius: 8px; padding: 9px 20px;
+    font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-s { background: #F5F3FF; color: #6366F1; border: 1px solid #E0E7FF; border-radius: 8px;
+    padding: 9px 20px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-cta { background: #10B981; color: white; border-radius: 8px; padding: 9px 20px;
+    font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Progress bar */
+  .progress-track { background: #E0E7FF; border-radius: 99px; height: 6px; overflow: hidden; }
+  .progress-fill  { background: #6366F1; border-radius: 99px; height: 6px; }
+
+  /* Section divider */
+  .section-divider { border: none; border-top: 1px dashed #E0E7FF; margin: 32px 0; }
+
+  /* Sticky section title */
+  .section-title { font-size: 22px; font-weight: 700; color: #1E1B4B; margin-bottom: 6px; }
+  .section-desc  { font-size: 14px; color: #6B7280; margin-bottom: 28px; line-height: 1.6; }
+
+  /* Page nav */
+  #page-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: white;
+    border-bottom: 1px solid #E0E7FF; display: flex; align-items: center; padding: 0 32px; height: 52px; }
+  .nav-link { font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 6px;
+    color: #6B7280; cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .nav-link:hover { background: #F5F3FF; color: #6366F1; }
+  .nav-link.active { background: #EDE9FE; color: #6366F1; font-weight: 700; }
+
+  /* Annotation bubble */
+  .note { display: inline-flex; align-items: flex-start; gap: 8px; background: #FFFBEB;
+    border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #78350F; }
+  .note-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Avatar */
+  .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-weight: 700; font-size: 14px; color: white; flex-shrink: 0; }
+
+  /* CDK box */
+  .cdk-box { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 10px 14px;
+    font-family: 'Courier New', monospace; font-size: 13px; color: #065F46; letter-spacing: .05em; }
+
+  /* Highlight outline */
+  .highlight-box { border: 2px dashed #F59E0B; border-radius: 10px; position: relative; }
+  .highlight-box::before { content: attr(data-label); position: absolute; top: -11px; left: 12px;
+    background: #F59E0B; color: white; font-size: 10px; font-weight: 700; padding: 1px 8px;
+    border-radius: 4px; white-space: nowrap; }
+
+  @media(max-width: 768px) {
+    #page-nav { overflow-x: auto; }
+  }
+</style>
+</head>
+<body class="pt-14">
+
+<!-- Top Nav -->
+<nav id="page-nav">
+  <div class="flex items-center gap-2 mr-6 flex-shrink-0">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <span class="font-bold text-ink text-sm">游戏推广平台 · 原型图</span>
+  </div>
+  <div class="flex items-center gap-1 overflow-x-auto">
+    <a class="nav-link active" href="#flow">流程总览</a>
+    <a class="nav-link" href="#role-select">角色选择</a>
+    <a class="nav-link" href="#maker-publish">制作人①发布</a>
+    <a class="nav-link" href="#maker-review">制作人②审核</a>
+    <a class="nav-link" href="#maker-content">制作人③内容</a>
+    <a class="nav-link" href="#creator-browse">博主①浏览</a>
+    <a class="nav-link" href="#creator-status">博主②我的报名</a>
+    <a class="nav-link" href="#creator-submit">博主③提交内容</a>
+    <a class="nav-link" href="#operator">运营看板</a>
+  </div>
+</nav>
+
+<div class="max-w-5xl mx-auto px-4 py-10">
+
+<!-- ============================================================ -->
+<!-- SECTION: 流程总览 -->
+<!-- ============================================================ -->
+<section id="flow" class="mb-16">
+  <div class="section-title">流程总览</div>
+  <div class="section-desc">三方协作的核心链路，平台承担所有中间环节，消除人工传达。</div>
+
+  <div class="wf-card p-6 mb-6">
+    <!-- Timeline -->
+    <div class="flex flex-col gap-0">
+
+      <!-- Step 1 -->
+      <div class="flex gap-4 pb-6 relative">
+        <div class="flex flex-col items-center gap-0">
+          <div class="step-bubble">1</div>
+          <div class="w-0.5 flex-1 bg-indigo-100 mt-2"></div>
+        </div>
+        <div class="flex-1 pt-0.5">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-bold text-ink">游戏制作人 · 发布推广任务</span>
+            <span class="chip chip-purple">制作人</span>
+          </div>
+          <p class="text-sm text-gray-500 mb-3">填写游戏名、类型、亮点、链接、上线时间、内容释出时间、招募类型等信息</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="chip chip-blue">游戏名：女吊</span>
+            <span class="chip chip-blue">类型：双人联机解谜</span>
+            <span class="chip chip-blue">上线：4月18日</span>
+            <span class="chip chip-blue">内容释出：4月18日 12:00后</span>
+            <span class="chip chip-blue">招募：博主+主播</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="flex gap-4 pb-6 relative">
+        <div class="flex flex-col items-center gap-0">
+          <div class="step-bubble">2</div>
+          <div class="w-0.5 flex-1 bg-indigo-100 mt-2"></div>
+        </div>
+        <div class="flex-1 pt-0.5">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-bold text-ink">博主 / 主播 · 自助报名</span>
+            <span class="chip chip-blue">博主/主播</span>
+          </div>
+          <p class="text-sm text-gray-500">在任务卡片上查看详情，一键报名并填写补充信息（粉丝量、平台等）</p>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="flex gap-4 pb-6 relative">
+        <div class="flex flex-col items-center gap-0">
+          <div class="step-bubble">3</div>
+          <div class="w-0.5 flex-1 bg-indigo-100 mt-2"></div>
+        </div>
+        <div class="flex-1 pt-0.5">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-bold text-ink">游戏制作人 · 筛选报名名单</span>
+            <span class="chip chip-purple">制作人</span>
+          </div>
+          <p class="text-sm text-gray-500">在报名管理页查看所有报名者，逐一通过 / 拒绝，并为通过者填写3个 CDK</p>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="flex gap-4 pb-6 relative">
+        <div class="flex flex-col items-center gap-0">
+          <div class="step-bubble">4</div>
+          <div class="w-0.5 flex-1 bg-indigo-100 mt-2"></div>
+        </div>
+        <div class="flex-1 pt-0.5">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-bold text-ink">博主 / 主播 · 领取 CDK & 产出内容</span>
+            <span class="chip chip-blue">博主/主播</span>
+          </div>
+          <p class="text-sm text-gray-500">在「我的报名」看到审核结果，通过者可查看3个 CDK，完成直播或视频后提交链接和截图</p>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="flex gap-4">
+        <div class="flex flex-col items-center">
+          <div class="step-bubble">5</div>
+        </div>
+        <div class="flex-1 pt-0.5">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-bold text-ink">运营 · 一键导出汇总报告</span>
+            <span class="chip chip-green">运营</span>
+          </div>
+          <p class="text-sm text-gray-500">运营看板实时监控所有任务进度，「导出报告」一键生成包含通过名单、CDK、内容链接的汇总，直接发给厂商</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pain point mapping -->
+  <div class="grid grid-cols-3 gap-4">
+    <div class="wf-card p-4">
+      <div class="text-xs font-bold text-red-500 mb-2 uppercase tracking-wide">旧流程痛点</div>
+      <ul class="text-sm text-gray-600 space-y-2">
+        <li class="flex gap-2"><span class="text-red-400">✕</span>运营手动转发游戏信息到群</li>
+        <li class="flex gap-2"><span class="text-red-400">✕</span>报名通过后私聊发 CDK</li>
+        <li class="flex gap-2"><span class="text-red-400">✕</span>手动收集截图和链接</li>
+        <li class="flex gap-2"><span class="text-red-400">✕</span>整理表格汇总给厂商</li>
+      </ul>
+    </div>
+    <div class="wf-card p-4">
+      <div class="text-xs font-bold text-primary mb-2 uppercase tracking-wide">平台解决方案</div>
+      <ul class="text-sm text-gray-600 space-y-2">
+        <li class="flex gap-2"><span class="text-primary">✓</span>制作人直接发布任务</li>
+        <li class="flex gap-2"><span class="text-primary">✓</span>CDK 在平台录入自动展示</li>
+        <li class="flex gap-2"><span class="text-primary">✓</span>博主/主播自助提交内容</li>
+        <li class="flex gap-2"><span class="text-primary">✓</span>一键导出汇总报告</li>
+      </ul>
+    </div>
+    <div class="wf-card p-4">
+      <div class="text-xs font-bold text-cta mb-2 uppercase tracking-wide">角色权限</div>
+      <ul class="text-sm text-gray-600 space-y-2">
+        <li class="flex gap-2"><span class="chip chip-purple text-xs">制作人</span>密码登录</li>
+        <li class="flex gap-2"><span class="chip chip-blue text-xs">博主/主播</span>填昵称</li>
+        <li class="flex gap-2"><span class="chip chip-green text-xs">运营</span>密码登录</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- SECTION: 角色选择 -->
+<!-- ============================================================ -->
+<section id="role-select" class="mb-16">
+  <div class="section-title">页面 0 · 角色选择</div>
+  <div class="section-desc">用户打开平台后首先看到的界面，选择身份后进入对应视图。</div>
+
+  <div class="wf-card p-8 max-w-md mx-auto">
+    <!-- Logo area -->
+    <div class="text-center mb-8">
+      <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto mb-3">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="font-bold text-ink text-xl">单主机 · 游戏推广平台</div>
+      <div class="text-gray-400 text-sm mt-1">请选择你的身份</div>
+    </div>
+
+    <!-- Role cards -->
+    <div class="space-y-3">
+      <!-- Maker -->
+      <div class="highlight-box p-4 rounded-xl cursor-pointer" data-label="点击后弹出密码框">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+          </div>
+          <div>
+            <div class="font-bold text-ink text-sm">游戏制作人 / 厂商</div>
+            <div class="text-xs text-gray-500 mt-0.5">发布任务、筛选报名、发放CDK、查看产出</div>
+          </div>
+          <svg class="ml-auto text-gray-300" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- Creator -->
+      <div class="border border-indigo-100 rounded-xl p-4 cursor-pointer hover:border-primary bg-surface">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <div>
+            <div class="font-bold text-ink text-sm">博主 / 主播</div>
+            <div class="text-xs text-gray-500 mt-0.5">浏览任务、报名、领CDK、提交内容</div>
+          </div>
+          <svg class="ml-auto text-gray-300" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- Operator -->
+      <div class="border border-indigo-100 rounded-xl p-4 cursor-pointer hover:border-primary bg-surface">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </div>
+          <div>
+            <div class="font-bold text-ink text-sm">运营</div>
+            <div class="text-xs text-gray-500 mt-0.5">全流程监控、导出汇总报告</div>
+          </div>
+          <svg class="ml-auto text-gray-300" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Annotation -->
+  <div class="note mt-5 max-w-md mx-auto">
+    <span class="note-icon">💡</span>
+    <div>制作人和运营点击后弹出密码输入框；博主/主播点击后弹出昵称输入框。首次登录的信息会存入浏览器，下次免填。</div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- SECTION: 制作人①发布任务 -->
+<!-- ============================================================ -->
+<section id="maker-publish" class="mb-16">
+  <div class="section-title">页面 1A · 制作人 · 发布推广任务</div>
+  <div class="section-desc">制作人填写游戏信息，发布后博主/主播即可看到并报名。</div>
+
+  <div class="wf-card overflow-hidden">
+    <!-- Top nav tabs -->
+    <div class="flex items-center gap-1 px-5 pt-4 border-b border-indigo-50 pb-0">
+      <div class="nav-item" style="border-radius:8px 8px 0 0; padding-bottom:12px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        我的任务
+      </div>
+      <div class="nav-item active" style="border-radius:8px 8px 0 0; padding-bottom:12px; border-bottom: 3px solid #6366F1;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        发布新任务
+      </div>
+      <div class="nav-item" style="border-radius:8px 8px 0 0; padding-bottom:12px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        报名管理
+      </div>
+      <div class="nav-item" style="border-radius:8px 8px 0 0; padding-bottom:12px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+        内容收集
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="p-6">
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">游戏名称 *</label>
+          <div class="proto-input focused text-gray-700">女吊</div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">游戏类型</label>
+          <div class="proto-input text-gray-400">双人联机解谜（需要两台电脑）</div>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">一句话亮点 *</label>
+        <div class="proto-input text-gray-700">吴越民俗微恐双人联机</div>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">游戏 / Steam 链接</label>
+        <div class="proto-input text-blue-400">https://store.steampowered.com/</div>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">游戏简介</label>
+        <div class="proto-input" style="height:80px; display:flex; align-items:flex-start; padding-top:10px; color:#9CA3AF;">
+          介绍游戏背景、核心玩法与特色...
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">内容要求</label>
+        <div class="proto-input" style="height:70px; display:flex; align-items:flex-start; padding-top:10px; color:#374151;">
+          需要两台电脑联机体验，内容（直播/视频/图文）需在游戏上线后释出...
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">游戏上线时间</label>
+          <div class="proto-input text-gray-700">4月18日</div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">内容释出时间</label>
+          <div class="proto-input text-gray-700">4月18日中午12点后</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">招募类型</label>
+          <div class="proto-input text-gray-700 flex items-center justify-between">
+            <span>不限（博主+主播）</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">名额限制</label>
+          <div class="proto-input text-gray-400">不填则无限制</div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">报名截止日期</label>
+          <div class="proto-input text-gray-700">2025-04-17</div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3">
+        <div class="btn-s cursor-pointer">取消</div>
+        <div class="btn-p cursor-pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+          发布任务
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note mt-5">
+    <span class="note-icon">💡</span>
+    <div>发布后任务即刻对博主/主播可见。制作人可在「我的任务」查看实时报名人数，无需联系运营。</div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- SECTION: 制作人②审核报名 -->
+<!-- ============================================================ -->
+<section id="maker-review" class="mb-16">
+  <div class="section-title">页面 1B · 制作人 · 报名管理 & CDK 发放</div>
+  <div class="section-desc">查看报名名单，通过 / 拒绝后直接在平台填写 CDK，博主/主播实时可见。</div>
+
+  <div class="wf-card overflow-hidden">
+    <!-- Task selector -->
+    <div class="p-5 border-b border-indigo-50">
+      <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">选择任务</label>
+      <div class="proto-input flex items-center justify-between w-72">
+        <span class="text-gray-700">女吊</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+
+    <!-- Signup list -->
+    <div class="divide-y divide-gray-50">
+
+      <!-- Row 1 - Pending -->
+      <div class="p-4 border-b border-gray-50">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3 flex-1">
+            <div class="avatar bg-gradient-to-br from-blue-400 to-indigo-500 flex-shrink-0">游</div>
+            <div class="flex-1">
+              <!-- 昵称 + 身份标签 -->
+              <div class="flex items-center gap-2 flex-wrap mb-2">
+                <span class="font-bold text-ink text-sm">游戏主播小明</span>
+                <span class="chip chip-purple text-xs font-bold">主播</span>
+              </div>
+              <!-- 粉丝数 + 主页链接（重点展示） -->
+              <div class="flex items-center gap-4 mb-2">
+                <div class="flex items-center gap-1.5">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                  <span class="text-xs text-gray-500">粉丝</span>
+                  <span class="font-bold text-ink text-sm">12万</span>
+                </div>
+                <div class="highlight-box" data-label="点击跳转主页">
+                  <a class="flex items-center gap-1 text-xs text-blue-500 font-semibold cursor-pointer px-1">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    查看主页
+                  </a>
+                </div>
+              </div>
+              <div class="text-xs text-gray-400">报名于 2025-04-14 14:23</div>
+              <div class="text-xs text-gray-500 mt-1.5 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">主做单机游戏直播，平均在线 300+</div>
+            </div>
+          </div>
+          <!-- 审核操作 -->
+          <div class="flex flex-col items-end gap-2 flex-shrink-0">
+            <span class="chip chip-yellow text-xs">⏳ 待审核</span>
+            <div class="flex gap-2">
+              <div class="highlight-box px-3 py-1.5 text-xs font-bold text-white bg-cta rounded-lg cursor-pointer" data-label="点击通过">通过</div>
+              <div class="px-3 py-1.5 text-xs font-bold text-white bg-red-400 rounded-lg cursor-pointer">拒绝</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2 - Approved + CDK -->
+      <div class="p-4 bg-green-50/30 border-b border-gray-50">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div class="flex items-start gap-3 flex-1">
+            <div class="avatar bg-gradient-to-br from-pink-400 to-rose-500 flex-shrink-0">花</div>
+            <div class="flex-1">
+              <!-- 昵称 + 身份标签 -->
+              <div class="flex items-center gap-2 flex-wrap mb-2">
+                <span class="font-bold text-ink text-sm">花花爱打游戏</span>
+                <span class="chip chip-blue text-xs font-bold">博主</span>
+              </div>
+              <!-- 粉丝数 + 主页链接 -->
+              <div class="flex items-center gap-4 mb-2">
+                <div class="flex items-center gap-1.5">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                  <span class="text-xs text-gray-500">粉丝</span>
+                  <span class="font-bold text-ink text-sm">8.2万</span>
+                </div>
+                <a class="flex items-center gap-1 text-xs text-blue-500 font-semibold cursor-pointer">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  查看主页
+                </a>
+              </div>
+              <div class="text-xs text-gray-400">报名于 2025-04-14 10:05</div>
+              <div class="text-xs text-gray-500 mt-1.5 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">图文博主，专注恐怖解谜</div>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-2 flex-shrink-0">
+            <span class="chip chip-green text-xs">✅ 已通过</span>
+            <div class="text-xs text-blue-500">已提交内容 ✅</div>
+          </div>
+        </div>
+        <!-- CDK inputs -->
+        <div class="ml-14">
+          <div class="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">CDK 发放（共3个）</div>
+          <div class="flex gap-2 items-center">
+            <div class="cdk-box flex-1">NUZHI-AAAA-1234</div>
+            <div class="cdk-box flex-1">NUZHI-BBBB-5678</div>
+            <div class="cdk-box flex-1">NUZHI-CCCC-9012</div>
+            <div class="btn-cta text-xs py-2 px-3 cursor-pointer">已保存</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3 - Approved, waiting CDK -->
+      <div class="p-4 border-b border-gray-50">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div class="flex items-start gap-3 flex-1">
+            <div class="avatar bg-gradient-to-br from-amber-400 to-orange-500 flex-shrink-0">王</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 flex-wrap mb-2">
+                <span class="font-bold text-ink text-sm">王者聊游戏</span>
+                <span class="chip chip-purple text-xs font-bold">主播</span>
+              </div>
+              <div class="flex items-center gap-4 mb-2">
+                <div class="flex items-center gap-1.5">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                  <span class="text-xs text-gray-500">粉丝</span>
+                  <span class="font-bold text-ink text-sm">5.6万</span>
+                </div>
+                <a class="flex items-center gap-1 text-xs text-blue-500 font-semibold cursor-pointer">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  查看主页
+                </a>
+              </div>
+              <div class="text-xs text-gray-400">报名于 2025-04-14 16:48</div>
+              <div class="text-xs text-gray-500 mt-1.5 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">B站+小红书双平台，擅长双人合作类游戏</div>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-2 flex-shrink-0">
+            <span class="chip chip-green text-xs">✅ 已通过</span>
+            <span class="text-xs text-amber-500">⏳ 等待内容</span>
+          </div>
+        </div>
+        <div class="ml-14">
+          <div class="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">🎮 CDK 发放（共 3 个）</div>
+          <div class="flex gap-2 items-center">
+            <div class="highlight-box flex-1" data-label="填入CDK">
+              <input class="proto-input text-xs" placeholder="CDK 1" />
+            </div>
+            <input class="proto-input text-xs flex-1" placeholder="CDK 2" />
+            <input class="proto-input text-xs flex-1" placeholder="CDK 3" />
+            <div class="btn-p text-xs py-2 px-3 cursor-pointer">保存</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 4 - Rejected -->
+      <div class="p-4 opacity-60">
+        <div class="flex items-center gap-4">
+          <div class="avatar bg-gradient-to-br from-gray-300 to-gray-400">测</div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-0.5">
+              <span class="font-semibold text-sm text-gray-500">测试账号001</span>
+              <span class="chip chip-red text-xs">❌ 已拒绝</span>
+            </div>
+            <div class="text-xs text-gray-400">报名于 2025-04-14 22:11</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="note mt-5">
+    <span class="note-icon">💡</span>
+    <div>CDK 填写保存后，博主/主播在自己的「我的报名」页面实时看到，无需制作人单独发送。</div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- SECTION: 制作人③内容收集 -->
+<!-- ============================================================ -->
+<section id="maker-content" class="mb-16">
+  <div class="section-title">页面 1C · 制作人 · 内容收集</div>
+  <div class="section-desc">查看所有已提交的直播截图和视频链接，一目了然。</div>
+
+  <div class="wf-card overflow-hidden">
+    <div class="p-5 border-b border-indigo-50">
+      <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">选择任务</label>
+      <div class="proto-input flex items-center justify-between w-72">
+        <span class="text-gray-700">女吊</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+    <!-- Stats bar -->
+    <div class="px-5 py-3 bg-surface border-b border-indigo-50 flex gap-6">
+      <div class="text-center"><div class="font-bold text-ink text-lg">3</div><div class="text-xs text-gray-400">通过总数</div></div>
+      <div class="text-center"><div class="font-bold text-cta text-lg">1</div><div class="text-xs text-gray-400">已交稿</div></div>
+      <div class="text-center"><div class="font-bold text-amber-500 text-lg">2</div><div class="text-xs text-gray-400">待交稿</div></div>
+    </div>
+    <!-- Content rows -->
+    <div class="divide-y divide-gray-50">
+      <div class="p-4">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="avatar bg-gradient-to-br from-pink-400 to-rose-500 w-8 h-8 text-sm">花</div>
+          <div>
+            <span class="font-semibold text-sm text-ink">花花爱打游戏</span>
+            <span class="ml-2 chip chip-blue text-xs">博主</span>
+          </div>
+          <span class="chip chip-green text-xs ml-auto">✅ 已提交</span>
+        </div>
+        <div class="ml-11 space-y-1.5">
+          <div class="flex items-center gap-2 text-xs">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span class="text-gray-500">直播截图：</span>
+            <span class="text-blue-500 underline">https://cdn.xiaohongshu.com/…</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="M22 8s-3.5-5-10-5S2 8 2 8s3.5 5 10 5 10-5 10-5z"/><circle cx="12" cy="8" r="3"/></svg>
+            <span class="text-gray-500">视频/笔记：</span>
+            <span class="text-blue-500 underline">https://www.xiaohongshu.com/explore/…</span>
+          </div>
+          <div class="text-xs text-gray-400 bg-gray-50 rounded px-3 py-2 mt-1">直播1.5小时，最高在线127人，笔记发布后互动持续增长</div>
+        </div>
+      </div>
+      <div class="p-4 opacity-50">
+        <div class="flex items-center gap-3">
+          <div class="avatar bg-gradient-to-br from-amber-400 to-orange-500 w-8 h-8 text-sm">王</div>
+          <div><span class="font-semibold text-sm text-gray-500">王者聊游戏</span><span class="ml-2 chip chip-yellow text-xs">⏳ 未提交</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- SECTION: 博主①浏览任务 -->
+<!-- ============================================================ -->
+<section id="creator-browse" class="mb-16">
+  <div class="section-title">页面 2A · 博主/主播 · 浏览任务</div>
+  <div class="section-desc">无需运营转发，博主/主播直接看到所有可报名的推广任务。</div>
+
+  <div class="wf-card overflow-hidden">
+    <!-- Greeting -->
+    <div class="px-5 pt-5 pb-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-50 flex items-center justify-between">
+      <div>
+        <span class="text-gray-500 text-sm">当前身份：</span>
+        <span class="font-bold text-ink">游戏主播小明</span>
+        <span class="chip chip-blue text-xs ml-2">主播</span>
+      </div>
+      <span class="text-xs text-gray-400 cursor-pointer hover:text-primary">修改昵称</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-1 px-5 py-3 border-b border-indigo-50">
+      <div class="section-tab active text-sm">浏览任务</div>
+      <div class="section-tab text-sm" style="padding:7px 18px; border-radius:99px; font-size:14px; color:#6B7280; cursor:pointer;">我的报名</div>
+    </div>
+
+    <!-- Task card -->
+    <div class="p-5">
+      <div class="border border-indigo-100 rounded-xl p-5 hover:border-primary transition-colors">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-bold text-ink text-lg">女吊</span>
+              <span class="chip chip-purple text-xs">双人联机解谜</span>
+            </div>
+            <div class="text-sm text-pink-600 font-medium mb-2">✨ 吴越民俗微恐双人联机</div>
+            <a class="text-xs text-blue-400 underline">🔗 查看 Steam 页面 ↗</a>
+          </div>
+          <div class="highlight-box" data-label="核心操作">
+            <div class="btn-p text-sm cursor-pointer px-4 py-2">报名参与</div>
+          </div>
+        </div>
+
+        <!-- Desc -->
+        <div class="text-sm text-gray-500 mb-3 leading-relaxed">
+          《女吊》是一款以吴越民俗文化为背景的微恐双人联机解谜游戏，两位玩家扮演不同角色，通过合作解开层层谜题...
+        </div>
+
+        <!-- Requirement -->
+        <div class="bg-amber-50 rounded-lg p-3 mb-3 text-xs text-amber-800 leading-relaxed">
+          <strong>📌 内容要求：</strong>需要两台电脑进行联机体验，内容（直播/视频/图文）需在游戏上线后释出。
+        </div>
+
+        <!-- Meta info -->
+        <div class="flex flex-wrap gap-3 text-xs text-gray-500">
+          <span class="flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            上线：4月18日
+          </span>
+          <span class="flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+            内容释出：4月18日 12:00 后
+          </span>
+          <span class="flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            已报名 7 人 · 无名额限制
+          </span>
+          <span class="flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            招募：博主 + 主播
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signup Modal Wireframe -->
+  <div class="mt-6">
+    <div class="screen-label">报名弹窗（点击「报名参与」后出现）</div>
+    <div class="max-w-md mx-auto">
+      <!-- Modal backdrop hint -->
+      <div class="relative">
+        <!-- Backdrop indicator -->
+        <div class="absolute -inset-6 bg-ink/5 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center" style="z-index:0;">
+          <span class="text-xs text-gray-300 font-medium select-none">背景遮罩（点击外部可关闭）</span>
+        </div>
+        <!-- Modal card -->
+        <div class="wf-card p-6 relative" style="z-index:1;">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <div class="font-bold text-ink text-base">报名参与推广</div>
+              <div class="text-xs text-gray-400 mt-0.5">女吊 · 吴越民俗微恐双人联机</div>
+            </div>
+            <div class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer text-gray-400 text-sm font-bold">×</div>
+          </div>
+
+          <div class="space-y-4">
+            <!-- 昵称 -->
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
+                昵称 <span class="text-red-400">*</span>
+              </label>
+              <div class="proto-input focused text-gray-700">游戏主播小明</div>
+              <div class="text-xs text-gray-400 mt-1">制作人会用这个名字识别你</div>
+            </div>
+
+            <!-- 主页链接 -->
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
+                小红书 / 直播平台主页链接 <span class="text-red-400">*</span>
+              </label>
+              <div class="highlight-box proto-input text-blue-400" data-label="必填">
+                https://www.xiaohongshu.com/user/profile/…
+              </div>
+              <div class="text-xs text-gray-400 mt-1">方便制作人查看你的内容风格</div>
+            </div>
+
+            <!-- 实时粉丝数 -->
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
+                实时粉丝数 <span class="text-red-400">*</span>
+              </label>
+              <div class="proto-input text-gray-700">12万</div>
+              <div class="text-xs text-gray-400 mt-1">填写当前真实粉丝量，如：12万、8500</div>
+            </div>
+
+            <!-- 补充说明（可选） -->
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
+                补充说明 <span class="text-gray-300 font-normal normal-case tracking-normal">（可选）</span>
+              </label>
+              <div class="proto-input text-gray-400" style="height:68px; display:flex; align-items:flex-start; padding-top:10px;">
+                内容风格、平台数据、配合档期等补充信息…
+              </div>
+            </div>
+
+            <!-- 协议提示 -->
+            <div class="bg-amber-50 border border-amber-100 rounded-lg px-3 py-2.5 text-xs text-amber-700 leading-relaxed">
+              📌 提交即视为同意在游戏上线后发布相关内容（直播或视频），内容释出时间：<strong>4月18日 12:00 后</strong>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 pt-1">
+              <div class="btn-s flex-1 justify-center cursor-pointer text-sm">取消</div>
+              <div class="btn-p flex-1 justify-center cursor-pointer text-sm">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                确认报名
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Field annotation -->
+  <div class="mt-8 max-w-md mx-auto">
+    <div class="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wide">字段说明</div>
+    <table class="w-full text-sm border border-indigo-50 rounded-xl overflow-hidden">
+      <thead><tr class="bg-surface">
+        <th class="text-left px-4 py-2.5 text-xs font-bold text-gray-500">字段</th>
+        <th class="text-left px-4 py-2.5 text-xs font-bold text-gray-500">必填</th>
+        <th class="text-left px-4 py-2.5 text-xs font-bold text-gray-500">用途</th>
+      </tr></thead>
+      <tbody class="divide-y divide-gray-50">
+        <tr><td class="px-4 py-3 font-medium">昵称</td><td class="px-4 py-3"><span class="chip chip-red text-xs">必填</span></td><td class="px-4 py-3 text-gray-500 text-xs">制作人识别报名者身份</td></tr>
+        <tr><td class="px-4 py-3 font-medium">主页链接</td><td class="px-4 py-3"><span class="chip chip-red text-xs">必填</span></td><td class="px-4 py-3 text-gray-500 text-xs">制作人点击查看内容风格、历史作品</td></tr>
+        <tr><td class="px-4 py-3 font-medium">实时粉丝数</td><td class="px-4 py-3"><span class="chip chip-red text-xs">必填</span></td><td class="px-4 py-3 text-gray-500 text-xs">制作人评估传播量级，辅助筛选决策</td></tr>
+        <tr><td class="px-4 py-3 font-medium">补充说明</td><td class="px-4 py-3"><span class="chip chip-yellow text-xs">可选</span></td><td class="px-4 py-3 text-gray-500 text-xs">自由填写风格、档期、平台等补充信息</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note mt-5">
+    <span class="note-icon">💡</span>
+    <div>昵称、主页链接、粉丝数为必填项，提交后立即进入待审核状态。制作人在「报名管理」可直接点击主页链接查看内容，无需单独沟通。</div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- SECTION: 博主②我的报名 -->
+<!-- ============================================================ -->
+<section id="creator-status" class="mb-16">
+  <div class="section-title">页面 2B · 博主/主播 · 我的报名状态</div>
+  <div class="section-desc">实时看审核结果和 CDK，无需追问运营。</div>
+
+  <div class="grid grid-cols-3 gap-4">
+    <!-- State: Pending -->
+    <div class="wf-card p-4">
+      <div class="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wide">状态：待审核</div>
+      <div class="font-bold text-sm text-ink mb-1">女吊</div>
+      <div class="chip chip-yellow text-xs mb-3">⏳ 审核中</div>
+      <p class="text-xs text-gray-500">制作人正在审核，通过后将显示 CDK。</p>
+    </div>
+
+    <!-- State: Approved + CDK -->
+    <div class="wf-card p-4 border-2 border-cta/30">
+      <div class="text-xs font-bold text-cta mb-3 uppercase tracking-wide">状态：已通过</div>
+      <div class="font-bold text-sm text-ink mb-1">女吊</div>
+      <div class="chip chip-green text-xs mb-3">✅ 已通过</div>
+      <div class="bg-green-50 rounded-lg p-3 mb-3">
+        <div class="text-xs font-bold text-green-700 mb-2">🎁 你的 CDK（共3个）</div>
+        <div class="space-y-1.5">
+          <div class="cdk-box text-xs py-1.5">NUZHI-AAAA-1234</div>
+          <div class="cdk-box text-xs py-1.5">NUZHI-BBBB-5678</div>
+          <div class="cdk-box text-xs py-1.5">NUZHI-CCCC-9012</div>
+        </div>
+      </div>
+      <div class="highlight-box" data-label="完成内容后点这里">
+        <div class="btn-p text-xs w-full text-center py-2 cursor-pointer justify-center">📤 提交内容</div>
+      </div>
+    </div>
+
+    <!-- State: Rejected -->
+    <div class="wf-card p-4 opacity-60">
+      <div class="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wide">状态：未通过</div>
+      <div class="font-bold text-sm text-gray-400 mb-1">其他游戏任务</div>
+      <div class="chip chip-red text-xs mb-3">❌ 未通过</div>
+      <p class="text-xs text-gray-400">本次报名未通过，可关注其他任务。</p>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- SECTION: 博主③提交内容 -->
+<!-- ============================================================ -->
+<section id="creator-submit" class="mb-16">
+  <div class="section-title">页面 2C · 博主/主播 · 提交内容</div>
+  <div class="section-desc">完成直播或视频后，在平台填写链接和截图，运营一键可见。</div>
+
+  <div class="wf-card p-6 max-w-lg mx-auto">
+    <div class="font-bold text-ink text-base mb-5 flex items-center gap-2">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      提交内容 · 女吊
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">直播截图 URL（可选）</label>
+        <div class="proto-input text-gray-400">https://... 上传截图后的图片地址</div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">视频 / 笔记链接 *</label>
+        <div class="highlight-box proto-input text-blue-400" data-label="必填">https://www.xiaohongshu.com/explore/…</div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">补充说明（可选）</label>
+        <div class="proto-input text-gray-400" style="height:72px; display:flex; align-items:flex-start; padding-top:10px;">
+          直播时长、在线人数、笔记互动数据...
+        </div>
+      </div>
+      <div class="flex gap-3 pt-1">
+        <div class="btn-s flex-1 justify-center cursor-pointer">取消</div>
+        <div class="btn-cta flex-1 justify-center cursor-pointer">确认提交</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- SECTION: 运营看板 -->
+<!-- ============================================================ -->
+<section id="operator" class="mb-16">
+  <div class="section-title">页面 3 · 运营全局看板</div>
+  <div class="section-desc">实时监控所有任务进度，一键导出给厂商的汇总报告。</div>
+
+  <div class="wf-card overflow-hidden">
+    <!-- Header -->
+    <div class="p-5 border-b border-indigo-50 flex items-center justify-between">
+      <div class="font-bold text-ink text-lg">运营全局看板</div>
+      <div class="highlight-box" data-label="导出给厂商">
+        <div class="btn-cta cursor-pointer text-sm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          导出汇总报告
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-4 divide-x divide-indigo-50 border-b border-indigo-50">
+      <div class="p-4 text-center"><div class="text-2xl font-bold text-ink">2</div><div class="text-xs text-gray-400 mt-1">任务总数</div></div>
+      <div class="p-4 text-center"><div class="text-2xl font-bold text-primary">11</div><div class="text-xs text-gray-400 mt-1">总报名人数</div></div>
+      <div class="p-4 text-center"><div class="text-2xl font-bold text-cta">7</div><div class="text-xs text-gray-400 mt-1">审核通过</div></div>
+      <div class="p-4 text-center"><div class="text-2xl font-bold text-amber-500">3</div><div class="text-xs text-gray-400 mt-1">已交稿</div></div>
+    </div>
+
+    <!-- Task detail: 女吊 -->
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <div class="font-bold text-ink">女吊</div>
+          <div class="text-xs text-pink-500">✨ 吴越民俗微恐双人联机</div>
+        </div>
+        <div class="flex gap-4 text-center">
+          <div><div class="font-bold text-lg text-gray-700">7</div><div class="text-xs text-gray-400">报名</div></div>
+          <div><div class="font-bold text-lg text-cta">4</div><div class="text-xs text-gray-400">通过</div></div>
+          <div><div class="font-bold text-lg text-primary">1</div><div class="text-xs text-gray-400">交稿</div></div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="mb-4">
+        <div class="flex justify-between text-xs text-gray-400 mb-1">
+          <span>交稿进度</span>
+          <span>1 / 4</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:25%"></div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <table class="proto-table w-full rounded-lg overflow-hidden border border-indigo-50">
+        <thead>
+          <tr>
+            <th>昵称</th>
+            <th>类型</th>
+            <th>状态</th>
+            <th>CDK</th>
+            <th>内容</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="flex items-center gap-2"><div class="avatar bg-gradient-to-br from-pink-400 to-rose-500 w-7 h-7 text-xs">花</div>花花爱打游戏</div></td>
+            <td><span class="chip chip-blue text-xs">博主</span></td>
+            <td><span class="chip chip-green text-xs">✅ 已通过</span></td>
+            <td><span class="text-xs text-cta">✓ 已发放</span></td>
+            <td><a class="text-xs text-blue-500 underline cursor-pointer">查看 ↗</a></td>
+          </tr>
+          <tr>
+            <td><div class="flex items-center gap-2"><div class="avatar bg-gradient-to-br from-amber-400 to-orange-500 w-7 h-7 text-xs">王</div>王者聊游戏</div></td>
+            <td><span class="chip chip-blue text-xs">主播</span></td>
+            <td><span class="chip chip-green text-xs">✅ 已通过</span></td>
+            <td><span class="text-xs text-cta">✓ 已发放</span></td>
+            <td><span class="text-xs text-gray-300">未提交</span></td>
+          </tr>
+          <tr>
+            <td><div class="flex items-center gap-2"><div class="avatar bg-gradient-to-br from-blue-400 to-indigo-500 w-7 h-7 text-xs">游</div>游戏主播小明</div></td>
+            <td><span class="chip chip-blue text-xs">主播</span></td>
+            <td><span class="chip chip-yellow text-xs">⏳ 待审核</span></td>
+            <td><span class="text-xs text-gray-300">-</span></td>
+            <td><span class="text-xs text-gray-300">-</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Export preview -->
+  <div class="wf-card mt-5 p-5">
+    <div class="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wide">导出报告预览（复制到剪贴板）</div>
+    <div class="bg-gray-50 rounded-lg p-4 font-mono text-xs text-gray-600 leading-relaxed whitespace-pre">📊 小红书单主机游戏推广平台 · 数据汇总报告
+生成时间：2025-04-18 14:30:00
+══════════════════════════════════════════════
+
+【任务1】女吊
+亮点：吴越民俗微恐双人联机
+游戏链接：https://store.steampowered.com/
+上线时间：4月18日 | 内容释出：4月18日中午12点后
+招募：不限 | 报名7人 | 通过4人
+
+  ✅ 通过名单：
+  · 花花爱打游戏（博主）| CDK: NUZHI-AAAA-1234 / NUZHI-BBBB-5678 / NUZHI-CCCC-9012
+    📹 内容链接：https://www.xiaohongshu.com/explore/...
+    📸 截图：https://cdn.xiaohongshu.com/...
+  · 王者聊游戏（主播）| CDK: NUZHI-DDDD-3456 / ...
+    ⏳ 等待提交内容</div>
+    <div class="note mt-3">
+      <span class="note-icon">💡</span>
+      <div>点击「导出汇总报告」一键复制到剪贴板，直接粘贴发给制作人/厂商，替代人工整理表格。</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- Scroll spy -->
+<script>
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY + 100 >= s.offsetTop) current = s.id; });
+  navLinks.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+  });
+});
+navLinks.forEach(l => l.addEventListener('click', e => {
+  e.preventDefault();
+  const target = document.querySelector(l.getAttribute('href'));
+  if (target) window.scrollTo({ top: target.offsetTop - 60, behavior: 'smooth' });
+}));
+</script>
+</body>
+</html>
