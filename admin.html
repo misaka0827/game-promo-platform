@@ -458,9 +458,9 @@ function renderOverview() {
         <button class="btn-secondary text-xs py-1.5 px-3" onclick="goToContent('${t.id}')">📦 查看内容</button>
         <button class="btn-secondary text-xs py-1.5 px-3" onclick="goToQR('${t.id}')">🔗 招募链接</button>
         <button class="btn-secondary text-xs py-1.5 px-3" onclick="openEditTask('${t.id}')">✏️ 编辑</button>
-        ${t.opStatus==='approved'
-          ?`<button class="btn-red text-xs py-1.5 px-3" onclick="toggleTaskStatus('${t.id}','rejected')">下架</button>`
-          :`<button class="btn-green text-xs py-1.5 px-3" onclick="toggleTaskStatus('${t.id}','approved')">发布</button>`}
+        ${t.opStatus!=='approved'
+          ?`<button class="btn-green text-xs py-1.5 px-3" onclick="toggleTaskStatus('${t.id}','approved')">发布</button>`:''}
+        <button class="btn-red text-xs py-1.5 px-3" onclick="deleteTask('${t.id}','${t.gameName}')">🗑️ 删除</button>
       </div>
     </div>`;
   }).join('');
@@ -470,6 +470,24 @@ async function toggleTaskStatus(id, status) {
   const db = await loadDB();
   const t  = db.tasks.find(t=>t.id===id);
   if (t) { t.opStatus=status; await saveDB(db); renderOverview(); renderStats(); showToast(status==='approved'?'任务已发布':'任务已下架','success'); }
+}
+
+async function deleteTask(id, name) {
+  // 二次确认弹窗
+  const confirmed = confirm(`确认删除任务「${name}」？\n\n删除后该任务的所有报名、CDK、内容数据也将一并删除，无法恢复。`);
+  if (!confirmed) return;
+  const db = await loadDB();
+  const idx = db.tasks.findIndex(t => t.id === id);
+  if (idx === -1) return;
+  db.tasks.splice(idx, 1);
+  // 同步清除关联数据
+  db.signups        = db.signups.filter(s => s.taskId !== id);
+  db.contents       = db.contents.filter(c => c.taskId !== id);
+  delete db.cdkPools[id];
+  await saveDB(db);
+  renderOverview();
+  renderStats();
+  showToast(`任务「${name}」已删除`, 'success');
 }
 
 // ---- AUTO PARSE BRIEF ----
