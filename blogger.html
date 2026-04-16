@@ -481,7 +481,10 @@ function renderMyStatus() {
           <div class="text-sm ${content?'text-blue-600 font-medium':'text-amber-600'}">${content?'✅ 内容已提交':'⏳ 待提交内容'}</div>
           ${!content
             ? `<button class="btn-primary text-sm py-2" onclick="openSubmit('${task.id}')">📤 提交内容</button>`
-            : `<div class="text-xs text-gray-400">已于 ${new Date(content.createdAt).toLocaleString('zh-CN')} 提交</div>`}
+            : `<div class="flex items-center gap-2">
+                <div class="text-xs text-gray-400">已于 ${new Date(content.createdAt).toLocaleString('zh-CN')} 提交</div>
+                <button class="btn-secondary text-xs py-1.5 px-3" onclick="openSubmit('${task.id}')">🔄 重新提交</button>
+              </div>`}
         </div>
       ` : `<p class="text-sm text-gray-400">本次报名未通过，可关注其他任务。</p>`}
     </div>`;
@@ -494,7 +497,9 @@ function openSubmit(taskId) {
   document.getElementById('sub_name').value    = creatorName;
   document.getElementById('sub_profile').value = creatorProfile;
   document.getElementById('sub_fans').value    = creatorFans;
-  document.getElementById('sub_video').value   = '';
+  // 预填上次提交的内容链接
+  const prev = cachedDB.contents && cachedDB.contents.find(c=>c.taskId===taskId&&c.creatorName===creatorName&&c.creatorType===CREATOR_TYPE);
+  document.getElementById('sub_video').value = prev ? (prev.video||prev.clip||'') : '';
   document.getElementById('submitModal').classList.remove('hidden');
 }
 
