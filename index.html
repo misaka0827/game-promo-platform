@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>单主机游戏推广协作平台</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+  .card-hover { transition: all .2s; }
+  .card-hover:hover { box-shadow: 0 8px 32px rgba(230,62,109,.15); transform: translateY(-3px); }
+  .identity-card { border:2px solid #f0f0f0;border-radius:20px;padding:28px 24px;cursor:pointer;transition:all .2s;background:white; }
+  .identity-card:hover { border-color:#e63e6d; }
+  .btn-primary { background:#e63e6d;color:white;border-radius:10px;padding:10px 24px;font-weight:600;cursor:pointer;transition:background .2s;border:none; }
+  .btn-primary:hover { background:#c52d5a; }
+  .btn-secondary { background:#f3f4f6;color:#374151;border-radius:10px;padding:10px 24px;font-weight:600;cursor:pointer;border:none; }
+  .btn-secondary:hover { background:#e5e7eb; }
+  input[type=text],input[type=url],input[type=password] {
+    border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;width:100%;outline:none;transition:border .2s;font-size:14px;
+  }
+  input:focus { border-color:#e63e6d; }
+  .modal-backdrop { background:rgba(0,0,0,.45); }
+</style>
+</head>
+<body class="bg-gradient-to-br from-pink-50 via-white to-purple-50 min-h-screen">
+
+<div class="bg-white shadow-sm">
+  <div class="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
+    <span class="text-2xl">🎮</span>
+    <span class="font-bold text-gray-800 text-lg">单主机 · 游戏推广协作平台</span>
+  </div>
+</div>
+
+<div class="max-w-2xl mx-auto mt-12 px-4 pb-16">
+  <div class="text-center mb-10">
+    <div class="text-5xl mb-4">🎯</div>
+    <h2 class="text-3xl font-bold text-gray-800 mb-2">请选择你的身份</h2>
+    <p class="text-gray-400 text-sm">选择后进入对应功能页面</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+
+    <!-- 运营后台 -->
+    <div class="identity-card card-hover sm:col-span-1" onclick="handleAdmin()">
+      <div class="text-4xl mb-3">🎛️</div>
+      <div class="font-bold text-gray-800 text-lg mb-1">运营后台</div>
+      <div class="text-sm text-gray-500 leading-relaxed">发布任务 · 审核报名<br>分配CDK · 收集数据<br>导出报告</div>
+      <div class="mt-3 text-xs text-gray-400 flex items-center gap-1">🔐 需要密码</div>
+    </div>
+
+    <!-- 主播 -->
+    <div class="identity-card card-hover" onclick="handleStreamer()">
+      <div class="text-4xl mb-3">🎙️</div>
+      <div class="font-bold text-gray-800 text-lg mb-1">主播</div>
+      <div class="text-sm text-gray-500 leading-relaxed">浏览任务 · 报名参与<br>领取CDK · 提交直播内容</div>
+      <div class="mt-3 text-xs text-purple-500 font-medium">直播类创作者</div>
+    </div>
+
+    <!-- 博主 -->
+    <div class="identity-card card-hover" onclick="handleBlogger()">
+      <div class="text-4xl mb-3">✍️</div>
+      <div class="font-bold text-gray-800 text-lg mb-1">博主</div>
+      <div class="text-sm text-gray-500 leading-relaxed">浏览任务 · 报名参与<br>领取CDK · 提交种草内容</div>
+      <div class="mt-3 text-xs text-blue-500 font-medium">图文/视频创作者</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed top-4 right-4 text-white px-5 py-3 rounded-xl text-sm shadow-xl z-[9999] opacity-0 transition-opacity duration-300 pointer-events-none" style="background:#1f2937"></div>
+
+<!-- Admin Password Modal -->
+<div id="adminPwdModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-8 w-[360px] shadow-xl">
+    <div class="text-3xl mb-3 text-center">🎛️</div>
+    <h3 class="text-xl font-bold text-gray-800 text-center mb-1">运营后台</h3>
+    <p class="text-gray-400 text-sm text-center mb-5">请输入访问密码</p>
+    <input type="password" id="adminPwdInput" placeholder="请输入密码" class="mb-4" />
+    <div class="flex gap-3">
+      <button class="btn-secondary flex-1" onclick="closeAdminPwd()">取消</button>
+      <button class="btn-primary flex-1" onclick="verifyAdminPwd()">进入</button>
+    </div>
+  </div>
+</div>
+
+<!-- Streamer Modal -->
+<div id="streamerModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-8 w-[420px] shadow-xl">
+    <div class="text-2xl mb-2">🎙️</div>
+    <h3 class="text-xl font-bold text-gray-800 mb-1">主播信息</h3>
+    <p class="text-gray-400 text-sm mb-5">运营筛选时会看到你的信息</p>
+    <div class="space-y-4 mb-5">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">昵称 <span class="text-red-500">*</span></label>
+        <input type="text" id="st_name" placeholder="你的直播昵称" /></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">小红书主页链接 <span class="text-red-500">*</span></label>
+        <input type="url" id="st_profile" placeholder="https://www.xiaohongshu.com/user/profile/..." /></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">实时粉丝数 <span class="text-red-500">*</span></label>
+        <input type="text" id="st_fans" placeholder="例如：12万、8500" /></div>
+    </div>
+    <div class="flex gap-3">
+      <button class="btn-secondary flex-1" onclick="closeModal('streamerModal')">取消</button>
+      <button class="btn-primary flex-1" onclick="saveStreamer()">进入平台</button>
+    </div>
+  </div>
+</div>
+
+<!-- Blogger Modal -->
+<div id="bloggerModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-8 w-[420px] shadow-xl">
+    <div class="text-2xl mb-2">✍️</div>
+    <h3 class="text-xl font-bold text-gray-800 mb-1">博主信息</h3>
+    <p class="text-gray-400 text-sm mb-5">运营筛选时会看到你的信息</p>
+    <div class="space-y-4 mb-5">
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">昵称 <span class="text-red-500">*</span></label>
+        <input type="text" id="bl_name" placeholder="你的小红书昵称" /></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">小红书主页链接 <span class="text-red-500">*</span></label>
+        <input type="url" id="bl_profile" placeholder="https://www.xiaohongshu.com/user/profile/..." /></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">实时粉丝数 <span class="text-red-500">*</span></label>
+        <input type="text" id="bl_fans" placeholder="例如：8500、3万" /></div>
+    </div>
+    <div class="flex gap-3">
+      <button class="btn-secondary flex-1" onclick="closeModal('bloggerModal')">取消</button>
+      <button class="btn-primary flex-1" onclick="saveBlogger()">进入平台</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DB_KEY    = 'xhs_game_promo_v2';
+const ADMIN_PWD = 'xhs2024';
+
+// Seed demo
+(function() {
+  const raw = localStorage.getItem(DB_KEY);
+  const db  = raw ? JSON.parse(raw) : {};
+  if (db.tasks && db.tasks.length) return;
+  const d = { tasks:[], signups:[], contents:[], cdkPools:{}, pendingActions:[] };
+  d.tasks.push({
+    id:'demo1', gameName:'女吊', gameType:'双人联机解谜（需要两台电脑）',
+    highlight:'吴越民俗微恐双人联机', gameLink:'https://store.steampowered.com/',
+    desc:'《女吊》是一款以吴越民俗文化为背景的微恐双人联机解谜游戏，两位玩家扮演不同角色，通过合作解开层层谜题。',
+    req:'需要两台电脑进行联机体验，内容需在游戏上线后释出。',
+    launchDate:'4月18日', releaseTime:'4月18日中午12点后',
+    recruitType:'不限', maxSignup:'', deadline:'2025-04-30',
+    status:'active', opStatus:'approved', createdAt: Date.now()
+  });
+  localStorage.setItem(DB_KEY, JSON.stringify(d));
+})();
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+// ---- Admin ----
+function handleAdmin() {
+  if (sessionStorage.getItem('admin_unlocked') === '1') { window.location.href = 'admin.html'; return; }
+  document.getElementById('adminPwdInput').value = '';
+  document.getElementById('adminPwdModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('adminPwdInput').focus(), 100);
+}
+function closeAdminPwd() { closeModal('adminPwdModal'); }
+function verifyAdminPwd() {
+  if (document.getElementById('adminPwdInput').value.trim() === ADMIN_PWD) {
+    sessionStorage.setItem('admin_unlocked', '1');
+    window.location.href = 'admin.html';
+  } else { showToast('密码错误 ❌'); }
+}
+document.getElementById('adminPwdInput').addEventListener('keydown', e => { if(e.key==='Enter') verifyAdminPwd(); });
+
+// ---- Streamer ----
+function handleStreamer() {
+  const name = localStorage.getItem('creatorName');
+  const type = localStorage.getItem('creatorType');
+  if (name && type === '主播') { window.location.href = 'streamer.html'; return; }
+  document.getElementById('st_name').value    = name || '';
+  document.getElementById('st_profile').value = localStorage.getItem('creatorProfile') || '';
+  document.getElementById('st_fans').value    = localStorage.getItem('creatorFans') || '';
+  document.getElementById('streamerModal').classList.remove('hidden');
+}
+function saveStreamer() {
+  const name = document.getElementById('st_name').value.trim();
+  const profile = document.getElementById('st_profile').value.trim();
+  const fans  = document.getElementById('st_fans').value.trim();
+  if (!name) { showToast('请输入昵称'); return; }
+  if (!profile) { showToast('请填写主页链接'); return; }
+  if (!fans) { showToast('请填写粉丝数'); return; }
+  localStorage.setItem('creatorName', name);
+  localStorage.setItem('creatorType', '主播');
+  localStorage.setItem('creatorProfile', profile);
+  localStorage.setItem('creatorFans', fans);
+  window.location.href = 'streamer.html';
+}
+
+// ---- Blogger ----
+function handleBlogger() {
+  const name = localStorage.getItem('creatorName');
+  const type = localStorage.getItem('creatorType');
+  if (name && type === '博主') { window.location.href = 'blogger.html'; return; }
+  document.getElementById('bl_name').value    = name || '';
+  document.getElementById('bl_profile').value = localStorage.getItem('creatorProfile') || '';
+  document.getElementById('bl_fans').value    = localStorage.getItem('creatorFans') || '';
+  document.getElementById('bloggerModal').classList.remove('hidden');
+}
+function saveBlogger() {
+  const name = document.getElementById('bl_name').value.trim();
+  const profile = document.getElementById('bl_profile').value.trim();
+  const fans  = document.getElementById('bl_fans').value.trim();
+  if (!name) { showToast('请输入昵称'); return; }
+  if (!profile) { showToast('请填写主页链接'); return; }
+  if (!fans) { showToast('请填写粉丝数'); return; }
+  localStorage.setItem('creatorName', name);
+  localStorage.setItem('creatorType', '博主');
+  localStorage.setItem('creatorProfile', profile);
+  localStorage.setItem('creatorFans', fans);
+  window.location.href = 'blogger.html';
+}
+</script>
+</body>
+</html>
