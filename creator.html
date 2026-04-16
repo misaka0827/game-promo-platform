@@ -182,6 +182,17 @@ function quickGo() {
   window.location.href = task ? `${dest}?task=${task}` : dest;
 }
 
+// 有历史登录记录时自动跳转，无需再选身份
+(function autoRedirect() {
+  const name = localStorage.getItem('creatorName');
+  const type = localStorage.getItem('creatorType');
+  if (!name || !type) return; // 没有记录，停留在选身份页
+  const params = new URLSearchParams(window.location.search);
+  const task = params.get('task');
+  const dest = type === '主播' ? 'streamer.html' : 'blogger.html';
+  window.location.replace(task ? `${dest}?task=${task}` : dest);
+})();
+
 function choose(role) {
   const params = new URLSearchParams(window.location.search);
   const task = params.get('task');
