@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>制作人控制台 · 单主机游戏推广</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+  .badge-pending   { background:#fef3c7;color:#92400e; }
+  .badge-approved  { background:#d1fae5;color:#065f46; }
+  .badge-rejected  { background:#fee2e2;color:#991b1b; }
+  .badge-op-pending { background:#ede9fe;color:#5b21b6; }
+  .card-hover:hover { box-shadow:0 4px 20px rgba(0,0,0,.10);transform:translateY(-1px);transition:all .2s; }
+  textarea,input[type=text],input[type=url],input[type=date],input[type=number],select {
+    border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 13px;width:100%;outline:none;transition:border .2s;font-size:14px;
+  }
+  textarea:focus,input:focus,select:focus { border-color:#e63e6d; }
+  .btn-primary   { background:#e63e6d;color:white;border-radius:9px;padding:9px 20px;font-weight:600;cursor:pointer;transition:background .2s;border:none;display:inline-block; }
+  .btn-primary:hover { background:#c52d5a; }
+  .btn-secondary { background:#f3f4f6;color:#374151;border-radius:9px;padding:9px 20px;font-weight:600;cursor:pointer;border:none; }
+  .btn-secondary:hover { background:#e5e7eb; }
+  .btn-green  { background:#10b981;color:white;border-radius:7px;padding:5px 14px;font-size:13px;cursor:pointer;border:none; }
+  .btn-red    { background:#ef4444;color:white;border-radius:7px;padding:5px 14px;font-size:13px;cursor:pointer;border:none; }
+  .btn-blue   { background:#3b82f6;color:white;border-radius:7px;padding:5px 14px;font-size:13px;cursor:pointer;border:none; }
+  .section-tab { padding:7px 18px;border-radius:99px;cursor:pointer;font-size:14px;transition:all .15s;border:none;background:transparent; }
+  .section-tab.active { background:#e63e6d;color:white; }
+  .cdk-mono { font-family:'Courier New',monospace;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:5px 10px;font-size:12px;color:#065f46; }
+  .modal-backdrop { background:rgba(0,0,0,.45); }
+  ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-thumb { background:#d1d5db;border-radius:3px; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- Header -->
+<div class="bg-white shadow-sm sticky top-0 z-40">
+  <div class="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
+    <a href="index.html" class="text-gray-400 hover:text-gray-700 flex items-center gap-1 text-sm">← 返回</a>
+    <div class="w-px h-4 bg-gray-200"></div>
+    <span class="text-xl">🏢</span>
+    <span class="font-bold text-gray-800">制作人控制台</span>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="bg-white border-b border-gray-100 sticky top-[52px] z-30">
+  <div class="max-w-5xl mx-auto px-4 py-2 flex gap-1 overflow-x-auto">
+    <button onclick="showTab('tasks')"   id="tab-tasks"   class="section-tab whitespace-nowrap">📋 我的任务</button>
+    <button onclick="showTab('publish')" id="tab-publish" class="section-tab whitespace-nowrap">📝 发布任务</button>
+    <button onclick="showTab('signups')" id="tab-signups" class="section-tab whitespace-nowrap">👥 报名管理</button>
+    <button onclick="showTab('content')" id="tab-content" class="section-tab whitespace-nowrap">📦 内容收集</button>
+    <button onclick="showTab('qrcode')" id="tab-qrcode" class="section-tab whitespace-nowrap">📱 二维码</button>
+  </div>
+</div>
+
+<div class="max-w-5xl mx-auto px-4 py-6">
+
+  <!-- Tab: My Tasks -->
+  <div id="pane-tasks" class="hidden space-y-4">
+    <div id="taskOverviewList"></div>
+  </div>
+
+  <!-- Tab: Publish Task -->
+  <div id="pane-publish">
+    <div class="bg-white rounded-2xl shadow-sm p-6">
+      <h3 class="text-lg font-bold text-gray-800 mb-5">📝 发布推广任务</h3>
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">游戏名称 <span class="text-red-500">*</span></label>
+            <input type="text" id="f_gameName" placeholder="例如：女吊" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">游戏类型</label>
+            <input type="text" id="f_gameType" placeholder="例如：双人联机解谜" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">一句话亮点 <span class="text-red-500">*</span></label>
+          <input type="text" id="f_highlight" placeholder="例如：吴越民俗微恐双人联机" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">游戏链接</label>
+          <input type="url" id="f_gameLink" placeholder="https://store.steampowered.com/..." />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">游戏简介</label>
+          <textarea id="f_desc" rows="3" placeholder="详细介绍游戏背景、玩法特色..."></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">内容要求</label>
+          <textarea id="f_req" rows="3" placeholder="例如：需要两台电脑联机体验，内容需在上线日后释出..."></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">游戏上线时间</label>
+            <input type="text" id="f_launchDate" placeholder="例如：4月18日" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">内容释出时间</label>
+            <input type="text" id="f_releaseTime" placeholder="例如：4月18日中午12点后" />
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">招募类型</label>
+            <select id="f_recruitType">
+              <option value="不限">不限（博主+主播）</option>
+              <option value="博主">仅博主</option>
+              <option value="主播">仅主播</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">名额上限</label>
+            <input type="text" id="f_maxSignup" placeholder="不填则无限制" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">报名截止日期 <span class="text-red-500">*</span></label>
+            <input type="date" id="f_deadline" />
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button class="btn-secondary" onclick="resetPublishForm()">重置</button>
+          <button class="btn-primary" onclick="publishTask()">🚀 提交任务</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Signups -->
+  <div id="pane-signups" class="hidden">
+    <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-xs font-medium text-gray-500 mb-1">选择任务</label>
+          <select id="signupTaskSelect" onchange="loadSignups()"></select>
+        </div>
+        <button class="btn-primary mt-4" onclick="openCDKModal()" style="background:#7c3aed;padding:9px 16px;font-size:13px;">🎮 批量上传CDK</button>
+      </div>
+      <div id="signupDeadlineStatus" class="mt-3 hidden"></div>
+    </div>
+    <div id="signupList" class="space-y-3"></div>
+  </div>
+
+  <!-- Tab: Content -->
+  <div id="pane-content" class="hidden">
+    <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+      <label class="block text-xs font-medium text-gray-500 mb-1">选择任务</label>
+      <select id="contentTaskSelect" onchange="loadContent()"></select>
+    </div>
+    <div id="contentList" class="space-y-4"></div>
+  </div>
+
+  <!-- Tab: QR Code -->
+  <div id="pane-qrcode" class="hidden">
+    <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+      <label class="block text-xs font-medium text-gray-500 mb-1">选择任务</label>
+      <select id="qrTaskSelect" onchange="renderQRCodes()"></select>
+    </div>
+    <div id="qrPanel" class="grid grid-cols-2 gap-6"></div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed top-4 right-4 text-white px-5 py-3 rounded-xl text-sm shadow-xl z-[9999] opacity-0 transition-opacity duration-300 pointer-events-none" style="background:#1f2937"></div>
+
+<!-- Password Modal (on page load) -->
+<div id="pwdModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+  <div class="bg-white rounded-2xl p-8 w-96 shadow-xl">
+    <div class="text-2xl mb-2">🔐</div>
+    <h3 class="text-xl font-bold text-gray-800 mb-1">制作人控制台</h3>
+    <p class="text-gray-400 text-sm mb-5">请输入访问密码（默认：xhs2024）</p>
+    <input type="password" id="pwdInput" placeholder="请输入密码" class="mb-5" />
+    <div class="flex gap-3">
+      <button class="btn-secondary flex-1" onclick="window.location.href='index.html'">取消</button>
+      <button class="btn-primary flex-1" onclick="verifyPwd()">确认进入</button>
+    </div>
+  </div>
+</div>
+
+<!-- CDK Modal -->
+<div id="cdkModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-6 w-[540px] shadow-xl max-h-[90vh] overflow-y-auto">
+    <h3 class="text-lg font-bold text-gray-800 mb-1">🎮 批量上传 CDK</h3>
+    <div class="mb-1">
+      <label class="block text-xs font-medium text-gray-500 mb-1">选择任务</label>
+      <select id="cdkTaskSelect" onchange="updateCdkStats()"></select>
+    </div>
+    <p class="text-xs text-gray-500 mb-4 mt-2" id="cdkModalStats"></p>
+    <div class="mb-4">
+      <label class="block text-xs font-semibold text-gray-500 mb-2">粘贴 CDK 列表（每行一个）</label>
+      <textarea id="cdkBatchInput" rows="10" placeholder="GAME-XXXX-1111&#10;GAME-XXXX-2222&#10;..."></textarea>
+      <p class="text-xs text-gray-400 mt-1">系统自动去重，每人分配3个</p>
+    </div>
+    <div id="cdkPreview" class="hidden mb-4 bg-blue-50 rounded-xl p-4">
+      <div class="text-xs font-semibold text-blue-700 mb-2" id="cdkPreviewTitle"></div>
+      <div id="cdkPreviewList" class="space-y-1 text-xs text-blue-600 max-h-32 overflow-y-auto"></div>
+    </div>
+    <div class="flex gap-3">
+      <button class="btn-secondary flex-1" onclick="closeModal('cdkModal')">取消</button>
+      <button class="btn-blue flex-1" onclick="previewCDK()">预览分配</button>
+      <button class="btn-primary flex-1" id="cdkConfirmBtn" onclick="confirmCDK()" style="display:none">确认提交</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DB_KEY = 'xhs_game_promo_v2';
+const MAKER_PWD = 'xhs2024';
+let _cdkTaskId = null;
+let _cdkAllocation = null;
+let _unlocked = false;
+
+function loadDB() {
+  try {
+    const d = JSON.parse(localStorage.getItem(DB_KEY)) || {};
+    return {
+      tasks: d.tasks || [],
+      signups: d.signups || [],
+      contents: d.contents || [],
+      cdkPools: d.cdkPools || {},
+      pendingActions: d.pendingActions || []
+    };
+  } catch(e) {
+    return { tasks:[], signups:[], contents:[], cdkPools:{}, pendingActions:[] };
+  }
+}
+function saveDB(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function isDeadlinePassed(d) { return d && new Date(d+'T23:59:59') < new Date(); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type==='success'?'#059669':type==='error'?'#dc2626':'#1f2937';
+  t.style.opacity = '1';
+  setTimeout(()=>{ t.style.opacity='0'; }, 2800);
+}
+
+// ---- AUTH ----
+function verifyPwd() {
+  if (document.getElementById('pwdInput').value.trim() === MAKER_PWD) {
+    document.getElementById('pwdModal').classList.add('hidden');
+    sessionStorage.setItem('maker_unlocked', '1');
+    _unlocked = true;
+    initPage();
+  } else {
+    showToast('密码错误', 'error');
+  }
+}
+document.getElementById('pwdInput').addEventListener('keydown', e => { if(e.key==='Enter') verifyPwd(); });
+
+// Auto-unlock if session already verified
+if (sessionStorage.getItem('maker_unlocked') === '1') {
+  document.getElementById('pwdModal').classList.add('hidden');
+  _unlocked = true;
+}
+
+// ---- INIT ----
+function initPage() {
+  populateTaskSelects();
+  showTab('tasks');
+}
+
+function showTab(tab) {
+  ['tasks','publish','signups','content','qrcode'].forEach(t => {
+    document.getElementById('pane-'+t).classList.add('hidden');
+    document.getElementById('tab-'+t).classList.remove('active');
+  });
+  document.getElementById('pane-'+tab).classList.remove('hidden');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab === 'tasks')   renderTaskOverview();
+  if (tab === 'signups') { populateTaskSelects(); }
+  if (tab === 'content') { populateTaskSelects(); }
+  if (tab === 'qrcode')  { populateTaskSelects(); renderQRCodes(); }
+}
+
+// ---- TASK OVERVIEW ----
+function renderTaskOverview() {
+  const db = loadDB();
+  const el = document.getElementById('taskOverviewList');
+  if (!db.tasks.length) {
+    el.innerHTML = `<div class="text-center text-gray-400 py-16"><div class="text-4xl mb-3">📭</div><p>还没有任务，点击「发布任务」开始</p><button class="btn-primary mt-4 text-sm" onclick="showTab('publish')">📝 发布新任务</button></div>`;
+    return;
+  }
+  const opLabel = {pending:'⏳ 待运营确认', approved:'✅ 已发布', rejected:'❌ 已拒绝'};
+  const opColor = {pending:'bg-amber-100 text-amber-800', approved:'bg-green-100 text-green-700', rejected:'bg-red-100 text-red-700'};
+  el.innerHTML = db.tasks.map(t => {
+    // 只统计运营已确认的报名
+    const tSignups  = db.signups.filter(s=>s.taskId===t.id && s.opStatus==='approved');
+    const tApproved = tSignups.filter(s=>s.makerStatus==='approved');
+    const tContents = db.contents.filter(c=>c.taskId===t.id);
+    const hasCDK    = tApproved.some(s=>s.cdkKeys&&s.cdkKeys.length);
+    return `<div class="bg-white rounded-2xl shadow-sm p-5 card-hover">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            <h3 class="text-lg font-bold text-gray-800">${t.gameName}</h3>
+            ${t.gameType?`<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">${t.gameType}</span>`:''}
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${opColor[t.opStatus]||'bg-gray-100 text-gray-500'}">${opLabel[t.opStatus]||t.opStatus}</span>
+          </div>
+          <p class="text-sm font-medium mb-2" style="color:#e63e6d;">✨ ${t.highlight}</p>
+          <div class="flex flex-wrap gap-3 text-xs text-gray-500">
+            ${t.launchDate?`<span>🚀 上线：${t.launchDate}</span>`:''}
+            <span>⏰ 截止：${t.deadline||'无'}</span>
+            <span>👥 招募：${t.recruitType}</span>
+          </div>
+        </div>
+        <div class="flex gap-4 text-center flex-shrink-0">
+          <div><div class="text-2xl font-bold text-gray-700">${tSignups.length}</div><div class="text-xs text-gray-400">已确认报名</div></div>
+          <div><div class="text-2xl font-bold text-green-600">${tApproved.length}</div><div class="text-xs text-gray-400">通过</div></div>
+          <div><div class="text-2xl font-bold ${hasCDK?'text-purple-600':'text-gray-300'}">${tApproved.filter(s=>s.cdkKeys&&s.cdkKeys.length).length}</div><div class="text-xs text-gray-400">已发CDK</div></div>
+          <div><div class="text-2xl font-bold text-blue-600">${tContents.length}</div><div class="text-xs text-gray-400">已交稿</div></div>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4 pt-3 border-t border-gray-100">
+        <button class="btn-secondary text-xs py-1.5 px-3" onclick="goToSignups('${t.id}')">👥 查看报名</button>
+        <button class="btn-secondary text-xs py-1.5 px-3" onclick="goToQR('${t.id}')">📱 二维码</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function goToSignups(taskId) {
+  showTab('signups');
+  populateTaskSelects();
+  document.getElementById('signupTaskSelect').value = taskId;
+  loadSignups();
+}
+function goToQR(taskId) {
+  showTab('qrcode');
+  populateTaskSelects();
+  document.getElementById('qrTaskSelect').value = taskId;
+  renderQRCodes();
+}
+
+function populateTaskSelects() {
+  const db = loadDB();
+  const opts = '<option value="">-- 请选择任务 --</option>' + db.tasks.map(t=>`<option value="${t.id}">${t.gameName}${t.opStatus==='approved'?'':' ('+statusLabel(t.opStatus)+')'}</option>`).join('');
+  ['signupTaskSelect','contentTaskSelect','cdkTaskSelect','qrTaskSelect'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = opts;
+    if (cur) el.value = cur;
+  });
+}
+
+function statusLabel(s) {
+  return {pending:'待运营确认', approved:'已发布', rejected:'已拒绝'}[s] || s;
+}
+
+// ---- PUBLISH TASK ----
+function publishTask() {
+  const gameName  = document.getElementById('f_gameName').value.trim();
+  const highlight = document.getElementById('f_highlight').value.trim();
+  const deadline  = document.getElementById('f_deadline').value;
+  if (!gameName)   { showToast('游戏名称为必填项'); return; }
+  if (!highlight)  { showToast('一句话亮点为必填项'); return; }
+  if (!deadline)   { showToast('报名截止日期为必填项'); return; }
+
+  const db = loadDB();
+  const id = genId();
+  const task = {
+    id, gameName, highlight, deadline,
+    gameType:    document.getElementById('f_gameType').value.trim(),
+    gameLink:    document.getElementById('f_gameLink').value.trim(),
+    desc:        document.getElementById('f_desc').value.trim(),
+    req:         document.getElementById('f_req').value.trim(),
+    launchDate:  document.getElementById('f_launchDate').value.trim(),
+    releaseTime: document.getElementById('f_releaseTime').value.trim(),
+    recruitType: document.getElementById('f_recruitType').value,
+    maxSignup:   document.getElementById('f_maxSignup').value.trim(),
+    status: 'active', opStatus: 'pending', createdAt: Date.now()
+  };
+  db.tasks.push(task);
+  db.pendingActions.push({
+    id: genId(), type: 'task_publish', taskId: id,
+    payload: { gameName },
+    createdAt: Date.now(), opStatus: 'pending'
+  });
+  saveDB(db);
+  showToast('已提交，等待运营确认后对外可见 ⏳', 'success');
+  resetPublishForm();
+}
+
+function resetPublishForm() {
+  ['f_gameName','f_gameType','f_highlight','f_gameLink','f_desc','f_req','f_launchDate','f_releaseTime','f_maxSignup','f_deadline'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('f_recruitType').value = '不限';
+}
+
+// ---- SIGNUPS ----
+function loadSignups() {
+  const taskId = document.getElementById('signupTaskSelect').value;
+  const listEl = document.getElementById('signupList');
+  const statusEl = document.getElementById('signupDeadlineStatus');
+  if (!taskId) { listEl.innerHTML = ''; statusEl.classList.add('hidden'); return; }
+  const db = loadDB();
+  const task = db.tasks.find(t=>t.id===taskId);
+  // 只显示运营已确认（opStatus=approved）的报名，隔离未确认的
+  const signups = db.signups.filter(s=>s.taskId===taskId && s.opStatus==='approved');
+  const passed = isDeadlinePassed(task?.deadline);
+
+  statusEl.classList.remove('hidden');
+  if (passed) {
+    statusEl.innerHTML = `<div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">⏰ 报名已截止，可继续审核和上传CDK</div>`;
+  } else {
+    statusEl.innerHTML = `<div class="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-800">✅ 报名进行中，截止日期：<strong>${task?.deadline||'未设置'}</strong></div>`;
+  }
+
+  if (!signups.length) {
+    listEl.innerHTML = `<div class="text-center text-gray-400 py-12"><div class="text-4xl mb-3">📭</div><p>暂无报名</p></div>`;
+    return;
+  }
+
+  listEl.innerHTML = signups.map(s => {
+    const content = db.contents.find(c=>c.taskId===taskId&&c.creatorName===s.creatorName);
+    const typeColor = s.creatorType==='主播' ? 'background:#ede9fe;color:#5b21b6' : 'background:#dbeafe;color:#1e40af';
+    const cdkAssigned = s.cdkKeys && s.cdkKeys.length > 0;
+    const makerStatus = s.makerStatus || 'pending';
+    const opStatus = s.opStatus || 'pending';
+
+    let actionHtml = '';
+    if (makerStatus === 'pending') {
+      actionHtml = `<div class="flex gap-2">
+        <button class="btn-green" onclick="reviewSignup('${s.id}','approved')">通过</button>
+        <button class="btn-red" onclick="reviewSignup('${s.id}','rejected')">拒绝</button>
+      </div>`;
+    } else {
+      const badgeColor = makerStatus==='approved' ? 'badge-approved' : 'badge-rejected';
+      const badgeText = makerStatus==='approved' ? '✅ 已通过' : '❌ 已拒绝';
+      actionHtml = `<div>
+        <span class="${badgeColor} px-3 py-1 rounded-full text-xs font-semibold">${badgeText}</span>
+        ${opStatus==='pending' ? '<div class="text-xs text-purple-500 mt-1">⏳ 等待运营确认</div>' : ''}
+        ${opStatus==='approved' ? '<div class="text-xs text-green-600 mt-1">✅ 运营已确认</div>' : ''}
+        ${opStatus==='rejected' ? '<div class="text-xs text-red-500 mt-1">❌ 运营已拒绝</div>' : ''}
+      </div>`;
+    }
+
+    return `<div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start gap-3 flex-1">
+          <div class="w-11 h-11 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">${s.creatorName.charAt(0)}</div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 flex-wrap mb-1.5">
+              <span class="font-bold text-gray-900 text-sm">${s.creatorName}</span>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full" style="${typeColor}">${s.creatorType}</span>
+            </div>
+            <div class="flex items-center gap-4 flex-wrap mb-1.5">
+              ${s.creatorFans ? `<span class="text-sm font-bold text-gray-800">粉丝 ${s.creatorFans}</span>` : ''}
+              ${s.creatorProfile ? `<a href="${s.creatorProfile}" target="_blank" class="text-xs text-blue-500 hover:underline">查看主页 ↗</a>` : ''}
+            </div>
+            <div class="text-xs text-gray-400">报名于 ${new Date(s.createdAt).toLocaleString('zh-CN')}</div>
+            ${s.note ? `<div class="text-xs text-gray-600 mt-2 bg-gray-50 rounded-lg px-3 py-2">${s.note}</div>` : ''}
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-2 flex-shrink-0">
+          ${actionHtml}
+        </div>
+      </div>
+      ${makerStatus==='approved' && opStatus==='approved' ? `
+        <div class="mt-3 pt-3 border-t border-gray-100 space-y-1.5">
+          ${cdkAssigned
+            ? `<div class="text-xs font-semibold text-gray-600 mb-1">🎮 已分配 CDK</div>
+               <div class="flex gap-2 flex-wrap">${(s.cdkKeys||[]).map(k=>`<span class="cdk-mono">${k}</span>`).join('')}</div>`
+            : `<div class="text-xs text-amber-600">⏳ CDK 待分配</div>`}
+          <div class="text-xs ${content?'text-blue-600':'text-gray-400'}">${content?'✅ 已提交内容':'⏳ 等待内容提交'}</div>
+        </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function reviewSignup(signupId, decision) {
+  const db = loadDB();
+  const s = db.signups.find(x=>x.id===signupId);
+  if (!s) return;
+  s.makerStatus = decision;
+  s.opStatus = 'pending';
+  // Write pendingAction
+  db.pendingActions.push({
+    id: genId(), type: 'signup_review', taskId: s.taskId,
+    payload: { signupId, decision },
+    createdAt: Date.now(), opStatus: 'pending'
+  });
+  saveDB(db);
+  showToast(decision==='approved' ? '已通过，等待运营确认 ⏳' : '已拒绝，等待运营确认', decision==='approved'?'success':'info');
+  loadSignups();
+}
+
+// ---- CDK ----
+function openCDKModal() {
+  populateTaskSelects();
+  const curTask = document.getElementById('signupTaskSelect').value;
+  _cdkTaskId = null;
+  _cdkAllocation = null;
+  document.getElementById('cdkBatchInput').value = '';
+  document.getElementById('cdkPreview').classList.add('hidden');
+  document.getElementById('cdkConfirmBtn').style.display = 'none';
+  document.getElementById('cdkModal').classList.remove('hidden');
+  if (curTask) {
+    document.getElementById('cdkTaskSelect').value = curTask;
+    updateCdkStats();
+  }
+}
+
+function updateCdkStats() {
+  const taskId = document.getElementById('cdkTaskSelect').value;
+  _cdkTaskId = taskId || null;
+  if (!taskId) { document.getElementById('cdkModalStats').textContent = ''; return; }
+  const db = loadDB();
+  const task = db.tasks.find(t=>t.id===taskId);
+  // CDK分配条件：运营已确认报名(opStatus=approved) + 制作人已通过(makerStatus=approved)
+  const approved = db.signups.filter(s=>s.taskId===taskId && s.makerStatus==='approved' && s.opStatus==='approved');
+  const notYetAssigned = approved.filter(s=>!(s.cdkKeys&&s.cdkKeys.length));
+  document.getElementById('cdkModalStats').textContent =
+    `任务：${task?.gameName} · 已通过 ${approved.length} 人 · 待分配 ${notYetAssigned.length} 人 · 需要 ${notYetAssigned.length*3} 个CDK`;
+  // Pre-fill existing pool
+  const pool = (db.cdkPools && db.cdkPools[taskId]) || [];
+  if (pool.length && !document.getElementById('cdkBatchInput').value) {
+    document.getElementById('cdkBatchInput').value = pool.join('\n');
+  }
+}
+
+function previewCDK() {
+  const taskId = document.getElementById('cdkTaskSelect').value;
+  if (!taskId) { showToast('请选择任务'); return; }
+  _cdkTaskId = taskId;
+  const raw = document.getElementById('cdkBatchInput').value;
+  const keys = [...new Set(raw.split('\n').map(k=>k.trim()).filter(Boolean))];
+  const db = loadDB();
+  const approved = db.signups.filter(s=>s.taskId===taskId && s.makerStatus==='approved' && s.opStatus==='approved' && !(s.cdkKeys && s.cdkKeys.length));
+  const needed = approved.length * 3;
+  if (needed === 0) { showToast('没有待分配的已通过种草官'); return; }
+  if (keys.length < needed) {
+    showToast(`CDK 不足：需要 ${needed} 个，当前有效 ${keys.length} 个`, 'error'); return;
+  }
+  let idx = 0;
+  const alloc = approved.map(s => ({
+    signupId: s.id, name: s.creatorName, type: s.creatorType,
+    cdkKeys: [keys[idx++], keys[idx++], keys[idx++]]
+  }));
+  _cdkAllocation = { keys, alloc };
+  document.getElementById('cdkPreviewTitle').textContent = `预览：将为 ${alloc.length} 人分配CDK（使用 ${alloc.length*3} 个）`;
+  document.getElementById('cdkPreviewList').innerHTML = alloc.map(a =>
+    `<div class="py-1 border-b border-blue-100"><span class="font-medium">${a.name}（${a.type}）</span>：${a.cdkKeys.join(' / ')}</div>`
+  ).join('');
+  document.getElementById('cdkPreview').classList.remove('hidden');
+  document.getElementById('cdkConfirmBtn').style.display = '';
+}
+
+function confirmCDK() {
+  if (!_cdkAllocation || !_cdkTaskId) return;
+  const db = loadDB();
+  if (!db.cdkPools) db.cdkPools = {};
+  db.cdkPools[_cdkTaskId] = [...new Set([...(db.cdkPools[_cdkTaskId]||[]), ..._cdkAllocation.keys])];
+  db.pendingActions.push({
+    id: genId(), type: 'cdk_assign', taskId: _cdkTaskId,
+    payload: { allocations: _cdkAllocation.alloc },
+    createdAt: Date.now(), opStatus: 'pending'
+  });
+  saveDB(db);
+  showToast(`已提交，等待运营确认后种草官可见 ⏳`, 'success');
+  closeModal('cdkModal');
+  loadSignups();
+}
+
+// ---- CONTENT ----
+function loadContent() {
+  const taskId = document.getElementById('contentTaskSelect').value;
+  const el = document.getElementById('contentList');
+  if (!taskId) { el.innerHTML = ''; return; }
+  const db = loadDB();
+  const contents = db.contents.filter(c=>c.taskId===taskId);
+  if (!contents.length) {
+    el.innerHTML = `<div class="text-center text-gray-400 py-12"><div class="text-4xl mb-3">📭</div><p>暂无内容提交</p></div>`;
+    return;
+  }
+  el.innerHTML = contents.map(c => {
+    const isStreamer = c.creatorType === '主播';
+    return `<div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold">${c.creatorName.charAt(0)}</div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-gray-800">${c.creatorName}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full font-semibold ${isStreamer?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'}">${c.creatorType}</span>
+          </div>
+          <div class="text-xs text-gray-400 mt-0.5">提交于 ${new Date(c.createdAt).toLocaleString('zh-CN')}</div>
+        </div>
+      </div>
+      ${c.fans ? `<div class="text-xs text-gray-600 mb-2">实时粉丝数：<strong>${c.fans}</strong></div>` : ''}
+      ${c.profile ? `<div class="text-xs mb-3"><span class="text-gray-500">主页：</span><a href="${c.profile}" target="_blank" class="text-blue-500 hover:underline">${c.profile}</a></div>` : ''}
+      ${isStreamer ? `
+        ${c.liveshotBase64 ? `<div class="mb-3"><div class="text-xs text-gray-500 mb-1">直播间截图</div><img src="${c.liveshotBase64}" class="max-w-full rounded-lg border border-gray-100" style="max-height:200px;object-fit:contain;" /></div>` : ''}
+        ${c.datashotBase64 ? `<div class="mb-3"><div class="text-xs text-gray-500 mb-1">直播数据截图</div><img src="${c.datashotBase64}" class="max-w-full rounded-lg border border-gray-100" style="max-height:200px;object-fit:contain;" /></div>` : ''}
+        ${c.clip ? `<div class="text-xs"><span class="text-gray-500">直播切片：</span><a href="${c.clip}" target="_blank" class="text-blue-500 hover:underline">${c.clip}</a></div>` : ''}
+      ` : `
+        ${c.video ? `<div class="text-xs"><span class="text-gray-500">种草视频：</span><a href="${c.video}" target="_blank" class="text-blue-500 hover:underline">${c.video}</a></div>` : ''}
+      `}
+    </div>`;
+  }).join('');
+}
+
+// ---- QR CODE ----
+function renderQRCodes() {
+  const taskId = document.getElementById('qrTaskSelect').value;
+  const el = document.getElementById('qrPanel');
+  if (!taskId) { el.innerHTML = '<div class="text-gray-400 text-sm col-span-2 py-8 text-center">请选择任务</div>'; return; }
+  const db = loadDB();
+  const task = db.tasks.find(t=>t.id===taskId);
+  if (!task) { el.innerHTML = ''; return; }
+  const base = window.location.href.replace(/[^/]*$/, '');
+  const streamerUrl = `${base}streamer.html?task=${taskId}`;
+  const bloggerUrl = `${base}blogger.html?task=${taskId}`;
+
+  el.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm p-6 text-center">
+      <div class="text-lg font-bold text-gray-800 mb-1">🎙️ 主播专属</div>
+      <p class="text-xs text-gray-400 mb-4">${task.gameName}</p>
+      <div class="flex justify-center mb-4"><canvas id="qr-streamer"></canvas></div>
+      <div class="bg-gray-50 rounded-lg px-3 py-2 text-xs text-gray-500 break-all mb-3" id="url-streamer">${streamerUrl}</div>
+      <button class="btn-secondary text-xs py-2 px-4" onclick="copyLink('url-streamer')">复制链接</button>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm p-6 text-center">
+      <div class="text-lg font-bold text-gray-800 mb-1">✍️ 博主专属</div>
+      <p class="text-xs text-gray-400 mb-4">${task.gameName}</p>
+      <div class="flex justify-center mb-4"><canvas id="qr-blogger"></canvas></div>
+      <div class="bg-gray-50 rounded-lg px-3 py-2 text-xs text-gray-500 break-all mb-3" id="url-blogger">${bloggerUrl}</div>
+      <button class="btn-secondary text-xs py-2 px-4" onclick="copyLink('url-blogger')">复制链接</button>
+    </div>
+  `;
+
+  setTimeout(() => {
+    QRCode.toCanvas(document.getElementById('qr-streamer'), streamerUrl, { width:180, margin:2 }, ()=>{});
+    QRCode.toCanvas(document.getElementById('qr-blogger'), bloggerUrl, { width:180, margin:2 }, ()=>{});
+  }, 50);
+}
+
+function copyLink(elId) {
+  const url = document.getElementById(elId).textContent;
+  navigator.clipboard.writeText(url).then(()=>showToast('链接已复制 ✅','success')).catch(()=>showToast('复制失败'));
+}
+
+// Backdrop close
+document.getElementById('cdkModal').addEventListener('click', e => { if(e.target===document.getElementById('cdkModal')) closeModal('cdkModal'); });
+</script>
+</body>
+</html>
