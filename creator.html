@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小红书 x 单主机游戏种草平台</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+  .card-hover { transition: all .2s; }
+  .card-hover:hover { box-shadow: 0 8px 32px rgba(230,62,109,.15); transform: translateY(-3px); }
+  .identity-card { border:2px solid #f0f0f0;border-radius:20px;padding:32px 28px;cursor:pointer;transition:all .2s;background:white; }
+  .identity-card:hover { border-color:#e63e6d; }
+  .btn-primary { background:#e63e6d;color:white;border-radius:10px;padding:10px 24px;font-weight:600;cursor:pointer;transition:background .2s;border:none;width:100%; }
+  .btn-primary:hover { background:#c52d5a; }
+  .btn-secondary { background:#f3f4f6;color:#374151;border-radius:10px;padding:10px 24px;font-weight:600;cursor:pointer;border:none;width:100%; }
+  .btn-secondary:hover { background:#e5e7eb; }
+  input[type=text],input[type=url] {
+    border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;width:100%;outline:none;transition:border .2s;font-size:14px;box-sizing:border-box;
+  }
+  input:focus { border-color:#e63e6d; }
+  .modal-backdrop { background:rgba(0,0,0,.5); }
+</style>
+</head>
+<body class="bg-gradient-to-br from-pink-50 via-white to-purple-50 min-h-screen">
+
+<!-- Header -->
+<div class="bg-white shadow-sm">
+  <div class="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
+    <span class="text-2xl">🎮</span>
+    <div>
+      <div class="font-bold text-gray-800">小红书 x 单主机游戏种草平台</div>
+      <div class="text-xs text-gray-400">接任务 · 领激活码 · 获奖励</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="max-w-xl mx-auto mt-10 px-4 pb-16">
+
+  <div class="text-center mb-8">
+    <div class="text-5xl mb-3">🕹️</div>
+    <h2 class="text-2xl font-bold text-gray-800 mb-1">玩游戏，也能领奖励</h2>
+    <p class="text-gray-400 text-sm">选择你的角色，报名任务领取激活码，玩完游戏按要求上传数据</p>
+  </div>
+
+  <!-- 步骤说明 -->
+  <div class="bg-white rounded-2xl shadow-sm p-5 mb-6 border border-gray-100">
+    <p class="text-xs font-semibold text-gray-400 mb-3 uppercase tracking-wide">任务流程</p>
+    <div class="flex items-start gap-3">
+      <div class="flex flex-col items-center gap-1">
+        <div class="w-6 h-6 rounded-full bg-pink-100 text-pink-600 text-xs font-bold flex items-center justify-center flex-shrink-0">1</div>
+        <div class="w-px h-8 bg-gray-100"></div>
+        <div class="w-6 h-6 rounded-full bg-pink-100 text-pink-600 text-xs font-bold flex items-center justify-center flex-shrink-0">2</div>
+        <div class="w-px h-8 bg-gray-100"></div>
+        <div class="w-6 h-6 rounded-full bg-pink-100 text-pink-600 text-xs font-bold flex items-center justify-center flex-shrink-0">3</div>
+      </div>
+      <div class="space-y-5 text-sm">
+        <div><p class="font-semibold text-gray-700">报名任务</p><p class="text-gray-400 text-xs mt-0.5">挑选感兴趣的游戏，填写信息提交申请，等待审核通过</p></div>
+        <div><p class="font-semibold text-gray-700">领取激活码，开始游玩</p><p class="text-gray-400 text-xs mt-0.5">审核通过后在「我的报名」领取 CDK，下载游戏开始体验</p></div>
+        <div><p class="font-semibold text-gray-700">完成内容，上传数据</p><p class="text-gray-400 text-xs mt-0.5">按要求完成直播或发布笔记，在截止前上传截图与内容链接</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 身份选择 -->
+  <div class="grid grid-cols-2 gap-4">
+    <div class="identity-card card-hover" onclick="choose('streamer')">
+      <div class="text-4xl mb-3">🎙️</div>
+      <div class="font-bold text-gray-800 text-lg mb-1">我是主播</div>
+      <div class="text-sm text-gray-500">直播类创作者<br>提交直播截图与数据</div>
+      <div class="mt-4 text-xs text-purple-500 font-semibold">→ 进入主播端</div>
+    </div>
+    <div class="identity-card card-hover" onclick="choose('blogger')">
+      <div class="text-4xl mb-3">✍️</div>
+      <div class="font-bold text-gray-800 text-lg mb-1">我是博主</div>
+      <div class="text-sm text-gray-500">图文/视频创作者<br>提交种草内容链接</div>
+      <div class="mt-4 text-xs text-blue-500 font-semibold">→ 进入博主端</div>
+    </div>
+  </div>
+
+  <!-- 已登录快捷入口 -->
+  <div id="quickEntry" class="hidden mt-6">
+    <div class="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 flex items-center justify-between">
+      <div>
+        <p class="text-xs text-gray-400 mb-0.5">上次以「<span id="qeName" class="font-semibold text-gray-600"></span>」身份登录</p>
+        <p class="text-xs text-gray-400">点击右侧直接进入，或重新选择上方身份</p>
+      </div>
+      <button id="qeBtn" class="flex-shrink-0 ml-4 bg-gray-800 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-gray-700 transition-colors" onclick="quickGo()">继续进入</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed top-4 right-4 text-white px-5 py-3 rounded-xl text-sm shadow-xl z-[9999] opacity-0 transition-opacity duration-300 pointer-events-none" style="background:#1f2937"></div>
+
+<!-- Streamer Modal -->
+<div id="streamerModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-8 w-[420px] shadow-2xl mx-4">
+    <div class="text-2xl mb-2">🎙️</div>
+    <h3 class="text-xl font-bold text-gray-800 mb-1">主播信息</h3>
+    <p class="text-gray-400 text-sm mb-5">运营筛选时会看到你的信息，请如实填写</p>
+    <div class="space-y-4 mb-6">
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">直播昵称 <span class="text-red-500">*</span></label>
+        <input type="text" id="st_name" placeholder="你的直播间昵称" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">微信号 <span class="text-red-500">*</span></label>
+        <input type="text" id="st_wechat" placeholder="方便运营联系你" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">小红书主页链接 <span class="text-red-500">*</span></label>
+        <input type="url" id="st_profile" placeholder="https://www.xiaohongshu.com/user/profile/..." />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">实时粉丝数 <span class="text-red-500">*</span></label>
+        <input type="text" id="st_fans" placeholder="例如：12万、8500" />
+      </div>
+    </div>
+    <div class="flex gap-3">
+      <button class="btn-secondary" onclick="closeModal('streamerModal')">取消</button>
+      <button class="btn-primary" onclick="saveStreamer()">进入平台</button>
+    </div>
+  </div>
+</div>
+
+<!-- Blogger Modal -->
+<div id="bloggerModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-8 w-[420px] shadow-2xl mx-4">
+    <div class="text-2xl mb-2">✍️</div>
+    <h3 class="text-xl font-bold text-gray-800 mb-1">博主信息</h3>
+    <p class="text-gray-400 text-sm mb-5">运营筛选时会看到你的信息，请如实填写</p>
+    <div class="space-y-4 mb-6">
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">小红书昵称 <span class="text-red-500">*</span></label>
+        <input type="text" id="bl_name" placeholder="你的小红书昵称" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">微信号 <span class="text-red-500">*</span></label>
+        <input type="text" id="bl_wechat" placeholder="方便运营联系你" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">小红书主页链接 <span class="text-red-500">*</span></label>
+        <input type="url" id="bl_profile" placeholder="https://www.xiaohongshu.com/user/profile/..." />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">实时粉丝数 <span class="text-red-500">*</span></label>
+        <input type="text" id="bl_fans" placeholder="例如：8500、3万" />
+      </div>
+    </div>
+    <div class="flex gap-3">
+      <button class="btn-secondary" onclick="closeModal('bloggerModal')">取消</button>
+      <button class="btn-primary" onclick="saveBlogger()">进入平台</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1';
+  setTimeout(() => t.style.opacity = '0', 2500);
+}
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+(function() {
+  const name = localStorage.getItem('creatorName');
+  const type = localStorage.getItem('creatorType');
+  if (!name || !type) return;
+  const el = document.getElementById('quickEntry');
+  document.getElementById('qeName').textContent = `${name} · ${type}`;
+  el.classList.remove('hidden');
+})();
+
+function quickGo() {
+  const type = localStorage.getItem('creatorType');
+  const params = new URLSearchParams(window.location.search);
+  const task = params.get('task');
+  const dest = type === '主播' ? 'streamer.html' : 'blogger.html';
+  window.location.href = task ? `${dest}?task=${task}` : dest;
+}
+
+function choose(role) {
+  const params = new URLSearchParams(window.location.search);
+  const task = params.get('task');
+  if (role === 'streamer') {
+    const name = localStorage.getItem('creatorName');
+    const type = localStorage.getItem('creatorType');
+    if (name && type === '主播') { window.location.href = task ? `streamer.html?task=${task}` : 'streamer.html'; return; }
+    document.getElementById('st_name').value    = name || '';
+    document.getElementById('st_wechat').value  = localStorage.getItem('creatorWechat') || '';
+    document.getElementById('st_profile').value = localStorage.getItem('creatorProfile') || '';
+    document.getElementById('st_fans').value    = localStorage.getItem('creatorFans') || '';
+    document.getElementById('streamerModal').classList.remove('hidden');
+  } else {
+    const name = localStorage.getItem('creatorName');
+    const type = localStorage.getItem('creatorType');
+    if (name && type === '博主') { window.location.href = task ? `blogger.html?task=${task}` : 'blogger.html'; return; }
+    document.getElementById('bl_name').value    = name || '';
+    document.getElementById('bl_wechat').value  = localStorage.getItem('creatorWechat') || '';
+    document.getElementById('bl_profile').value = localStorage.getItem('creatorProfile') || '';
+    document.getElementById('bl_fans').value    = localStorage.getItem('creatorFans') || '';
+    document.getElementById('bloggerModal').classList.remove('hidden');
+  }
+}
+
+function saveStreamer() {
+  const name    = document.getElementById('st_name').value.trim();
+  const wechat  = document.getElementById('st_wechat').value.trim();
+  const profile = document.getElementById('st_profile').value.trim();
+  const fans    = document.getElementById('st_fans').value.trim();
+  if (!name)    { showToast('请输入昵称'); return; }
+  if (!wechat)  { showToast('请填写微信号'); return; }
+  if (!profile) { showToast('请填写主页链接'); return; }
+  if (!fans)    { showToast('请填写粉丝数'); return; }
+  localStorage.setItem('creatorName', name);
+  localStorage.setItem('creatorWechat', wechat);
+  localStorage.setItem('creatorType', '主播');
+  localStorage.setItem('creatorProfile', profile);
+  localStorage.setItem('creatorFans', fans);
+  const params = new URLSearchParams(window.location.search);
+  const task = params.get('task');
+  window.location.href = task ? `streamer.html?task=${task}` : 'streamer.html';
+}
+
+function saveBlogger() {
+  const name    = document.getElementById('bl_name').value.trim();
+  const wechat  = document.getElementById('bl_wechat').value.trim();
+  const profile = document.getElementById('bl_profile').value.trim();
+  const fans    = document.getElementById('bl_fans').value.trim();
+  if (!name)    { showToast('请输入昵称'); return; }
+  if (!wechat)  { showToast('请填写微信号'); return; }
+  if (!profile) { showToast('请填写主页链接'); return; }
+  if (!fans)    { showToast('请填写粉丝数'); return; }
+  localStorage.setItem('creatorName', name);
+  localStorage.setItem('creatorWechat', wechat);
+  localStorage.setItem('creatorType', '博主');
+  localStorage.setItem('creatorProfile', profile);
+  localStorage.setItem('creatorFans', fans);
+  const params = new URLSearchParams(window.location.search);
+  const task = params.get('task');
+  window.location.href = task ? `blogger.html?task=${task}` : 'blogger.html';
+}
+
+['streamerModal','bloggerModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => { if(e.target===document.getElementById(id)) closeModal(id); });
+});
+</script>
+</body>
+</html>
