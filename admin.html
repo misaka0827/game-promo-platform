@@ -1102,7 +1102,7 @@ function renderQR() {
   const db     = cachedDB;
   const task   = db.tasks.find(t=>t.id===taskId);
   const gameName = task ? task.gameName : taskId;
-  const base   = window.location.origin + window.location.pathname.replace('admin.html','');
+  const base   = window.location.origin + window.location.pathname.replace(/\/?admin(\.html)?$/, '') + '/';
   const creatorBase = base + 'creator.html';
   const links  = [
     { label:'🎙️ 主播专属报名', sub:'仅主播可见', url:`${base}streamer.html?task=${taskId}`, color:'#7c3aed' },
