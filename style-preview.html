@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风格对比</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { margin: 0; font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #e8e8e8; display: flex; gap: 24px; padding: 24px; min-height: 100vh; box-sizing: border-box; align-items: flex-start; }
+  .mock { width: 380px; flex-shrink: 0; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 48px rgba(0,0,0,.18); }
+  .label { text-align: center; font-size: 13px; font-weight: 700; color: #555; margin-bottom: 10px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<!-- ===== A: 小红书游戏社区风 ===== -->
+<div>
+  <div class="label">方案 A · 小红书游戏社区风</div>
+  <div class="mock">
+    <!-- header -->
+    <div style="background:#fff;border-bottom:1px solid #f0f0f0;padding:14px 18px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">🎮</span>
+      <div>
+        <div style="font-weight:700;font-size:14px;color:#111;">单主机游戏创作计划</div>
+        <div style="font-size:11px;color:#aaa;">接任务 · 领激活码 · 获奖励</div>
+      </div>
+    </div>
+    <!-- hero banner -->
+    <div style="background:linear-gradient(135deg,#ff2d55 0%,#ff6b8a 50%,#c62a6e 100%);padding:28px 20px 24px;text-align:center;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
+      <div style="position:absolute;bottom:-30px;left:-10px;width:80px;height:80px;background:rgba(255,255,255,.06);border-radius:50%;"></div>
+      <div style="font-size:36px;margin-bottom:8px;">🕹️</div>
+      <div style="color:#fff;font-weight:900;font-size:20px;letter-spacing:.5px;margin-bottom:4px;">玩游戏，也能领奖励</div>
+      <div style="color:rgba(255,255,255,.8);font-size:12px;">选择你的角色，接受游戏任务，完成即可兑换激活码</div>
+    </div>
+    <!-- steps -->
+    <div style="background:#fff;padding:16px 18px;">
+      <div style="font-size:11px;font-weight:700;color:#bbb;margin-bottom:12px;letter-spacing:2px;">参与流程</div>
+      <div style="display:flex;gap:0;align-items:flex-start;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-right:12px;">
+          <div style="width:22px;height:22px;border-radius:50%;background:#ff2d55;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">1</div>
+          <div style="width:1.5px;height:22px;background:#f0f0f0;"></div>
+          <div style="width:22px;height:22px;border-radius:50%;background:#ff2d55;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">2</div>
+          <div style="width:1.5px;height:22px;background:#f0f0f0;"></div>
+          <div style="width:22px;height:22px;border-radius:50%;background:#ff2d55;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">3</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;padding-top:2px;">
+          <div><div style="font-size:13px;font-weight:600;color:#222;">接受游戏任务</div><div style="font-size:11px;color:#999;margin-top:2px;">挑选感兴趣的游戏，提交信息申请</div></div>
+          <div><div style="font-size:13px;font-weight:600;color:#222;">领取激活码</div><div style="font-size:11px;color:#999;margin-top:2px;">审核通过后即可下载游戏开始体验</div></div>
+          <div><div style="font-size:13px;font-weight:600;color:#222;">提交战绩，兑现奖励</div><div style="font-size:11px;color:#999;margin-top:2px;">发布内容或完成直播，上传截图领取奖励</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- cards -->
+    <div style="background:#f9f9f9;padding:14px 16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="background:#fff;border-radius:16px;padding:18px 14px;border:2px solid #f0f0f0;cursor:pointer;text-align:center;">
+        <div style="font-size:28px;margin-bottom:8px;">🎙️</div>
+        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:4px;">主播</div>
+        <div style="font-size:11px;color:#999;line-height:1.5;">开播游玩<br>提交直播数据</div>
+        <div style="margin-top:10px;background:#f5e6ff;color:#9333ea;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;display:inline-block;">进入 →</div>
+      </div>
+      <div style="background:#fff;border-radius:16px;padding:18px 14px;border:2px solid #f0f0f0;cursor:pointer;text-align:center;">
+        <div style="font-size:28px;margin-bottom:8px;">✍️</div>
+        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:4px;">博主</div>
+        <div style="font-size:11px;color:#999;line-height:1.5;">制作内容<br>发布笔记领奖励</div>
+        <div style="margin-top:10px;background:#e0f2fe;color:#0284c7;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;display:inline-block;">进入 →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== B: 游戏公告板风 ===== -->
+<div>
+  <div class="label">方案 B · 游戏公告栏风</div>
+  <div class="mock">
+    <!-- header -->
+    <div style="background:#1a1a2e;padding:14px 18px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">⚔️</span>
+      <div>
+        <div style="font-weight:700;font-size:14px;color:#fff;">赏金任务板</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);">单主机游戏 · 创作者专区</div>
+      </div>
+    </div>
+    <!-- notice board hero -->
+    <div style="background:#16213e;padding:22px 20px;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(255,255,255,.02) 28px,rgba(255,255,255,.02) 29px);"></div>
+      <div style="font-size:11px;letter-spacing:3px;color:#e63e6d;font-weight:700;margin-bottom:8px;">— 任务委托书 —</div>
+      <div style="color:#fff;font-weight:900;font-size:18px;line-height:1.3;margin-bottom:6px;">接受游戏委托<br>完成即获奖励</div>
+      <div style="color:rgba(255,255,255,.5);font-size:11px;">选择身份 · 领取激活码 · 提交战绩</div>
+      <div style="margin-top:14px;display:flex;gap:8px;">
+        <div style="background:rgba(230,62,109,.2);border:1px solid rgba(230,62,109,.4);color:#ff6b8a;font-size:10px;font-weight:600;padding:3px 10px;border-radius:4px;">🎮 单主机游戏</div>
+        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-size:10px;font-weight:600;padding:3px 10px;border-radius:4px;">⚡ 限时招募</div>
+      </div>
+    </div>
+    <!-- steps -->
+    <div style="background:#0f3460;padding:14px 18px;">
+      <div style="display:flex;gap:0;justify-content:space-between;text-align:center;">
+        <div style="flex:1;">
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(230,62,109,.2);border:1.5px solid #e63e6d;color:#ff6b8a;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">1</div>
+          <div style="font-size:10px;color:#fff;font-weight:600;">接受委托</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.4);margin-top:2px;">选游戏申请</div>
+        </div>
+        <div style="flex:0;display:flex;align-items:center;padding-bottom:20px;color:rgba(255,255,255,.2);font-size:14px;">→</div>
+        <div style="flex:1;">
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(230,62,109,.2);border:1.5px solid #e63e6d;color:#ff6b8a;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">2</div>
+          <div style="font-size:10px;color:#fff;font-weight:600;">领取激活码</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.4);margin-top:2px;">审核后发放</div>
+        </div>
+        <div style="flex:0;display:flex;align-items:center;padding-bottom:20px;color:rgba(255,255,255,.2);font-size:14px;">→</div>
+        <div style="flex:1;">
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(230,62,109,.2);border:1.5px solid #e63e6d;color:#ff6b8a;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">3</div>
+          <div style="font-size:10px;color:#fff;font-weight:600;">提交战绩</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.4);margin-top:2px;">兑现奖励</div>
+        </div>
+      </div>
+    </div>
+    <!-- cards -->
+    <div style="background:#16213e;padding:14px 16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="background:rgba(255,255,255,.04);border:1.5px solid rgba(147,51,234,.4);border-radius:14px;padding:16px 12px;cursor:pointer;text-align:center;">
+        <div style="font-size:26px;margin-bottom:8px;">🎙️</div>
+        <div style="font-weight:700;font-size:13px;color:#fff;margin-bottom:3px;">主播</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.45);line-height:1.5;">开播探索<br>直播数据兑奖</div>
+        <div style="margin-top:10px;background:rgba(147,51,234,.25);color:#c084fc;font-size:10px;font-weight:700;padding:4px 12px;border-radius:6px;border:1px solid rgba(147,51,234,.3);">进入 →</div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1.5px solid rgba(59,130,246,.4);border-radius:14px;padding:16px 12px;cursor:pointer;text-align:center;">
+        <div style="font-size:26px;margin-bottom:8px;">✍️</div>
+        <div style="font-weight:700;font-size:13px;color:#fff;margin-bottom:3px;">博主</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.45);line-height:1.5;">制作内容<br>笔记发布领奖励</div>
+        <div style="margin-top:10px;background:rgba(59,130,246,.2);color:#60a5fa;font-size:10px;font-weight:700;padding:4px 12px;border-radius:6px;border:1px solid rgba(59,130,246,.3);">进入 →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== C: 清爽游戏卡片风 ===== -->
+<div>
+  <div class="label">方案 C · 清爽游戏卡片风</div>
+  <div class="mock">
+    <!-- header -->
+    <div style="background:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f5f5f5;">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#ff2d55,#c62a6e);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;">🎮</div>
+      <div>
+        <div style="font-weight:700;font-size:14px;color:#111;">单主机 · 创作任务</div>
+        <div style="font-size:11px;color:#aaa;">接任务 · 领激活码</div>
+      </div>
+    </div>
+    <!-- hero -->
+    <div style="background:#fff;padding:22px 18px 14px;">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:#fff5f7;border:1px solid #ffd6df;border-radius:20px;padding:4px 12px;margin-bottom:14px;">
+        <span style="font-size:10px;">🔥</span>
+        <span style="font-size:11px;font-weight:600;color:#e63e6d;">限时招募中</span>
+      </div>
+      <div style="font-weight:900;font-size:22px;color:#111;line-height:1.3;margin-bottom:6px;">玩游戏<br>也能领到奖励 🎁</div>
+      <div style="font-size:12px;color:#999;">选择你的角色，接受游戏任务，完成后凭战绩兑换激活码与实物奖励</div>
+    </div>
+    <!-- step pills -->
+    <div style="background:#f9f9f9;padding:14px 18px;display:flex;gap:6px;align-items:center;">
+      <div style="background:#fff;border:1px solid #f0f0f0;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:#e63e6d;white-space:nowrap;">① 接受委托</div>
+      <div style="color:#ccc;font-size:12px;">→</div>
+      <div style="background:#fff;border:1px solid #f0f0f0;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:#9333ea;white-space:nowrap;">② 领激活码</div>
+      <div style="color:#ccc;font-size:12px;">→</div>
+      <div style="background:#fff;border:1px solid #f0f0f0;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:#059669;white-space:nowrap;">③ 兑现奖励</div>
+    </div>
+    <!-- cards -->
+    <div style="background:#fff;padding:14px 16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="border-radius:16px;padding:18px 14px;cursor:pointer;text-align:center;background:linear-gradient(145deg,#fdf4ff,#f5e8ff);border:1.5px solid #e9d5ff;">
+        <div style="font-size:28px;margin-bottom:8px;">🎙️</div>
+        <div style="font-weight:700;font-size:13px;color:#6b21a8;margin-bottom:3px;">主播</div>
+        <div style="font-size:11px;color:#a855f7;line-height:1.5;">开播探索游戏<br>提交直播数据</div>
+        <div style="margin-top:12px;background:#7c3aed;color:#fff;font-size:11px;font-weight:600;padding:6px 0;border-radius:10px;">进入主播通道 →</div>
+      </div>
+      <div style="border-radius:16px;padding:18px 14px;cursor:pointer;text-align:center;background:linear-gradient(145deg,#eff8ff,#dbeafe);border:1.5px solid #bfdbfe;">
+        <div style="font-size:28px;margin-bottom:8px;">✍️</div>
+        <div style="font-weight:700;font-size:13px;color:#1e40af;margin-bottom:3px;">博主</div>
+        <div style="font-size:11px;color:#3b82f6;line-height:1.5;">制作图文内容<br>发布笔记领奖励</div>
+        <div style="margin-top:12px;background:#2563eb;color:#fff;font-size:11px;font-weight:600;padding:6px 0;border-radius:10px;">进入博主通道 →</div>
+      </div>
+    </div>
+    <div style="background:#fff;padding:0 16px 18px;text-align:center;">
+      <div style="font-size:10px;color:#ccc;">身份选错了也可以随时切换</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
