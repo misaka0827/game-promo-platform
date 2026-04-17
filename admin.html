@@ -855,22 +855,38 @@ async function doDistributeCDK() {
   const db       = await loadDB();
   const pool     = [...(db.cdkPools[taskId]||[])];
   const approved = db.signups.filter(s=>s.taskId===taskId&&s.makerStatus==='approved');
-  const needTotal= approved.length * perPerson;
-  if (pool.length < needTotal) {
-    showToast(`CDK数量不足！需要 ${needTotal} 个，当前只有 ${pool.length} 个`,'error'); return;
+
+  // 已分配过 CDK 的人跳过，只算待分配的人
+  const unassigned = approved.filter(s=>!(s.cdkKeys&&s.cdkKeys.length));
+  if (!unassigned.length) {
+    showToast('所有人均已分配过CDK，无需重复分配','info'); return;
   }
-  let idx=0;
-  approved.forEach(s=>{
+
+  // 收集所有已被分配出去的 CDK（不管哪个任务），防止重复
+  const usedCDKs = new Set(
+    db.signups.flatMap(s => s.cdkKeys||[])
+  );
+  // 从池中过滤出未使用的 CDK
+  const availablePool = pool.filter(k => !usedCDKs.has(k));
+
+  const needTotal = unassigned.length * perPerson;
+  if (availablePool.length < needTotal) {
+    showToast(`CDK数量不足！还需 ${needTotal} 个，可用未分配CDK仅 ${availablePool.length} 个`,'error'); return;
+  }
+
+  let idx = 0;
+  unassigned.forEach(s => {
     const signup = db.signups.find(x=>x.id===s.id);
-    if (signup && !(signup.cdkKeys&&signup.cdkKeys.length)) {
-      signup.cdkKeys = pool.slice(idx, idx+perPerson);
+    if (signup) {
+      signup.cdkKeys = availablePool.slice(idx, idx+perPerson);
       idx += perPerson;
     }
   });
+
   await saveDB(db);
   closeModal('distribModal');
   loadCDKPane();
-  showToast(`✅ 已为 ${approved.length} 人各分配 ${perPerson} 个CDK，种草官端即可查看`,'success');
+  showToast(`✅ 已为 ${unassigned.length} 人各分配 ${perPerson} 个CDK，种草官端即可查看`,'success');
 }
 
 // ---- CONTENT ----
