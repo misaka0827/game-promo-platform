@@ -769,6 +769,7 @@ function loadCDKPane() {
     ${poolKeys.length>0&&unassignedCount>0
       ?`<div class="ml-auto"><div class="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">需要 ${approved.length*3} 个CDK，CDK池有 ${poolKeys.length} 个${poolKeys.length>=approved.length*3?'，数量充足 ✅':'，<strong>数量不足</strong>，请补录'}</div></div>`
       :`<div class="ml-auto text-xs text-gray-400">${poolKeys.length===0?'请先批量录入CDK':'分配完成 ✅'}</div>`}
+    ${assigned.length>0?`<button class="btn-red text-xs py-1.5 px-3 ml-2" onclick="resetCDKDistribution()">🔄 重置分配</button>`:''}
   </div>`;
 
   const el = document.getElementById('cdkList');
@@ -887,6 +888,18 @@ async function doDistributeCDK() {
   closeModal('distribModal');
   loadCDKPane();
   showToast(`✅ 已为 ${unassigned.length} 人各分配 ${perPerson} 个CDK，种草官端即可查看`,'success');
+}
+
+async function resetCDKDistribution() {
+  const taskId = document.getElementById('cdkTaskSelect').value;
+  const task   = cachedDB.tasks.find(t=>t.id===taskId);
+  const name   = task?.gameName || taskId;
+  if (!confirm(`确认重置【${name}】的所有CDK分配？\n\n重置后所有创作者的CDK将被清空，需重新分配。`)) return;
+  const db = await loadDB();
+  db.signups.filter(s=>s.taskId===taskId).forEach(s=>{ s.cdkKeys = []; });
+  await saveDB(db);
+  loadCDKPane();
+  showToast('已重置所有CDK分配，可重新执行分配','success');
 }
 
 // ---- CONTENT ----
