@@ -182,6 +182,7 @@
         <div class="flex gap-2 flex-wrap items-end pb-1">
           <button class="btn-purple" onclick="openBatchCDKModal()">📋 批量录入CDK</button>
           <button class="btn-green" onclick="autoDistributeCDK()" id="btnAutoDistrib">⚡ 一键分配</button>
+          <button class="btn-secondary" onclick="openBatchEditCDK()">✏️ 批量编辑</button>
         </div>
       </div>
     </div>
@@ -778,39 +779,19 @@ function loadCDKPane() {
       <thead><tr class="text-xs text-gray-400 border-b border-gray-100">
         <th class="py-2 px-3 text-left">昵称</th><th class="py-2 px-3 text-left">类型</th>
         <th class="py-2 px-3 text-left">粉丝数</th><th class="py-2 px-3 text-left">CDK状态</th>
-        <th class="py-2 px-3 text-left">CDK内容</th><th class="py-2 px-3 text-left">操作</th>
+        <th class="py-2 px-3 text-left">CDK内容</th>
       </tr></thead>
       <tbody>${approved.map(s=>{
         const hasCDK=s.cdkKeys&&s.cdkKeys.length;
-        const cdkVal = hasCDK ? s.cdkKeys.join('\n') : '';
-        return `<tr class="border-b border-gray-50 tr-hover" id="cdkrow-${s.id}">
+        return `<tr class="border-b border-gray-50 tr-hover">
           <td class="py-2 px-3 font-semibold">${s.creatorName}</td>
           <td class="py-2 px-3"><span class="text-xs px-2 py-0.5 rounded-full ${s.creatorType==='主播'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'}">${s.creatorType}</span></td>
           <td class="py-2 px-3 text-gray-500">${s.creatorFans||'-'}</td>
           <td class="py-2 px-3">${hasCDK?`<span class="badge-approved px-2 py-0.5 rounded-full text-xs">已分配</span>`:`<span class="badge-pending px-2 py-0.5 rounded-full text-xs">待分配</span>`}</td>
-          <td class="py-2 px-3" id="cdkcell-${s.id}">${hasCDK?s.cdkKeys.map(k=>`<span class="cdk-mono mr-1">${k}</span>`).join(''):'<span class="text-gray-300 text-xs">-</span>'}</td>
-          <td class="py-2 px-3">
-            <button class="btn-secondary text-xs py-1 px-2" onclick="openEditCDK('${s.id}','${s.creatorName}',${JSON.stringify(cdkVal)})">✏️ 编辑</button>
-          </td>
+          <td class="py-2 px-3">${hasCDK?s.cdkKeys.map(k=>`<span class="cdk-mono mr-1">${k}</span>`).join(''):'<span class="text-gray-300 text-xs">-</span>'}</td>
         </tr>`;
       }).join('')}</tbody>
     </table></div>`;
-
-  // 单人CDK编辑 Modal（动态插入，只插一次）
-  if (!document.getElementById('editCDKModal')) {
-    document.body.insertAdjacentHTML('beforeend', `
-    <div id="editCDKModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
-      <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
-        <h3 class="text-lg font-bold text-gray-800 mb-1">✏️ 编辑 CDK — <span id="editCDKName"></span></h3>
-        <p class="text-xs text-gray-400 mb-3">每行一个CDK码，可新增、修改或清空</p>
-        <textarea id="editCDKText" rows="5" placeholder="每行一个CDK码..." style="border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 13px;width:100%;outline:none;font-size:13px;font-family:'Courier New',monospace;box-sizing:border-box;"></textarea>
-        <div class="flex gap-2 mt-4 justify-end">
-          <button class="btn-secondary" onclick="document.getElementById('editCDKModal').classList.add('hidden')">取消</button>
-          <button class="btn-primary" onclick="saveEditCDK()">保存</button>
-        </div>
-      </div>
-    </div>`);
-  }
 }
 
 // ---- BATCH CDK ----
@@ -909,25 +890,60 @@ async function doDistributeCDK() {
   showToast(`✅ 已为 ${unassigned.length} 人各分配 ${perPerson} 个CDK，种草官端即可查看`,'success');
 }
 
-let _editCDKSignupId = null;
-function openEditCDK(signupId, name, currentVal) {
-  _editCDKSignupId = signupId;
-  document.getElementById('editCDKName').textContent = name;
-  document.getElementById('editCDKText').value = currentVal || '';
-  document.getElementById('editCDKModal').classList.remove('hidden');
-  setTimeout(()=>document.getElementById('editCDKText').focus(), 100);
+let _batchEditSignups = [];
+function openBatchEditCDK() {
+  const taskId = document.getElementById('cdkTaskSelect').value;
+  const db = cachedDB;
+  _batchEditSignups = db.signups.filter(s=>s.taskId===taskId&&s.makerStatus==='approved');
+  if (!_batchEditSignups.length) { showToast('暂无已通过的报名者','error'); return; }
+
+  const rows = _batchEditSignups.map((s,i)=>{
+    const cdkVal = (s.cdkKeys&&s.cdkKeys.length) ? s.cdkKeys.join(' / ') : '';
+    return `<tr class="border-b border-gray-100">
+      <td class="py-2 pr-3 text-sm font-semibold text-gray-700 whitespace-nowrap w-28">${s.creatorName}</td>
+      <td class="py-2">
+        <input type="text" id="batchcdk-${i}" value="${cdkVal}"
+          placeholder="输入CDK，多个用 / 分隔"
+          style="border:1.5px solid #e5e7eb;border-radius:8px;padding:6px 10px;width:100%;font-size:13px;font-family:'Courier New',monospace;box-sizing:border-box;outline:none;"
+          onfocus="this.style.borderColor='#e63e6d'" onblur="this.style.borderColor='#e5e7eb'"/>
+      </td>
+    </tr>`;
+  }).join('');
+
+  let modal = document.getElementById('batchEditCDKModal');
+  if (!modal) {
+    document.body.insertAdjacentHTML('beforeend', `
+    <div id="batchEditCDKModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
+      <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-4" style="max-height:85vh;display:flex;flex-direction:column;">
+        <h3 class="text-lg font-bold text-gray-800 mb-1">✏️ 批量编辑 CDK 分配</h3>
+        <p class="text-xs text-gray-400 mb-4">每人一行，多个CDK用 <code class="bg-gray-100 px-1 rounded">/</code> 分隔；清空输入框即清除该人CDK</p>
+        <div class="overflow-y-auto flex-1">
+          <table class="w-full" id="batchEditCDKTable"><tbody></tbody></table>
+        </div>
+        <div class="flex gap-2 mt-4 justify-end pt-3 border-t border-gray-100">
+          <button class="btn-secondary" onclick="document.getElementById('batchEditCDKModal').classList.add('hidden')">取消</button>
+          <button class="btn-primary" onclick="saveBatchEditCDK()">💾 保存所有</button>
+        </div>
+      </div>
+    </div>`);
+    modal = document.getElementById('batchEditCDKModal');
+  }
+  modal.querySelector('tbody').innerHTML = rows;
+  modal.classList.remove('hidden');
 }
-async function saveEditCDK() {
-  if (!_editCDKSignupId) return;
-  const lines = document.getElementById('editCDKText').value.split('\n').map(l=>l.trim()).filter(Boolean);
+
+async function saveBatchEditCDK() {
   const db = await loadDB();
-  const signup = db.signups.find(s=>s.id===_editCDKSignupId);
-  if (!signup) { showToast('找不到该报名记录','error'); return; }
-  signup.cdkKeys = lines;
+  _batchEditSignups.forEach((s,i)=>{
+    const val = document.getElementById(`batchcdk-${i}`)?.value.trim() || '';
+    const keys = val ? val.split('/').map(k=>k.trim()).filter(Boolean) : [];
+    const signup = db.signups.find(x=>x.id===s.id);
+    if (signup) signup.cdkKeys = keys;
+  });
   await saveDB(db);
-  document.getElementById('editCDKModal').classList.add('hidden');
+  document.getElementById('batchEditCDKModal').classList.add('hidden');
   loadCDKPane();
-  showToast(lines.length ? `已更新 ${lines.length} 个CDK` : '已清空CDK', 'success');
+  showToast('CDK分配已保存 ✅','success');
 }
 
 // ---- CONTENT ----
