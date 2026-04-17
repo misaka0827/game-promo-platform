@@ -123,7 +123,7 @@
         <div><label class="block text-sm font-medium text-gray-700 mb-1">内容要求</label>
           <textarea id="f_req" rows="3" placeholder="例如：需要两台电脑联机体验，内容需在上线日后释出..."></textarea></div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div><label class="block text-sm font-medium text-gray-700 mb-1">📢 游戏上线时间 <span class="text-gray-400 font-normal">（可开始直播/发布内容的时间）</span></label>
+          <div><label class="block text-sm font-medium text-gray-700 mb-1">📢 内容释出时间 <span class="text-gray-400 font-normal">（可开始直播/发布内容的时间）</span></label>
             <input type="text" id="f_releaseStart" placeholder="例如：4月18日中午12点后" /></div>
           <div><label class="block text-sm font-medium text-gray-700 mb-1">⏰ 数据提交截止时间 <span class="text-gray-400 font-normal">（最晚上传数据的时间）</span></label>
             <input type="text" id="f_submitDeadline" placeholder="例如：4月25日23:59" /></div>
@@ -739,12 +739,7 @@ function exportSignupExcel() {
     '昵称': s.creatorName,
     '类型': s.creatorType,
     '粉丝数': s.creatorFans||'',
-    '微信号': s.creatorWechat||'',
-    '主页链接': s.creatorProfile||'',
-    '备注': s.note||'',
-    '报名状态': {pending:'待审核',approved:'已通过',rejected:'已拒绝'}[s.makerStatus]||s.makerStatus,
-    '报名时间': new Date(s.createdAt).toLocaleString('zh-CN'),
-    'CDK': s.cdkKeys ? s.cdkKeys.join(' / ') : ''
+    '主页链接': s.creatorProfile||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
@@ -1147,13 +1142,10 @@ async function exportFullReport() {
     if (sigs.length) {
       const rows = sigs.map((s,i)=>({
         '序号':i+1,'昵称':s.creatorName,'类型':s.creatorType,'粉丝数':s.creatorFans||'',
-        '主页':s.creatorProfile||'','备注':s.note||'',
-        '状态':{pending:'待审核',approved:'已通过',rejected:'已拒绝'}[s.makerStatus]||'',
-        '报名时间':new Date(s.createdAt).toLocaleString('zh-CN'),
-        'CDK':s.cdkKeys?s.cdkKeys.join(' / '):''
+        '主页链接':s.creatorProfile||''
       }));
       const ws = XLSX.utils.json_to_sheet(rows);
-      ws['!cols']=[{wch:5},{wch:12},{wch:8},{wch:10},{wch:30},{wch:16},{wch:8},{wch:20},{wch:36}];
+      ws['!cols']=[{wch:5},{wch:14},{wch:8},{wch:10},{wch:36}];
       XLSX.utils.book_append_sheet(wb, ws, `${t.gameName}_报名`.slice(0,31));
     }
     if (conts.length) {
