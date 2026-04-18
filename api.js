@@ -1,15 +1,11 @@
 /**
- * api.js — 云端数据层（GitHub Gist）
- * 所有页面共享同一份云端数据，跨网络、跨设备实时同步。
+ * api.js — 云端数据层（Cloudflare Workers KV）
+ * 通过 Cloudflare Worker 读写数据，国内直连，无限制。
  */
 
 (function () {
-  const GIST_ID    = '9c709522bb2b8882d335e81ba028873c';
-  // token 分段存储避免扫描（仅 gist 读写权限）
-  const _t = ['ghp_BbzoRFlbk8Rv', '34iDfR0o3X9Qk4', '8rMh0ZEAxq'];
-  const GIST_TOKEN = _t.join('');
-  const FILENAME   = 'data.json';
-  const API_URL    = `https://api.github.com/gists/${GIST_ID}`;
+  const WORKER_URL = 'https://game-promo-api.simonefrancinaqx459.workers.dev';
+  const AUTH_TOKEN = 'xhs-game-promo-2026';
 
   // 公开缓存
   window.cachedDB = {
@@ -30,40 +26,12 @@
     };
   }
 
-  /**
-   * 读取 Gist 文件内容，自动处理超过 1MB 时的 truncated 情况。
-   * 先拿元数据，若 truncated=true 则用 raw_url 直接下载完整内容。
-   */
-  async function _fetchGistContent() {
-    const res = await fetch(API_URL + '?t=' + Date.now(), {
-      headers: {
-        'Authorization': `token ${GIST_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-    if (!res.ok) throw new Error(`GitHub API ${res.status}`);
-    const gist = await res.json();
-    const fileInfo = gist.files?.[FILENAME];
-    if (!fileInfo) throw new Error('data.json not found in gist');
-
-    // 文件超过 1MB 时 content 被截断，需要用 raw_url 拉完整内容
-    if (fileInfo.truncated) {
-      const rawRes = await fetch(fileInfo.raw_url, {
-        headers: { 'Authorization': `token ${GIST_TOKEN}` }
-      });
-      if (!rawRes.ok) throw new Error(`raw_url fetch failed: ${rawRes.status}`);
-      return await rawRes.text();
-    }
-
-    return fileInfo.content;
-  }
-
-  /** GET Gist → 返回 db 对象，同时更新 cachedDB */
+  /** GET /db → 返回 db 对象，同时更新 cachedDB */
   window.loadDB = async function () {
     try {
-      const raw = await _fetchGistContent();
-      if (!raw) throw new Error('empty content');
-      const db = JSON.parse(raw);
+      const res = await fetch(WORKER_URL + '/db?t=' + Date.now());
+      if (!res.ok) throw new Error(`Worker API ${res.status}`);
+      const db = await res.json();
       _lastVersion = db._version || 0;
       window.cachedDB = _normalize(db);
       return window.cachedDB;
@@ -73,30 +41,22 @@
     }
   };
 
-  /** PATCH Gist → 保存并返回最新 db */
+  /** PUT /db → 保存并返回最新 db */
   window.saveDB = async function (db) {
     try {
       const current = await window.loadDB();
-      // 版本号递增（防止并发冲突）
       const newVersion = (current._version || _lastVersion || 0) + 1;
       const toSave = Object.assign({}, db, { _version: newVersion });
 
-      const res = await fetch(API_URL, {
-        method: 'PATCH',
+      const res = await fetch(WORKER_URL + '/db', {
+        method: 'PUT',
         headers: {
-          'Authorization': `token ${GIST_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-Auth-Token': AUTH_TOKEN
         },
-        body: JSON.stringify({
-          files: {
-            [FILENAME]: { content: JSON.stringify(toSave, null, 2) }
-          }
-        })
+        body: JSON.stringify(toSave)
       });
-      if (!res.ok) throw new Error(`GitHub API ${res.status}`);
-
-      // saveDB 返回的 gist 里 content 也可能被截断，重新 loadDB 获取完整数据
+      if (!res.ok) throw new Error(`Worker API ${res.status}`);
       _lastVersion = newVersion;
       window.cachedDB = _normalize(toSave);
       return window.cachedDB;
@@ -112,9 +72,9 @@
     window.stopSync();
     _syncTimer = setInterval(async () => {
       try {
-        const raw = await _fetchGistContent();
-        if (!raw) return;
-        const db      = JSON.parse(raw);
+        const res = await fetch(WORKER_URL + '/db?t=' + Date.now());
+        if (!res.ok) return;
+        const db      = await res.json();
         const version = db._version || 0;
         if (_lastVersion === -1) { _lastVersion = version; return; }
         if (version !== _lastVersion) {
