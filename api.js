@@ -30,19 +30,39 @@
     };
   }
 
+  /**
+   * 读取 Gist 文件内容，自动处理超过 1MB 时的 truncated 情况。
+   * 先拿元数据，若 truncated=true 则用 raw_url 直接下载完整内容。
+   */
+  async function _fetchGistContent() {
+    const res = await fetch(API_URL + '?t=' + Date.now(), {
+      headers: {
+        'Authorization': `token ${GIST_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+    const gist = await res.json();
+    const fileInfo = gist.files?.[FILENAME];
+    if (!fileInfo) throw new Error('data.json not found in gist');
+
+    // 文件超过 1MB 时 content 被截断，需要用 raw_url 拉完整内容
+    if (fileInfo.truncated) {
+      const rawRes = await fetch(fileInfo.raw_url, {
+        headers: { 'Authorization': `token ${GIST_TOKEN}` }
+      });
+      if (!rawRes.ok) throw new Error(`raw_url fetch failed: ${rawRes.status}`);
+      return await rawRes.text();
+    }
+
+    return fileInfo.content;
+  }
+
   /** GET Gist → 返回 db 对象，同时更新 cachedDB */
   window.loadDB = async function () {
     try {
-      const res = await fetch(API_URL + '?t=' + Date.now(), {
-        headers: {
-          'Authorization': `token ${GIST_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      });
-      if (!res.ok) throw new Error(`GitHub API ${res.status}`);
-      const gist = await res.json();
-      const raw  = gist.files?.[FILENAME]?.content;
-      if (!raw) throw new Error('data.json not found in gist');
+      const raw = await _fetchGistContent();
+      if (!raw) throw new Error('empty content');
       const db = JSON.parse(raw);
       _lastVersion = db._version || 0;
       window.cachedDB = _normalize(db);
@@ -75,11 +95,10 @@
         })
       });
       if (!res.ok) throw new Error(`GitHub API ${res.status}`);
-      const gist = await res.json();
-      const raw  = gist.files?.[FILENAME]?.content;
-      const saved = raw ? JSON.parse(raw) : toSave;
-      _lastVersion = saved._version || newVersion;
-      window.cachedDB = _normalize(saved);
+
+      // saveDB 返回的 gist 里 content 也可能被截断，重新 loadDB 获取完整数据
+      _lastVersion = newVersion;
+      window.cachedDB = _normalize(toSave);
       return window.cachedDB;
     } catch (e) {
       console.warn('[api.js] saveDB 失败，仍更新本地缓存:', e);
@@ -93,15 +112,7 @@
     window.stopSync();
     _syncTimer = setInterval(async () => {
       try {
-        const res = await fetch(API_URL + '?t=' + Date.now(), {
-          headers: {
-            'Authorization': `token ${GIST_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        });
-        if (!res.ok) return;
-        const gist    = await res.json();
-        const raw     = gist.files?.[FILENAME]?.content;
+        const raw = await _fetchGistContent();
         if (!raw) return;
         const db      = JSON.parse(raw);
         const version = db._version || 0;
