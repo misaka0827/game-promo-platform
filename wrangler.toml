@@ -1,6 +1,0 @@
-name = "game-promo-platform"
-compatibility_date = "2024-01-01"
-
-[[kv_namespaces]]
-binding = "GAME_PROMO_DB"
-id = "81370c22ec4b4e56b57d92f89eeae1f5"
