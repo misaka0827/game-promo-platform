@@ -34,6 +34,43 @@ export async function onRequest(context) {
     });
   }
 
+  // POST /api/db?action=clean — 清理 contents 中的 base64 字段（一次性操作）
+  if (request.method === 'POST') {
+    const token = request.headers.get('X-Auth-Token');
+    if (token !== AUTH_TOKEN) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' }
+      });
+    }
+    const url = new URL(request.url);
+    if (url.searchParams.get('action') === 'clean') {
+      const raw = await env.GAME_PROMO_DB.get('db');
+      const db = raw ? JSON.parse(raw) : {};
+      let cleaned = 0;
+      (db.contents || []).forEach(c => {
+        if (c.liveshotBase64) { c.liveshotUrl = c.liveshotUrl || ''; delete c.liveshotBase64; cleaned++; }
+        if (c.datashotBase64) { c.datashotUrl = c.datashotUrl || ''; delete c.datashotBase64; cleaned++; }
+      });
+      await env.GAME_PROMO_DB.put('db', JSON.stringify(db));
+      return new Response(JSON.stringify({ success: true, cleanedFields: cleaned }), {
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' }
+      });
+    }
+    // 普通 POST — 写入数据库（兼容旧逻辑）
+    const body = await request.text();
+    try { JSON.parse(body); } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
+        status: 400,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' }
+      });
+    }
+    await env.GAME_PROMO_DB.put('db', body);
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' }
+    });
+  }
+
   // PUT — 写入数据库
   if (request.method === 'PUT') {
     const token = request.headers.get('X-Auth-Token');
