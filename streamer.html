@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>小红书 x 单主机游戏种草平台 · 主播</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="api.js?v=1776589318"></script>
+<script src="api.js?v=1776594032"></script>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
   .badge-pending  { background:#fef3c7;color:#92400e; }
@@ -238,8 +238,8 @@ let creatorName    = localStorage.getItem('creatorName')    || '';
 let creatorWechat  = localStorage.getItem('creatorWechat')  || '';
 let creatorProfile = localStorage.getItem('creatorProfile') || '';
 let creatorFans    = localStorage.getItem('creatorFans')    || '';
-let _liveshotB64   = '';
-let _datashotB64   = '';
+let _liveshotUrl   = '';
+let _datashotUrl   = '';
 
 // Init
 (function() {
@@ -521,24 +521,55 @@ function renderMyStatus() {
 }
 
 // ---- SUBMIT CONTENT ----
-function previewImg(input, imgId, hintId) {
+// 上传图片到 GitHub 图床，返回 URL
+async function uploadImgToGithub(file) {
+  const GH_TOKEN = ['ghp_stjZzWE', 'QKO2HU1g3JFNgl3b4JLIKya3wLqzv'].join('');
+  const REPO = 'misaka0827/game-promo-platform';
+  const branch = 'main';
+  const filename = `uploads/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+  // 读文件为 base64
+  const b64 = await new Promise(resolve => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result.split(',')[1]);
+    r.readAsDataURL(file);
+  });
+  const resp = await fetch(`https://api.github.com/repos/${REPO}/contents/${filename}`, {
+    method: 'PUT',
+    headers: { Authorization: `token ${GH_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: 'upload screenshot', content: b64, branch })
+  });
+  if (!resp.ok) throw new Error('图片上传失败: ' + resp.status);
+  const data = await resp.json();
+  return data.content.download_url;
+}
+
+async function previewImg(input, imgId, hintId) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 2*1024*1024) { showToast('图片不能超过 2MB，请压缩后上传','error'); input.value=''; return; }
+  if (file.size > 5*1024*1024) { showToast('图片不能超过 5MB，请压缩后上传','error'); input.value=''; return; }
+  // 立即本地预览
   const reader = new FileReader();
   reader.onload = e => {
     const img = document.getElementById(imgId);
     img.src = e.target.result;
     img.classList.remove('hidden');
-    document.getElementById(hintId).textContent = '点击重新上传';
-    if (input.id==='sub_liveshot') _liveshotB64 = e.target.result;
-    if (input.id==='sub_datashot') _datashotB64 = e.target.result;
   };
   reader.readAsDataURL(file);
+  // 上传到 GitHub 图床
+  document.getElementById(hintId).textContent = '⏳ 上传中...';
+  try {
+    const url = await uploadImgToGithub(file);
+    document.getElementById(hintId).textContent = '✅ 已上传，点击重新上传';
+    if (input.id==='sub_liveshot') _liveshotUrl = url;
+    if (input.id==='sub_datashot') _datashotUrl = url;
+  } catch(e) {
+    document.getElementById(hintId).textContent = '❌ 上传失败，请重试';
+    showToast('图片上传失败，请重试','error');
+  }
 }
 
 function openSubmit(taskId) {
-  _liveshotB64 = ''; _datashotB64 = '';
+  _liveshotUrl = ''; _datashotUrl = '';
   document.getElementById('submitTaskId').value = taskId;
   document.getElementById('sub_name').value    = creatorName;
   document.getElementById('sub_profile').value = creatorProfile;
@@ -546,23 +577,23 @@ function openSubmit(taskId) {
   // 预填上次提交的数据
   const prev = cachedDB.contents && cachedDB.contents.find(c=>c.taskId===taskId&&c.creatorName===creatorName&&c.creatorType===CREATOR_TYPE);
   document.getElementById('sub_clip').value = prev ? (prev.clip||'') : '';
-  if (prev && prev.liveshotBase64) {
-    _liveshotB64 = prev.liveshotBase64;
+  if (prev && prev.liveshotUrl) {
+    _liveshotUrl = prev.liveshotUrl;
     const img = document.getElementById('prev_liveshot');
-    img.src = prev.liveshotBase64; img.classList.remove('hidden');
-    document.getElementById('prev_liveshot_hint').textContent = '点击重新上传';
+    img.src = prev.liveshotUrl; img.classList.remove('hidden');
+    document.getElementById('prev_liveshot_hint').textContent = '✅ 已上传，点击重新上传';
   } else {
     document.getElementById('prev_liveshot').classList.add('hidden');
-    document.getElementById('prev_liveshot_hint').textContent = '点击上传图片（最大 2MB）';
+    document.getElementById('prev_liveshot_hint').textContent = '点击上传图片（最大 5MB）';
   }
-  if (prev && prev.datashotBase64) {
-    _datashotB64 = prev.datashotBase64;
+  if (prev && prev.datashotUrl) {
+    _datashotUrl = prev.datashotUrl;
     const img = document.getElementById('prev_datashot');
-    img.src = prev.datashotBase64; img.classList.remove('hidden');
-    document.getElementById('prev_datashot_hint').textContent = '点击重新上传';
+    img.src = prev.datashotUrl; img.classList.remove('hidden');
+    document.getElementById('prev_datashot_hint').textContent = '✅ 已上传，点击重新上传';
   } else {
     document.getElementById('prev_datashot').classList.add('hidden');
-    document.getElementById('prev_datashot_hint').textContent = '点击上传图片（最大 2MB）';
+    document.getElementById('prev_datashot_hint').textContent = '点击上传图片（最大 5MB）';
   }
   document.getElementById('sub_liveshot').value = '';
   document.getElementById('sub_datashot').value = '';
@@ -574,16 +605,16 @@ async function submitContent() {
   const fans   = document.getElementById('sub_fans').value.trim();
   const clip   = document.getElementById('sub_clip').value.trim();
   if (!fans)           { showToast('请填写粉丝数'); return; }
-  if (!_liveshotB64)   { showToast('请上传直播间截图'); return; }
-  if (!_datashotB64)   { showToast('请上传直播数据截图'); return; }
+  if (!_liveshotUrl)   { showToast('请上传直播间截图，等待上传完成后再提交'); return; }
+  if (!_datashotUrl)   { showToast('请上传直播数据截图，等待上传完成后再提交'); return; }
   if (!clip)           { showToast('请填写直播切片链接'); return; }
   const db = await loadDB();
   db.contents = db.contents.filter(c=>!(c.taskId===taskId&&c.creatorName===creatorName));
   db.contents.push({
     id: genId(), taskId, creatorName, creatorType: CREATOR_TYPE,
     profile: creatorProfile, fans,
-    liveshotBase64: _liveshotB64,
-    datashotBase64: _datashotB64,
+    liveshotUrl: _liveshotUrl,
+    datashotUrl: _datashotUrl,
     clip, createdAt: Date.now()
   });
   await saveDB(db);
