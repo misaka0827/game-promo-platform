@@ -14,7 +14,7 @@
 <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 <!-- ExcelJS for image-embedded Excel -->
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-<script src="api.js?v=1776589318"></script>
+<script src="api.js?v=1776594032"></script>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
   .badge-pending  { background:#fef3c7;color:#92400e; }
@@ -1016,10 +1016,12 @@ function loadContentPane() {
         // 从 signup 取微信号
         const sig = db.signups.find(s=>s.creatorName===c.creatorName&&s.creatorType===c.creatorType&&s.taskId===taskId);
         const wechat = sig?.creatorWechat || c.wechat || '';
-        const screenshotHtml=(c.liveshotBase64||c.datashotBase64)
+        const liveSrc = c.liveshotUrl || c.liveshotBase64 || '';
+        const dataSrc = c.datashotUrl || c.datashotBase64 || '';
+        const screenshotHtml=(liveSrc||dataSrc)
           ?`<div class="flex gap-1">
-              ${c.liveshotBase64?`<img src="${c.liveshotBase64}" class="img-thumb" title="直播间截图（点击放大）" onclick="showImg(this.src,'${c.creatorName}_直播间截图.png')" />`:''}
-              ${c.datashotBase64?`<img src="${c.datashotBase64}" class="img-thumb" title="数据报告截图（点击放大）" onclick="showImg(this.src,'${c.creatorName}_数据报告截图.png')" />`:''}
+              ${liveSrc?`<img src="${liveSrc}" class="img-thumb" title="直播间截图（点击放大）" onclick="showImg('${liveSrc}','${c.creatorName}_直播间截图.png')" />`:''}
+              ${dataSrc?`<img src="${dataSrc}" class="img-thumb" title="数据报告截图（点击放大）" onclick="showImg('${dataSrc}','${c.creatorName}_数据报告截图.png')" />`:''}
             </div>`:'-';
         const linkHtml=(c.clip||c.video)?`<a href="${c.clip||c.video}" target="_blank" class="text-blue-500 underline text-xs">${c.clip?'直播切片':'种草视频'}</a>`:'-';
         return `<tr class="border-b border-gray-50 tr-hover">
@@ -1113,32 +1115,39 @@ async function _exportContentExcelJS(task, contents, filename) {
       profile: c.profile||'',
       link:    c.clip||c.video||'',
       ltype:   c.clip?'直播切片':'种草视频',
-      live:    c.liveshotBase64  ? '' : '（无截图）',
-      data:    c.datashotBase64  ? '' : '（无截图）',
+      live:    (c.liveshotUrl||c.liveshotBase64)  ? '' : '（无截图）',
+      data:    (c.datashotUrl||c.datashotBase64)  ? '' : '（无截图）',
       time:    new Date(c.createdAt).toLocaleString('zh-CN'),
     });
     row.height = IMG_ROW_H;
     row.alignment = { vertical:'middle' };
 
-    // 嵌入直播间截图（第9列 = I）
+    // 嵌入直播间截图（第9列 = I）—— 兼容 URL 和旧 base64
     const liveImg = _parseImgBase64(c.liveshotBase64);
     if (liveImg) {
       const imgId = wb.addImage({ base64: liveImg.b64, extension: liveImg.ext });
       ws.addImage(imgId, {
-        tl: { col: 8, row: rowNum - 1 },   // 0-indexed: col 8 = I
+        tl: { col: 8, row: rowNum - 1 },
         ext: { width: IMG_W, height: IMG_H },
         editAs: 'oneCell',
       });
+    } else if (c.liveshotUrl) {
+      // 新方案：存 URL，Excel 单元格直接写链接
+      ws.getCell(`I${rowNum}`).value = { text: '查看截图', hyperlink: c.liveshotUrl };
+      ws.getCell(`I${rowNum}`).font = { color: { argb: 'FF2563EB' }, underline: true };
     }
     // 嵌入数据报告截图（第10列 = J）
     const dataImg = _parseImgBase64(c.datashotBase64);
     if (dataImg) {
       const imgId = wb.addImage({ base64: dataImg.b64, extension: dataImg.ext });
       ws.addImage(imgId, {
-        tl: { col: 9, row: rowNum - 1 },   // col 9 = J
+        tl: { col: 9, row: rowNum - 1 },
         ext: { width: IMG_W, height: IMG_H },
         editAs: 'oneCell',
       });
+    } else if (c.datashotUrl) {
+      ws.getCell(`J${rowNum}`).value = { text: '查看截图', hyperlink: c.datashotUrl };
+      ws.getCell(`J${rowNum}`).font = { color: { argb: 'FF2563EB' }, underline: true };
     }
   }
 
@@ -1225,6 +1234,7 @@ async function exportFullReport() {
       const imgFolder = zip.folder(`截图_${t.gameName}`);
       const rows = conts.map((c,i)=>{
         let liveName='', dataName='';
+        // 兼容旧 base64 和新 URL
         if (c.liveshotBase64) {
           liveName=`${i+1}_${c.creatorName}_直播间截图.png`;
           imgFolder.file(liveName, c.liveshotBase64.replace(/^data:image\/\w+;base64,/,''), {base64:true});
@@ -1233,6 +1243,8 @@ async function exportFullReport() {
           dataName=`${i+1}_${c.creatorName}_数据报告截图.png`;
           imgFolder.file(dataName, c.datashotBase64.replace(/^data:image\/\w+;base64,/,''), {base64:true});
         }
+        if (!liveName && c.liveshotUrl) liveName = c.liveshotUrl;
+        if (!dataName && c.datashotUrl) dataName = c.datashotUrl;
         return {
           '序号':i+1,'昵称':c.creatorName,'类型':c.creatorType,'粉丝数':c.fans||'',
           '主页':c.profile||'','内容链接':c.clip||c.video||'',
