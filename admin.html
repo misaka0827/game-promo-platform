@@ -1082,13 +1082,11 @@ async function _exportContentExcelJS(task, contents, filename) {
     { header:'昵称',     key:'name',    width:14 },
     { header:'类型',     key:'type',    width:8  },
     { header:'粉丝数',   key:'fans',    width:10 },
-    { header:'微信号',   key:'wechat',  width:14 },
     { header:'主页链接', key:'profile', width:32 },
     { header:'内容链接', key:'link',    width:32 },
     { header:'内容类型', key:'ltype',   width:10 },
     { header:'直播间截图', key:'live',  width:18 },
     { header:'数据报告截图', key:'data',width:18 },
-    { header:'提交时间', key:'time',    width:20 },
   ];
 
   // 表头样式
@@ -1111,13 +1109,11 @@ async function _exportContentExcelJS(task, contents, filename) {
       name:    c.creatorName,
       type:    c.creatorType,
       fans:    c.fans||'',
-      wechat:  sig?.creatorWechat || '',
       profile: c.profile||'',
       link:    c.clip||c.video||'',
       ltype:   c.clip?'直播切片':'种草视频',
       live:    (c.liveshotUrl||c.liveshotBase64)  ? '' : '（无截图）',
       data:    (c.datashotUrl||c.datashotBase64)  ? '' : '（无截图）',
-      time:    new Date(c.createdAt).toLocaleString('zh-CN'),
     });
     row.height = IMG_ROW_H;
     row.alignment = { vertical:'middle' };
@@ -1248,12 +1244,11 @@ async function exportFullReport() {
         return {
           '序号':i+1,'昵称':c.creatorName,'类型':c.creatorType,'粉丝数':c.fans||'',
           '主页':c.profile||'','内容链接':c.clip||c.video||'',
-          '直播间截图':liveName||'（无）','数据报告截图':dataName||'（无）',
-          '提交时间':new Date(c.createdAt).toLocaleString('zh-CN')
+          '直播间截图':liveName||'（无）','数据报告截图':dataName||'（无）'
         };
       });
       const ws = XLSX.utils.json_to_sheet(rows);
-      ws['!cols']=[{wch:5},{wch:12},{wch:8},{wch:10},{wch:28},{wch:28},{wch:24},{wch:24},{wch:20}];
+      ws['!cols']=[{wch:5},{wch:12},{wch:8},{wch:10},{wch:28},{wch:28},{wch:24},{wch:24}];
       XLSX.utils.book_append_sheet(wb, ws, `${t.gameName}_内容`.slice(0,31));
     }
   });
