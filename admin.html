@@ -51,6 +51,44 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
 
+<!-- PASSWORD GATE -->
+<div id="pwGate" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:20px;padding:36px 32px;width:340px;box-shadow:0 8px 40px rgba(0,0,0,0.18);text-align:center;">
+    <div style="font-size:2rem;margin-bottom:8px;">🔐</div>
+    <div style="font-size:18px;font-weight:700;color:#1f2937;margin-bottom:4px;">运营后台</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:24px;">请输入访问密码</div>
+    <input id="pwInput" type="password" placeholder="输入密码" autocomplete="current-password"
+      style="border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;width:100%;font-size:15px;outline:none;box-sizing:border-box;margin-bottom:12px;"
+      onkeydown="if(event.key==='Enter')checkPw()"
+      onfocus="this.style.borderColor='#e63e6d'" onblur="this.style.borderColor='#e5e7eb'"/>
+    <div id="pwErr" style="color:#ef4444;font-size:13px;margin-bottom:8px;min-height:18px;"></div>
+    <button onclick="checkPw()"
+      style="background:#e63e6d;color:white;border:none;border-radius:10px;padding:11px 0;width:100%;font-size:15px;font-weight:600;cursor:pointer;">
+      进入后台
+    </button>
+  </div>
+</div>
+<script>
+(function(){
+  const PW_KEY = 'admin_auth_xhs';
+  const CORRECT = 'xhs2026';
+  function showGate(){ document.getElementById('pwGate').style.display='flex'; }
+  function hideGate(){ document.getElementById('pwGate').style.display='none'; }
+  window.checkPw = function(){
+    const val = document.getElementById('pwInput').value;
+    if(val === CORRECT){
+      localStorage.setItem(PW_KEY, '1');
+      hideGate();
+    } else {
+      document.getElementById('pwErr').textContent = '密码错误，请重试';
+      document.getElementById('pwInput').value = '';
+      document.getElementById('pwInput').focus();
+    }
+  };
+  if(localStorage.getItem(PW_KEY) !== '1'){ showGate(); }
+})();
+</script>
+
 <!-- HEADER -->
 <div class="bg-white shadow-sm sticky top-0 z-40">
   <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
