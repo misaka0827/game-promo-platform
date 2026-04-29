@@ -72,12 +72,35 @@
 (function(){
   const PW_KEY = 'admin_auth_xhs';
   const CORRECT = 'xhs2026';
-  function showGate(){ document.getElementById('pwGate').style.display='flex'; }
+  const COOKIE_NAME = 'admin_auth_xhs';
+
+  function setCookie(name, value, days){
+    const d = new Date();
+    d.setTime(d.getTime() + days*24*60*60*1000);
+    document.cookie = name+'='+value+';expires='+d.toUTCString()+';path=/;SameSite=Lax';
+  }
+  function getCookie(name){
+    const m = document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
+    return m ? m[2] : null;
+  }
+  function isAuthed(){
+    return localStorage.getItem(PW_KEY)==='1'
+        || sessionStorage.getItem(PW_KEY)==='1'
+        || getCookie(COOKIE_NAME)==='1';
+  }
+  function setAuthed(){
+    try{ localStorage.setItem(PW_KEY,'1'); }catch(e){}
+    try{ sessionStorage.setItem(PW_KEY,'1'); }catch(e){}
+    setCookie(COOKIE_NAME,'1',365);
+  }
+
+  function showGate(){ document.getElementById('pwGate').style.display='flex'; setTimeout(()=>document.getElementById('pwInput').focus(),100); }
   function hideGate(){ document.getElementById('pwGate').style.display='none'; }
+
   window.checkPw = function(){
     const val = document.getElementById('pwInput').value;
     if(val === CORRECT){
-      localStorage.setItem(PW_KEY, '1');
+      setAuthed();
       hideGate();
     } else {
       document.getElementById('pwErr').textContent = '密码错误，请重试';
@@ -85,7 +108,8 @@
       document.getElementById('pwInput').focus();
     }
   };
-  if(localStorage.getItem(PW_KEY) !== '1'){ showGate(); }
+
+  if(!isAuthed()){ showGate(); }
 })();
 </script>
 
