@@ -464,7 +464,7 @@ function renderMyStatus() {
       ${!opOk ? `<p class="text-sm text-gray-400">报名已提交，等待运营核实后制作人审核，请耐心等待。</p>`
       : s.makerStatus==='approved' ? `
         <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 mb-4 border border-green-100">
-          <div class="text-sm font-semibold text-green-800 mb-3">🎮 你的 CDK（共3个）</div>
+          <div class="text-sm font-semibold text-green-800 mb-3">🎮 你的 CDK（共${cdkKeys.length}个）</div>
           ${cdkKeys.length
             ? `<div class="space-y-2">${cdkKeys.map(k=>`<span class="cdk-mono">${k}</span>`).join('')}</div>`
             : `<div class="text-sm text-green-600">⏳ CDK分配中，请稍候...</div>`}
