@@ -341,20 +341,18 @@ main {
 .act-card {
   background: var(--white); border-radius: var(--radius);
   border: 1px solid var(--gray-200);
-  display: flex; align-items: center; gap: 0;
-  transition: all 0.18s; overflow: hidden;
+  display: flex; gap: 16px; padding: 18px;
+  transition: all 0.18s; align-items: center;
 }
 .act-card:hover { border-color: #FFBFC5; box-shadow: var(--shadow-md); }
 .act-badge {
-  flex-shrink: 0; width: 68px; min-height: 80px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--xhs-red); color: #fff;
-  font-size: 11px; font-weight: 700;
-  text-align: center; letter-spacing: 0.5px; line-height: 1.6;
-  padding: 12px 8px;
+  flex-shrink: 0; padding: 8px 12px; border-radius: 8px;
+  background: var(--xhs-red-pale); border: 1px solid #FFBFC5;
+  font-size: 11px; font-weight: 700; color: var(--xhs-red);
+  text-align: center; letter-spacing: 0.5px; line-height: 1.6; min-width: 52px;
 }
 .act-body {
-  flex: 1; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+  flex: 1; display: flex; flex-direction: column; gap: 8px;
 }
 .act-body h3 { font-size: 15px; font-weight: 600; margin: 0; color: var(--gray-900); }
 .act-chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -367,14 +365,14 @@ main {
 .chip-tag { background: var(--xhs-red-pale); color: var(--xhs-red); border: 1px solid #FFBFC5; }
 .chip-gift { background: #EDE9FE; color: #5B21B6; border: 1px solid #DDD6FE; }
 .act-btn {
-  flex-shrink: 0; padding: 0 20px; min-height: 80px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--xhs-red-pale); color: var(--xhs-red);
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px;
+  background: var(--xhs-red); color: #fff;
   font-size: 13px; font-weight: 600; text-decoration: none;
-  border-left: 1px solid #FFBFC5; transition: background 0.15s; white-space: nowrap;
-  gap: 4px;
+  transition: opacity 0.15s; white-space: nowrap;
 }
-.act-btn:hover { background: var(--xhs-red); color: #fff; }
+.act-btn:hover { opacity: 0.88; }
 .act-btn svg { width: 13px; height: 13px; }
 .tag {
   display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px;
@@ -465,6 +463,7 @@ main {
   <div class="nav-group">
     <div class="nav-label">游戏品类</div>
     <div class="nav-item" onclick="go('wzry')"><span class="nav-icon">⚔️</span>王者荣耀</div>
+    <div class="nav-item" onclick="go('supernatural')"><span class="nav-icon">🌌</span>超自然行动</div>
     <div class="nav-item" onclick="go('idv')"><span class="nav-icon">🎭</span>第五人格</div>
     <div class="nav-item" onclick="go('singlehost')"><span class="nav-icon">🕹️</span>单主机</div>
     <div class="nav-item" onclick="go('peaceelite')"><span class="nav-icon">🔫</span>和平精英</div>
@@ -485,7 +484,7 @@ main {
     <p>涵盖公会入驻、主播孵化、激励政策、品类运营规范及当期活动信息，助力公会高效管理主播、快速成长。</p>
     <div class="home-stats">
       <div class="stat"><span class="stat-n">8</span><span class="stat-l">通用指引文档</span></div>
-      <div class="stat"><span class="stat-n">6</span><span class="stat-l">游戏品类</span></div>
+      <div class="stat"><span class="stat-n">7</span><span class="stat-l">游戏品类</span></div>
       <div class="stat"><span class="stat-n">5+</span><span class="stat-l">进行中活动</span></div>
     </div>
   </div>
@@ -901,25 +900,48 @@ main {
         <a class="doc-link" href="https://doc.weixin.qq.com/doc/w3_AeQAXgaNAOgCNnB8CsdegRAW1sgk5?scode=ANAAyQcbAAgnq2I3R5AeQAXgaNAOg" target="_blank" rel="noopener">打开文档 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
       </div>
     </div>
-    <div class="doc-card">
+  </div>
+
+  <div class="sub-label" style="display:flex;align-items:center;gap:8px;">
+    推流申报
+    <span style="background:#FFF3CD;color:#856404;border:1px solid #FFE69C;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;">⚠️ 引入主播必填</span>
+  </div>
+  <div class="doc-grid">
+    <div class="doc-card" style="border-color:#FFB800;box-shadow:0 0 0 1px #FFB80033;">
       <div class="dc-head">
         <div class="dc-ico">📊</div>
         <div class="dc-meta">
           <h3>小红书游戏直播推流总表</h3>
-          <div class="dc-type">推流参数速查 · 全品类通用</div>
+          <div class="dc-type">全品类通用 · 公会引入主播必填</div>
         </div>
       </div>
-      <div class="dc-body"><p>各游戏品类推流参数配置总表，包含推荐码率、分辨率、帧率等关键参数，确保直播画质稳定。</p></div>
+      <div class="dc-body">
+        <p>公会引入新主播后，需在此表填写推流申报信息。请务必在主播开播前完成填写，确保流量正常分发。</p>
+        <div><span class="tag tag-red">必填表格</span> <span class="tag tag-gray">全品类通用</span></div>
+      </div>
       <div class="dc-foot">
-        <a class="doc-link" href="https://doc.weixin.qq.com/sheet/e3_AVQATQaWAI0CNhFtmODn0TPqtfx2G?scode=ANAAyQcbAAgRYkJ21NAVQATQaWAI0&tab=8d5tzs" target="_blank" rel="noopener">打开文档 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        <a class="doc-link" href="https://doc.weixin.qq.com/sheet/e3_AVQATQaWAI0CNhFtmODn0TPqtfx2G?scode=ANAAyQcbAAgRYkJ21NAVQATQaWAI0&tab=8d5tzs" target="_blank" rel="noopener">打开表格填写 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 超自然行动 ===================== -->
+<section id="sec-supernatural" class="section">
+  <div class="game-banner">
+    <div class="game-bar" style="background:linear-gradient(180deg,#6C3483,#1A5276);"></div>
+    <div class="game-body">
+      <div class="game-emoji">🌌</div>
+      <div class="game-info">
+        <h2>超自然行动</h2>
+        <p>动作冒险 · 小红书游戏品类直播指引</p>
       </div>
     </div>
   </div>
 
   <div class="sub-label">当期活动</div>
-  <!-- Row24: A24=超自然行动组, B24=活动, D24=超自然行动摸金节, E24=5.1-5.31 总奖金池15w -->
   <div class="act-card">
-    <div class="act-badge">王者<br>限时</div>
+    <div class="act-badge">摸金节<br>限时</div>
     <div class="act-body">
       <h3>超自然行动摸金节</h3>
       <div class="act-chips">
