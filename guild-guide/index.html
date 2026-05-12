@@ -1174,6 +1174,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 灯箱
 function openQR() {
+  document.getElementById('qrLargeImg').src = document.getElementById('qrImg').src;
   document.getElementById('qrLightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
