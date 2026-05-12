@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>运营后台 · 单主机游戏推广</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <!-- SheetJS for Excel export -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -59,7 +60,7 @@
       <div class="w-px h-4 bg-gray-200"></div>
       <span class="text-xl">🎛️</span>
       <span class="font-bold text-gray-800">运营后台</span>
-      <span class="text-xs text-gray-400 hidden sm:inline">· 发任务 / 审名单 / 分CDK / 收数据</span>
+      <span class="text-xs text-gray-400 hidden sm:inline" id="adminSubtitle">· 发任务 / 审名单 / 分CDK / 收数据</span>
     </div>
     <button class="btn-secondary text-sm py-2 px-4" onclick="exportFullReport()">📋 导出完整报告</button>
   </div>
@@ -79,6 +80,7 @@
     <button onclick="showTab('cdk')"      id="tab-cdk"      class="section-tab whitespace-nowrap">🎮 CDK分配</button>
     <button onclick="showTab('content')"  id="tab-content"  class="section-tab whitespace-nowrap">📦 数据跟进</button>
     <button onclick="showTab('qrcode')"   id="tab-qrcode"   class="section-tab whitespace-nowrap">🔗 招募链接</button>
+    <button onclick="showTab('creators')" id="tab-creators" class="section-tab whitespace-nowrap">👤 创作者管理</button>
   </div>
 </div>
 
@@ -130,15 +132,25 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div><label class="block text-sm font-medium text-gray-700 mb-1">招募类型</label>
-            <select id="f_recruitType">
-              <option value="不限">不限（博主 + 主播）</option>
-              <option value="博主">仅博主</option>
-              <option value="主播">仅主播</option>
-            </select></div>
+            <select id="f_recruitType"></select></div>
           <div><label class="block text-sm font-medium text-gray-700 mb-1">名额上限</label>
             <input type="text" id="f_maxSignup" placeholder="不填则无限制" /></div>
           <div><label class="block text-sm font-medium text-gray-700 mb-1">报名截止日期 <span class="text-red-500">*</span></label>
             <input type="date" id="f_deadline" /></div>
+        </div>
+        <!-- 定向邀约 -->
+        <div class="border-t border-gray-100 pt-4">
+          <div class="flex items-center gap-3 mb-2">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="f_whitelistToggle" onchange="toggleWhitelist('f')" class="w-4 h-4 accent-pink-600" />
+              <span class="text-sm font-medium text-gray-700">定向邀约</span>
+            </label>
+            <span class="text-xs text-gray-400">开启后仅受邀创作者可见该任务</span>
+          </div>
+          <div id="f_whitelistPanel" class="hidden bg-gray-50 rounded-xl p-4 max-h-48 overflow-y-auto">
+            <p class="text-xs text-gray-500 mb-2">选择受邀创作者：</p>
+            <div id="f_whitelistCheckboxes" class="space-y-1"></div>
+          </div>
         </div>
         <div class="flex justify-end gap-3 pt-2">
           <button class="btn-secondary" onclick="resetPublishForm()">重置</button>
@@ -218,6 +230,28 @@
       <p class="text-xs text-gray-400 mt-2">👇 选择任务后，生成该任务的专属报名链接 / 二维码，发给主播或博主扫码报名</p>
     </div>
     <div id="qrList" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+  </div>
+
+  <!-- CREATORS -->
+  <div id="pane-creators" class="hidden space-y-4">
+    <div class="card">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">👤 创作者管理</h3>
+      <p class="text-xs text-gray-400 mb-4">已注册的创作者账号列表</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-200 text-left text-xs text-gray-500 font-semibold uppercase tracking-wide">
+              <th class="py-2 px-3">用户名</th>
+              <th class="py-2 px-3">小红书链接</th>
+              <th class="py-2 px-3">UID</th>
+              <th class="py-2 px-3">注册时间</th>
+              <th class="py-2 px-3">操作</th>
+            </tr>
+          </thead>
+          <tbody id="creatorsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -304,9 +338,23 @@
       </div>
       <div class="grid grid-cols-3 gap-3">
         <div><label class="text-xs text-gray-500 font-semibold mb-1 block">招募类型</label>
-          <select id="et_recruitType"><option value="不限">不限</option><option value="博主">仅博主</option><option value="主播">仅主播</option></select></div>
+          <select id="et_recruitType"></select></div>
         <div><label class="text-xs text-gray-500 font-semibold mb-1 block">名额上限</label><input type="text" id="et_maxSignup" /></div>
         <div><label class="text-xs text-gray-500 font-semibold mb-1 block">截止日期</label><input type="date" id="et_deadline" /></div>
+      </div>
+      <!-- 定向邀约 -->
+      <div class="border-t border-gray-100 pt-3 mt-2">
+        <div class="flex items-center gap-3 mb-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="et_whitelistToggle" onchange="toggleWhitelist('et')" class="w-4 h-4 accent-pink-600" />
+            <span class="text-xs font-medium text-gray-700">定向邀约</span>
+          </label>
+          <span class="text-xs text-gray-400">开启后仅受邀创作者可见</span>
+        </div>
+        <div id="et_whitelistPanel" class="hidden bg-gray-50 rounded-xl p-3 max-h-36 overflow-y-auto">
+          <p class="text-xs text-gray-500 mb-2">选择受邀创作者：</p>
+          <div id="et_whitelistCheckboxes" class="space-y-1"></div>
+        </div>
       </div>
     </div>
     <div class="flex gap-3 mt-5">
@@ -328,6 +376,17 @@
 </div>
 
 <script>
+// Apply config
+(function(){
+  const C = window.SITE_CONFIG;
+  document.title = '运营后台 · ' + C.adminTitleSuffix;
+  document.getElementById('adminSubtitle').textContent = '· ' + C.adminSubtitle;
+  // Populate recruit type dropdowns
+  const optHtml = C.recruitOptions.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+  document.getElementById('f_recruitType').innerHTML = optHtml;
+  document.getElementById('et_recruitType').innerHTML = optHtml;
+})();
+
 // DB 函数由 api.js 提供（loadDB / saveDB / cachedDB）
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 function isDeadlinePassed(d) { return d && new Date(d+'T23:59:59') < new Date(); }
@@ -372,7 +431,7 @@ function renderStats() {
 
 // ---- TABS ----
 async function showTab(tab) {
-  ['overview','publish','signups','cdk','content','qrcode'].forEach(t=>{
+  ['overview','publish','signups','cdk','content','qrcode','creators'].forEach(t=>{
     document.getElementById('pane-'+t).classList.add('hidden');
     document.getElementById('tab-'+t).classList.remove('active');
   });
@@ -381,10 +440,12 @@ async function showTab(tab) {
   await loadDB();
   renderStats();
   if (tab==='overview') renderOverview();
+  if (tab==='publish')  populateWhitelistCheckboxes('f', []);
   if (tab==='signups')  { populateSelects('signupTaskSelect'); loadSignups(); }
   if (tab==='cdk')      { populateSelects('cdkTaskSelect');    loadCDKPane(); }
   if (tab==='content')  { populateSelects('contentTaskSelect'); loadContentPane(); }
   if (tab==='qrcode')   { populateSelects('qrTaskSelect');      renderQR(); }
+  if (tab==='creators') renderCreators();
 }
 
 function populateSelects(id) {
@@ -606,9 +667,12 @@ function resetPublishForm() {
   ['f_gameName','f_gameType','f_highlight','f_reward','f_gameLink','f_desc','f_req','f_releaseStart','f_submitDeadline','f_maxSignup','f_deadline'].forEach(id=>{
     document.getElementById(id).value='';
   });
-  document.getElementById('f_recruitType').value='不限';
+  document.getElementById('f_recruitType').value=window.SITE_CONFIG.recruitOptions[0].value;
   document.getElementById('autoPasteBox').value='';
   document.getElementById('autoParseResult').classList.add('hidden');
+  document.getElementById('f_whitelistToggle').checked = false;
+  document.getElementById('f_whitelistPanel').classList.add('hidden');
+  document.getElementById('f_whitelistCheckboxes').innerHTML = '';
 }
 async function publishTask() {
   const gameName  = document.getElementById('f_gameName').value.trim();
@@ -619,6 +683,16 @@ async function publishTask() {
   if (!highlight) { showToast('请填写一句话亮点','error'); return; }
   if (!reward)    { showToast('请填写任务奖励','error'); return; }
   if (!deadline)  { showToast('请设置报名截止日期','error'); return; }
+
+  // 收集定向邀约 whitelist
+  const whitelistEnabled = document.getElementById('f_whitelistToggle').checked;
+  const whitelist = [];
+  if (whitelistEnabled) {
+    document.querySelectorAll('#f_whitelistCheckboxes input:checked').forEach(cb => {
+      whitelist.push(cb.value);
+    });
+  }
+
   const db = await loadDB();
   db.tasks.push({
     id:genId(), gameName, highlight, reward, deadline,
@@ -630,6 +704,7 @@ async function publishTask() {
     submitDeadline: document.getElementById('f_submitDeadline').value.trim(),
     recruitType:    document.getElementById('f_recruitType').value,
     maxSignup:      document.getElementById('f_maxSignup').value.trim(),
+    whitelist:      whitelist,
     status:'active', opStatus:'approved', createdAt:Date.now()
   });
   await saveDB(db);
@@ -648,6 +723,11 @@ function openEditTask(id) {
     const el = document.getElementById('et_'+k);
     if (el) el.value = t[k]||'';
   });
+  // 定向邀约回填
+  const wl = Array.isArray(t.whitelist) ? t.whitelist : [];
+  document.getElementById('et_whitelistToggle').checked = wl.length > 0;
+  populateWhitelistCheckboxes('et', wl);
+  document.getElementById('et_whitelistPanel').classList.toggle('hidden', wl.length === 0);
   document.getElementById('editTaskModal').classList.remove('hidden');
 }
 async function saveEditTask() {
@@ -659,10 +739,87 @@ async function saveEditTask() {
     const el = document.getElementById('et_'+k);
     if (el) t[k] = el.value.trim ? el.value.trim() : el.value;
   });
+  // 收集定向邀约 whitelist
+  const whitelistEnabled = document.getElementById('et_whitelistToggle').checked;
+  const whitelist = [];
+  if (whitelistEnabled) {
+    document.querySelectorAll('#et_whitelistCheckboxes input:checked').forEach(cb => {
+      whitelist.push(cb.value);
+    });
+  }
+  t.whitelist = whitelist;
   await saveDB(db);
   closeModal('editTaskModal');
   showToast('任务已更新','success');
   renderOverview();
+}
+
+// ---- 定向邀约辅助 ----
+/** 切换定向邀约面板显隐 */
+function toggleWhitelist(prefix) {
+  const checked = document.getElementById(prefix + '_whitelistToggle').checked;
+  document.getElementById(prefix + '_whitelistPanel').classList.toggle('hidden', !checked);
+  if (checked) populateWhitelistCheckboxes(prefix, []);
+}
+
+/** 填充创作者 checkbox 列表 */
+function populateWhitelistCheckboxes(prefix, selectedUids) {
+  const container = document.getElementById(prefix + '_whitelistCheckboxes');
+  const accounts = (cachedDB.accounts || []);
+  if (!accounts.length) {
+    container.innerHTML = '<p class="text-xs text-gray-400">暂无已注册创作者</p>';
+    return;
+  }
+  container.innerHTML = accounts.map(a => {
+    const checked = selectedUids.includes(a.uid) ? 'checked' : '';
+    return `<label class="flex items-center gap-2 py-1 cursor-pointer">
+      <input type="checkbox" value="${a.uid}" ${checked} class="w-4 h-4 accent-pink-600" />
+      <span class="text-sm text-gray-700">${a.username}</span>
+      <span class="text-xs text-gray-400">(UID: ${a.uid})</span>
+    </label>`;
+  }).join('');
+}
+
+async function hashPasswordAdmin(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** 渲染创作者管理面板 */
+async function renderCreators() {
+  await loadDB();
+  const accounts = cachedDB.accounts || [];
+  const tbody = document.getElementById('creatorsTableBody');
+  if (!accounts.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-gray-400 text-sm">暂无已注册创作者</td></tr>';
+    return;
+  }
+  tbody.innerHTML = accounts.map(a => {
+    const regDate = a.createdAt ? new Date(a.createdAt).toLocaleString('zh-CN') : '-';
+    return `<tr class="border-b border-gray-100 tr-hover">
+      <td class="py-2.5 px-3 font-medium text-gray-800">${a.username}</td>
+      <td class="py-2.5 px-3"><a href="${a.profile}" target="_blank" class="text-blue-500 hover:underline text-xs truncate block max-w-[200px]">${a.profile}</a></td>
+      <td class="py-2.5 px-3 text-xs text-gray-500 font-mono">${a.uid}</td>
+      <td class="py-2.5 px-3 text-xs text-gray-400">${regDate}</td>
+      <td class="py-2.5 px-3"><button class="btn-red text-xs py-1 px-3 rounded" onclick="resetAccountPassword('${a.id}')">重置密码</button></td>
+    </tr>`;
+  }).join('');
+}
+
+/** 重置创作者密码 */
+async function resetAccountPassword(accountId) {
+  const newPwd = prompt('请输入新密码：');
+  if (!newPwd || !newPwd.trim()) return;
+  const passwordHash = await hashPasswordAdmin(newPwd.trim());
+  const db = await loadDB();
+  const account = db.accounts.find(a => a.id === accountId);
+  if (!account) { showToast('账号不存在', 'error'); return; }
+  account.passwordHash = passwordHash;
+  await saveDB(db);
+  showToast(`"${account.username}" 密码已重置`, 'success');
 }
 
 // ---- SIGNUPS ----
