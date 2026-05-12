@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 · 小红书 x 单主机游戏种草平台</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+  .btn-primary { background:#e63e6d;color:white;border-radius:10px;padding:12px 24px;font-weight:600;cursor:pointer;transition:background .2s;border:none;width:100%;font-size:15px; }
+  .btn-primary:hover { background:#c52d5a; }
+  input[type=text],input[type=password] {
+    border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px;width:100%;outline:none;transition:border .2s;font-size:14px;box-sizing:border-box;
+  }
+  input:focus { border-color:#e63e6d; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-pink-50 via-white to-purple-50 min-h-screen flex flex-col">
+
+<!-- Header -->
+<div class="bg-white shadow-sm">
+  <div class="max-w-md mx-auto px-4 py-4 flex items-center gap-3">
+    <span class="text-2xl">🎮</span>
+    <span class="font-bold text-gray-800 text-lg">小红书 x 单主机游戏种草平台</span>
+  </div>
+</div>
+
+<!-- Login Form -->
+<div class="flex-1 flex items-center justify-center px-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="text-5xl mb-4">🔐</div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-1">登录账号</h2>
+      <p class="text-gray-400 text-sm">登录以继续你的种草之旅</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
+      <div class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">用户名</label>
+          <input type="text" id="loginUsername" placeholder="请输入用户名" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">密码</label>
+          <input type="password" id="loginPassword" placeholder="请输入密码" />
+        </div>
+        <div id="loginError" class="hidden text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2"></div>
+        <button class="btn-primary" onclick="handleLogin()" id="loginBtn">登录</button>
+      </div>
+
+      <div class="mt-6 text-center">
+        <p class="text-sm text-gray-400">还没有账号？<a href="register.html" class="text-[#e63e6d] font-medium hover:underline">去注册</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed top-4 right-4 text-white px-5 py-3 rounded-xl text-sm shadow-xl z-[9999] opacity-0 transition-opacity duration-300 pointer-events-none" style="background:#1f2937"></div>
+
+<script>
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg; el.classList.remove('hidden');
+}
+function hideLoginError() {
+  document.getElementById('loginError').classList.add('hidden');
+}
+
+async function handleLogin() {
+  hideLoginError();
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!username || !password) { showLoginError('请输入用户名和密码'); return; }
+
+  const passwordHash = await hashPassword(password);
+  await loadDB();
+  const accounts = cachedDB.accounts || [];
+  const account = accounts.find(a => a.username === username && a.passwordHash === passwordHash);
+  if (!account) { showLoginError('用户名或密码错误'); return; }
+
+  localStorage.setItem('xhsUser', JSON.stringify({
+    username: account.username,
+    uid: account.uid,
+    profile: account.profile,
+    loggedIn: true
+  }));
+  showToast('登录成功 ✅');
+  setTimeout(() => { window.location.href = 'creator.html'; }, 500);
+}
+
+document.getElementById('loginPassword').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+</script>
+</body>
+</html>
