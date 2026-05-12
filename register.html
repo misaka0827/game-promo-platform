@@ -42,7 +42,7 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">用户名</label>
           <input type="text" id="regUsername" placeholder="建议填你的小红书昵称" />
-          <p class="text-xs text-gray-400 mt-1">建议使用小红书昵称，方便运营识别</p>
+          <p class="text-xs text-gray-400 mt-1">⚠️ 请填写你的小红书昵称，且与之前报名时填写的名称保持一致，历史任务记录可自动找回</p>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">密码</label>
@@ -153,6 +153,9 @@ async function handleRegister() {
     profile: profile,
     loggedIn: true
   }));
+  // 同步写入 creatorName，让现有报名记录匹配逻辑自动找回历史数据
+  localStorage.setItem('creatorName', username);
+  localStorage.setItem('creatorProfile', profile);
 
   showToast('注册成功 🎉');
   setTimeout(() => { window.location.href = 'creator.html'; }, 500);
