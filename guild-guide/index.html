@@ -341,27 +341,41 @@ main {
 .act-card {
   background: var(--white); border-radius: var(--radius);
   border: 1px solid var(--gray-200);
-  display: flex; gap: 16px; padding: 18px;
-  transition: all 0.18s; align-items: flex-start;
+  display: flex; align-items: center; gap: 0;
+  transition: all 0.18s; overflow: hidden;
 }
 .act-card:hover { border-color: #FFBFC5; box-shadow: var(--shadow-md); }
 .act-badge {
-  flex-shrink: 0; padding: 6px 10px; border-radius: 8px;
-  background: var(--xhs-red-pale); border: 1px solid #FFBFC5;
-  font-size: 10px; font-weight: 700; color: var(--xhs-red);
-  text-align: center; letter-spacing: 0.5px; line-height: 1.5;
+  flex-shrink: 0; width: 68px; min-height: 80px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--xhs-red); color: #fff;
+  font-size: 11px; font-weight: 700;
+  text-align: center; letter-spacing: 0.5px; line-height: 1.6;
+  padding: 12px 8px;
 }
-.act-info h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-.act-meta { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
-.act-meta-item { font-size: 12px; color: var(--gray-500); display: flex; align-items: center; gap: 4px; }
-.act-meta-item svg { width: 12px; height: 12px; }
-.act-prize {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 3px 12px; border-radius: 20px;
-  background: #FFF8E1; color: #B07D00;
-  font-size: 13px; font-weight: 600; border: 1px solid #FFE082;
+.act-body {
+  flex: 1; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
 }
-.act-extras { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+.act-body h3 { font-size: 15px; font-weight: 600; margin: 0; color: var(--gray-900); }
+.act-chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
+}
+.chip-date { background: #F3F4F6; color: #374151; }
+.chip-prize { background: #FFF8E1; color: #B07D00; border: 1px solid #FFE082; font-weight: 600; }
+.chip-tag { background: var(--xhs-red-pale); color: var(--xhs-red); border: 1px solid #FFBFC5; }
+.chip-gift { background: #EDE9FE; color: #5B21B6; border: 1px solid #DDD6FE; }
+.act-btn {
+  flex-shrink: 0; padding: 0 20px; min-height: 80px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--xhs-red-pale); color: var(--xhs-red);
+  font-size: 13px; font-weight: 600; text-decoration: none;
+  border-left: 1px solid #FFBFC5; transition: background 0.15s; white-space: nowrap;
+  gap: 4px;
+}
+.act-btn:hover { background: var(--xhs-red); color: #fff; }
+.act-btn svg { width: 13px; height: 13px; }
 .tag {
   display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px;
 }
@@ -906,17 +920,14 @@ main {
   <!-- Row24: A24=超自然行动组, B24=活动, D24=超自然行动摸金节, E24=5.1-5.31 总奖金池15w -->
   <div class="act-card">
     <div class="act-badge">王者<br>限时</div>
-    <div class="act-info">
+    <div class="act-body">
       <h3>超自然行动摸金节</h3>
-      <div class="act-meta">
-        <div class="act-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          活动时间：5月1日 - 5月31日
-        </div>
+      <div class="act-chips">
+        <span class="chip chip-date">📅 5.1 – 5.31</span>
+        <span class="chip chip-prize">🏆 奖金池 15万</span>
       </div>
-      <div class="act-prize">🏆 总奖金池 15万</div>
     </div>
-    <a class="doc-link" style="margin-left:auto;flex-shrink:0;" href="https://xhslink.com/m/91x9A7YjodF?xhsshare=&appuid=60ee4754000000000101d742&apptime=1778489026&share_id=410a2b72434245e5bbedb6bd8b505487&share_channel=copy_link" target="_blank" rel="noopener">查看详情 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+    <a class="act-btn" href="https://xhslink.com/m/91x9A7YjodF?xhsshare=&appuid=60ee4754000000000101d742&apptime=1778489026&share_id=410a2b72434245e5bbedb6bd8b505487&share_channel=copy_link" target="_blank" rel="noopener">查看详情 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
   </div>
 </section>
 
@@ -954,22 +965,17 @@ main {
   <div class="sub-label">当期活动</div>
   <!-- Row27: D27=第五人格八周年开播激励, E27=3.26-5.11 总奖金12万 专属头像框涂鸦 -->
   <div class="act-card">
-    <div class="act-badge">五周年<br>限时</div>
-    <div class="act-info">
+    <div class="act-badge">八周年<br>限时</div>
+    <div class="act-body">
       <h3>第五人格八周年开播激励</h3>
-      <div class="act-meta">
-        <div class="act-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          活动时间：3月26日 - 5月11日
-        </div>
-      </div>
-      <div class="act-prize">🏆 总奖金 12万</div>
-      <div class="act-extras">
-        <span class="tag tag-red">专属头像框</span>
-        <span class="tag tag-red">专属涂鸦</span>
+      <div class="act-chips">
+        <span class="chip chip-date">📅 3.26 – 5.11</span>
+        <span class="chip chip-prize">🏆 奖金 12万</span>
+        <span class="chip chip-gift">🎁 专属头像框</span>
+        <span class="chip chip-gift">🎨 专属涂鸦</span>
       </div>
     </div>
-    <a class="doc-link" style="margin-left:auto;flex-shrink:0;" href="https://fe.xiaohongshu.com/ditto/vincent/1432097dd8d74b3fadc92ab6a6222fa3?naviHidden=yes&fullscreen=true&source=splash" target="_blank" rel="noopener">查看详情 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+    <a class="act-btn" href="https://fe.xiaohongshu.com/ditto/vincent/1432097dd8d74b3fadc92ab6a6222fa3?naviHidden=yes&fullscreen=true&source=splash" target="_blank" rel="noopener">查看详情 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
   </div>
 </section>
 
@@ -1047,16 +1053,14 @@ main {
   <!-- Row31: D31=和平精英主播招募, E31=5.10-6.9 -->
   <div class="act-card">
     <div class="act-badge">招募<br>进行中</div>
-    <div class="act-info">
+    <div class="act-body">
       <h3>和平精英主播招募</h3>
-      <div class="act-meta">
-        <div class="act-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          活动时间：5月10日 - 6月9日
-        </div>
+      <div class="act-chips">
+        <span class="chip chip-date">📅 5.10 – 6.9</span>
+        <span class="chip chip-tag">🎮 主播招募</span>
       </div>
     </div>
-    <a class="doc-link" style="margin-left:auto;flex-shrink:0;" href="https://xhslink.com/m/98mnCZUVXw0?xhsshare=&appuid=60ee4754000000000101d742&apptime=1778488871&share_id=4edf9b01e0a84f0f8321f4b39a03904b&share_channel=copy_link" target="_blank" rel="noopener">查看详情 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+    <a class="act-btn" href="https://xhslink.com/m/98mnCZUVXw0?xhsshare=&appuid=60ee4754000000000101d742&apptime=1778488871&share_id=4edf9b01e0a84f0f8321f4b39a03904b&share_channel=copy_link" target="_blank" rel="noopener">查看详情 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
   </div>
 </section>
 
@@ -1114,17 +1118,14 @@ main {
   <!-- Row34: D34=蛋仔派对5月直播激励活动, E34=5.1-5.31 总奖金池15w -->
   <div class="act-card">
     <div class="act-badge">蛋仔<br>限时</div>
-    <div class="act-info">
+    <div class="act-body">
       <h3>蛋仔派对 5 月直播激励活动</h3>
-      <div class="act-meta">
-        <div class="act-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          活动时间：5月1日 - 5月31日
-        </div>
+      <div class="act-chips">
+        <span class="chip chip-date">📅 5.1 – 5.31</span>
+        <span class="chip chip-prize">🏆 奖金池 15万</span>
       </div>
-      <div class="act-prize">🏆 总奖金池 15万</div>
     </div>
-    <a class="doc-link" style="margin-left:auto;flex-shrink:0;" href="https://xhslink.com/m/7YEafbVr3dn?xhsshare=&appuid=60ee4754000000000101d742&apptime=1777618015&share_id=0104f368b6554865a84e5f9792808822&share_channel=copy_link" target="_blank" rel="noopener">查看详情 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+    <a class="act-btn" href="https://xhslink.com/m/7YEafbVr3dn?xhsshare=&appuid=60ee4754000000000101d742&apptime=1777618015&share_id=0104f368b6554865a84e5f9792808822&share_channel=copy_link" target="_blank" rel="noopener">查看详情 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
   </div>
 </section>
 
@@ -1143,22 +1144,15 @@ main {
 
   <div class="sub-label">当期活动</div>
   <div class="act-card">
-    <div class="act-badge">鹅鸭杀<br>联动</div>
-    <div class="act-info">
+    <div class="act-badge">联动<br>限时</div>
+    <div class="act-body">
       <h3>鹅鸭杀 × 甄嬛传联动创作激励活动</h3>
-      <div class="act-meta">
-        <div class="act-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          活动时间：4月23日 - 5月23日
-        </div>
-        <div class="act-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          话题：#鹅鸭杀甄心换真心
-        </div>
+      <div class="act-chips">
+        <span class="chip chip-date">📅 4.23 – 5.23</span>
+        <span class="chip chip-tag">#鹅鸭杀甄心换真心</span>
       </div>
-      <div class="act-desc">联动甄嬛传，创作激励同步开启！完成关注、点赞、评论、发布笔记、观看直播等任务可获得积分并参与抽奖，欢迎开播鹅鸭杀相关内容，吸引甄嬛传联动热度！</div>
     </div>
-    <a class="doc-link" style="margin-left:auto;flex-shrink:0;" href="https://fe.xiaohongshu.com/ditto/vincent/a0af4a8fe42444b087028f314cb42a8c?naviHidden=yes&fullscreen=true&source=splash" target="_blank" rel="noopener">查看详情 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+    <a class="act-btn" href="https://fe.xiaohongshu.com/ditto/vincent/a0af4a8fe42444b087028f314cb42a8c?naviHidden=yes&fullscreen=true&source=splash" target="_blank" rel="noopener">查看详情 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
   </div>
 </section>
 
