@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>注册 · 小红书 x 单主机游戏种草平台</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+  .btn-primary { background:#e63e6d;color:white;border-radius:10px;padding:12px 24px;font-weight:600;cursor:pointer;transition:background .2s;border:none;width:100%;font-size:15px; }
+  .btn-primary:hover { background:#c52d5a; }
+  .btn-primary:disabled { opacity:.5;cursor:not-allowed; }
+  input[type=text],input[type=password],input[type=url] {
+    border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px;width:100%;outline:none;transition:border .2s;font-size:14px;box-sizing:border-box;
+  }
+  input:focus { border-color:#e63e6d; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-pink-50 via-white to-purple-50 min-h-screen flex flex-col">
+
+<!-- Header -->
+<div class="bg-white shadow-sm">
+  <div class="max-w-md mx-auto px-4 py-4 flex items-center gap-3">
+    <span class="text-2xl">🎮</span>
+    <span class="font-bold text-gray-800 text-lg">小红书 x 单主机游戏种草平台</span>
+  </div>
+</div>
+
+<!-- Register Form -->
+<div class="flex-1 flex items-center justify-center px-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="text-5xl mb-4">📝</div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-1">注册新账号</h2>
+      <p class="text-gray-400 text-sm">创建你的创作者账号</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
+      <div class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">用户名</label>
+          <input type="text" id="regUsername" placeholder="建议填你的小红书昵称" />
+          <p class="text-xs text-gray-400 mt-1">建议使用小红书昵称，方便运营识别</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">密码</label>
+          <input type="password" id="regPassword" placeholder="请设置密码" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">确认密码</label>
+          <input type="password" id="regPasswordConfirm" placeholder="再次输入密码" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">小红书主页链接</label>
+          <input type="url" id="regProfile" placeholder="https://www.xiaohongshu.com/user/profile/..." />
+          <p class="text-xs text-gray-400 mt-1" id="uidHint"></p>
+        </div>
+        <div id="regError" class="hidden text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2"></div>
+        <button class="btn-primary" onclick="handleRegister()" id="regBtn">注册</button>
+      </div>
+
+      <div class="mt-6 text-center">
+        <p class="text-sm text-gray-400">已有账号？<a href="login.html" class="text-[#e63e6d] font-medium hover:underline">去登录</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed top-4 right-4 text-white px-5 py-3 rounded-xl text-sm shadow-xl z-[9999] opacity-0 transition-opacity duration-300 pointer-events-none" style="background:#1f2937"></div>
+
+<script>
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+function showRegError(msg) {
+  const el = document.getElementById('regError');
+  el.textContent = msg; el.classList.remove('hidden');
+}
+function hideRegError() {
+  document.getElementById('regError').classList.add('hidden');
+}
+
+function parseUID(profileUrl) {
+  if (!profileUrl) return '';
+  const match = profileUrl.match(/\/user\/profile\/([^?]+)/i);
+  return match ? match[1] : '';
+}
+
+document.getElementById('regProfile').addEventListener('input', function() {
+  const uid = parseUID(this.value);
+  const hint = document.getElementById('uidHint');
+  if (uid) {
+    hint.textContent = '识别到 UID: ' + uid;
+    hint.className = 'text-xs text-green-600 mt-1';
+  } else if (this.value) {
+    hint.textContent = '未能自动识别 UID，请确认链接格式';
+    hint.className = 'text-xs text-amber-600 mt-1';
+  } else {
+    hint.textContent = '';
+  }
+});
+
+async function handleRegister() {
+  hideRegError();
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+  const profile = document.getElementById('regProfile').value.trim();
+
+  if (!username) { showRegError('请输入用户名'); return; }
+  if (!password) { showRegError('请设置密码'); return; }
+  if (password !== passwordConfirm) { showRegError('两次密码输入不一致'); return; }
+  if (!profile) { showRegError('请提供小红书主页链接'); return; }
+
+  const uid = parseUID(profile);
+  if (!uid) { showRegError('无法从小红书链接中解析 UID，请检查链接格式'); return; }
+
+  const passwordHash = await hashPassword(password);
+  await loadDB();
+  const accounts = cachedDB.accounts || [];
+  const exists = accounts.find(a => a.username === username);
+  if (exists) { showRegError('该用户名已被注册'); return; }
+
+  const newAccount = {
+    id: 'acc_' + Date.now(),
+    username: username,
+    passwordHash: passwordHash,
+    profile: profile,
+    uid: uid,
+    createdAt: new Date().toISOString()
+  };
+  accounts.push(newAccount);
+
+  await saveDB({ ...cachedDB, accounts: accounts });
+
+  localStorage.setItem('xhsUser', JSON.stringify({
+    username: username,
+    uid: uid,
+    profile: profile,
+    loggedIn: true
+  }));
+
+  showToast('注册成功 🎉');
+  setTimeout(() => { window.location.href = 'creator.html'; }, 500);
+}
+</script>
+</body>
+</html>
