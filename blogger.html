@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>小红书 x 单主机游戏种草平台 · 博主</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="config.js"></script>
 <script src="api.js?v=1776589318"></script>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
@@ -32,11 +33,17 @@
 
 <!-- Header -->
 <div class="bg-white shadow-sm sticky top-0 z-40">
-  <div class="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
-    <a href="index.html" class="text-gray-400 hover:text-gray-700 text-sm">← 返回</a>
-    <div class="w-px h-4 bg-gray-200"></div>
-    <span class="text-xl">✍️</span>
-    <span class="font-bold text-gray-800">小红书 x 单主机游戏种草平台</span>
+  <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="creator.html" class="text-gray-400 hover:text-gray-700 text-sm">← 返回</a>
+      <div class="w-px h-4 bg-gray-200"></div>
+      <span class="text-xl">✍️</span>
+      <span class="font-bold text-gray-800" id="bloggerHeaderName">小红书 x 单主机游戏种草平台</span>
+    </div>
+    <div class="flex items-center gap-2" id="userBar">
+      <span class="text-xs text-gray-500">已登录：<span id="headerUsername" class="font-semibold text-gray-700"></span></span>
+      <button class="text-xs text-gray-400 hover:text-red-500 transition-colors" onclick="handleLogout()">退出</button>
+    </div>
   </div>
 </div>
 
@@ -63,15 +70,7 @@
 <div class="max-w-4xl mx-auto px-4 py-6">
   <div id="pane-browse" class="space-y-4">
     <!-- 合作规则：固定不被 renderBrowse 覆盖 -->
-    <div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-xs text-gray-600 space-y-1.5">
-      <p class="font-semibold text-gray-700 mb-1">📋 博主合作规则</p>
-      <p class="font-semibold text-gray-500">【笔记内容】</p>
-      <p>• 测评至少 <strong>50% 以上</strong>需是<strong>自己的游戏画面</strong>，时长 <strong>&gt; 30秒</strong></p>
-      <p>• <strong>文案和PV需自行剪辑&配音</strong>，直接贴PV/搬运文案视为低质，会被计入黑名单</p>
-      <p class="font-semibold text-gray-500 mt-1">【笔记发布】</p>
-      <p>• 合作笔记发布后至少<strong>保留一个月</strong>，提前删除将被计入黑名单</p>
-      <p>• 请<strong>务必按时发布</strong>，否则会计入黑名单影响后续权益</p>
-    </div>
+    <div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-xs text-gray-600 space-y-1.5" id="bloggerRulesBox"></div>
     <!-- 任务列表动态区域 -->
     <div id="browse-task-list"></div>
   </div>
@@ -194,8 +193,8 @@
         <input type="text" id="sub_fans" placeholder="发布内容时的最新粉丝数" />
       </div>
       <div>
-        <label class="block text-xs font-semibold text-gray-500 mb-1.5">种草视频链接 <span class="text-red-500">*</span></label>
-        <input type="url" id="sub_video" placeholder="请输入你制作的视频链接" />
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5" id="videoLabel">种草视频链接 <span class="text-red-500">*</span></label>
+        <input type="url" id="sub_video" />
       </div>
     </div>
     <div class="flex gap-3 mt-5">
@@ -206,8 +205,25 @@
 </div>
 
 <script>
+// 登录态检测
+const _xhsUser = JSON.parse(localStorage.getItem('xhsUser') || '{}');
+if (!_xhsUser.loggedIn) { window.location.href = 'login.html'; }
+function handleLogout() { localStorage.removeItem('xhsUser'); window.location.href = 'login.html'; }
+const _headerUsername = document.getElementById('headerUsername');
+if (_headerUsername) _headerUsername.textContent = _xhsUser.username;
+
+// Apply config
+const C = window.SITE_CONFIG;
+document.title = C.platformName + ' · ' + C.creatorTypeB.label;
+document.getElementById('bloggerHeaderName').textContent = C.platformName;
+document.getElementById('bloggerRulesBox').innerHTML = C.bloggerRules;
+// Submit content labels
+const _bf = C.bloggerSubmitFields;
+document.getElementById('videoLabel').innerHTML = _bf.videoLabel + ' <span class="text-red-500">*</span>';
+document.getElementById('sub_video').placeholder = _bf.videoPlaceholder;
+
 // DB 函数由 api.js 提供（loadDB / saveDB / cachedDB）
-const CREATOR_TYPE = '博主';
+const CREATOR_TYPE = C.creatorTypeB.label;
 
 let creatorName    = localStorage.getItem('creatorName')    || '';
 let creatorWechat  = localStorage.getItem('creatorWechat')  || '';
@@ -312,7 +328,7 @@ function renderBrowse() {
   const db = cachedDB;
   const el = document.getElementById('browse-task-list');
   const _pinId = new URLSearchParams(window.location.search).get('task');
-  const tasks = [...db.tasks].filter(t => t.opStatus==='approved' && (t.recruitType==='不限' || t.recruitType===CREATOR_TYPE)).sort((a,b)=>{
+  const tasks = [...db.tasks].filter(t => t.opStatus==='approved' && (t.recruitType==='不限' || t.recruitType===CREATOR_TYPE) && (!Array.isArray(t.whitelist) || !t.whitelist.length || t.whitelist.includes(_xhsUser.uid))).sort((a,b)=>{
     if (_pinId) { if (a.id===_pinId) return -1; if (b.id===_pinId) return 1; }
     return (b.createdAt||0)-(a.createdAt||0);
   });
