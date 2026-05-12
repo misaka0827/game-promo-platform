@@ -10,7 +10,7 @@
   // 公开缓存
   window.cachedDB = {
     tasks: [], signups: [], contents: [],
-    cdkPools: {}, pendingActions: []
+    cdkPools: {}, pendingActions: [], accounts: []
   };
 
   let _lastVersion = -1;
@@ -23,6 +23,7 @@
       contents:       Array.isArray(db.contents)       ? db.contents       : [],
       cdkPools:       (db.cdkPools && typeof db.cdkPools === 'object') ? db.cdkPools : {},
       pendingActions: Array.isArray(db.pendingActions)  ? db.pendingActions  : [],
+      accounts:       Array.isArray(db.accounts)        ? db.accounts        : [],
     };
   }
 
