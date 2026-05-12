@@ -101,6 +101,9 @@ async function handleLogin() {
     profile: account.profile,
     loggedIn: true
   }));
+  // 同步写入 creatorName，让现有报名记录匹配逻辑自动找回历史数据
+  localStorage.setItem('creatorName', account.username);
+  localStorage.setItem('creatorProfile', account.profile);
   showToast('登录成功 ✅');
   setTimeout(() => { window.location.href = 'creator.html'; }, 500);
 }
