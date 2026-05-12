@@ -242,6 +242,7 @@
           <thead>
             <tr class="border-b border-gray-200 text-left text-xs text-gray-500 font-semibold uppercase tracking-wide">
               <th class="py-2 px-3">用户名</th>
+              <th class="py-2 px-3">微信号</th>
               <th class="py-2 px-3">小红书链接</th>
               <th class="py-2 px-3">UID</th>
               <th class="py-2 px-3">注册时间</th>
@@ -801,6 +802,7 @@ async function renderCreators() {
     const regDate = a.createdAt ? new Date(a.createdAt).toLocaleString('zh-CN') : '-';
     return `<tr class="border-b border-gray-100 tr-hover">
       <td class="py-2.5 px-3 font-medium text-gray-800">${a.username}</td>
+      <td class="py-2.5 px-3 text-xs text-gray-600">${a.wechat || '-'}</td>
       <td class="py-2.5 px-3"><a href="${a.profile}" target="_blank" class="text-blue-500 hover:underline text-xs truncate block max-w-[200px]">${a.profile}</a></td>
       <td class="py-2.5 px-3 text-xs text-gray-500 font-mono">${a.uid}</td>
       <td class="py-2.5 px-3 text-xs text-gray-400">${regDate}</td>
