@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>单主机游戏推广协作平台</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="config.js"></script>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; }
   .card-hover { transition: all .2s; }
@@ -27,15 +28,15 @@
 <div class="bg-white shadow-sm">
   <div class="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
     <span class="text-2xl">🎮</span>
-    <span class="font-bold text-gray-800 text-lg">单主机 · 游戏推广协作平台</span>
+    <span class="font-bold text-gray-800 text-lg" id="headerLogo">单主机 · 游戏推广协作平台</span>
   </div>
 </div>
 
 <div class="max-w-2xl mx-auto mt-12 px-4 pb-16">
   <div class="text-center mb-10">
     <div class="text-5xl mb-4">🎯</div>
-    <h2 class="text-3xl font-bold text-gray-800 mb-2">请选择你的身份</h2>
-    <p class="text-gray-400 text-sm">选择后进入对应功能页面</p>
+    <h2 class="text-3xl font-bold text-gray-800 mb-2" id="indexHeroTitle">请选择你的身份</h2>
+    <p class="text-gray-400 text-sm" id="indexHeroSubtitle">选择后进入对应功能页面</p>
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -48,20 +49,20 @@
       <div class="mt-3 text-xs text-gray-400 flex items-center gap-1">🔐 需要密码</div>
     </div>
 
-    <!-- 主播 -->
+    <!-- 创作者类型 A -->
     <div class="identity-card card-hover" onclick="handleStreamer()">
-      <div class="text-4xl mb-3">🎙️</div>
-      <div class="font-bold text-gray-800 text-lg mb-1">主播</div>
-      <div class="text-sm text-gray-500 leading-relaxed">浏览任务 · 报名参与<br>领取CDK · 提交直播内容</div>
-      <div class="mt-3 text-xs text-purple-500 font-medium">直播类创作者</div>
+      <div class="text-4xl mb-3" id="idCardAIcon"></div>
+      <div class="font-bold text-gray-800 text-lg mb-1" id="idCardALabel"></div>
+      <div class="text-sm text-gray-500 leading-relaxed" id="idCardADesc"></div>
+      <div class="mt-3 text-xs font-medium" id="idCardASub"></div>
     </div>
 
-    <!-- 博主 -->
+    <!-- 创作者类型 B -->
     <div class="identity-card card-hover" onclick="handleBlogger()">
-      <div class="text-4xl mb-3">✍️</div>
-      <div class="font-bold text-gray-800 text-lg mb-1">博主</div>
-      <div class="text-sm text-gray-500 leading-relaxed">浏览任务 · 报名参与<br>领取CDK · 提交种草内容</div>
-      <div class="mt-3 text-xs text-blue-500 font-medium">图文/视频创作者</div>
+      <div class="text-4xl mb-3" id="idCardBIcon"></div>
+      <div class="font-bold text-gray-800 text-lg mb-1" id="idCardBLabel"></div>
+      <div class="text-sm text-gray-500 leading-relaxed" id="idCardBDesc"></div>
+      <div class="mt-3 text-xs font-medium" id="idCardBSub"></div>
     </div>
 
   </div>
@@ -87,16 +88,16 @@
 <!-- Streamer Modal -->
 <div id="streamerModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-2xl p-8 w-[420px] shadow-xl">
-    <div class="text-2xl mb-2">🎙️</div>
-    <h3 class="text-xl font-bold text-gray-800 mb-1">主播信息</h3>
+    <div class="text-2xl mb-2" id="stModalIcon"></div>
+    <h3 class="text-xl font-bold text-gray-800 mb-1" id="stModalTitle"></h3>
     <p class="text-gray-400 text-sm mb-5">运营筛选时会看到你的信息</p>
     <div class="space-y-4 mb-5">
       <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">昵称 <span class="text-red-500">*</span></label>
-        <input type="text" id="st_name" placeholder="你的直播昵称" /></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">小红书主页链接 <span class="text-red-500">*</span></label>
-        <input type="url" id="st_profile" placeholder="https://www.xiaohongshu.com/user/profile/..." /></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">实时粉丝数 <span class="text-red-500">*</span></label>
-        <input type="text" id="st_fans" placeholder="例如：12万、8500" /></div>
+        <input type="text" id="st_name" /></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5" id="stProfileLabel"></label>
+        <input type="url" id="st_profile" /></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5" id="stFansLabel"></label>
+        <input type="text" id="st_fans" /></div>
     </div>
     <div class="flex gap-3">
       <button class="btn-secondary flex-1" onclick="closeModal('streamerModal')">取消</button>
@@ -108,16 +109,16 @@
 <!-- Blogger Modal -->
 <div id="bloggerModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-2xl p-8 w-[420px] shadow-xl">
-    <div class="text-2xl mb-2">✍️</div>
-    <h3 class="text-xl font-bold text-gray-800 mb-1">博主信息</h3>
+    <div class="text-2xl mb-2" id="blModalIcon"></div>
+    <h3 class="text-xl font-bold text-gray-800 mb-1" id="blModalTitle"></h3>
     <p class="text-gray-400 text-sm mb-5">运营筛选时会看到你的信息</p>
     <div class="space-y-4 mb-5">
       <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">昵称 <span class="text-red-500">*</span></label>
-        <input type="text" id="bl_name" placeholder="你的小红书昵称" /></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">小红书主页链接 <span class="text-red-500">*</span></label>
-        <input type="url" id="bl_profile" placeholder="https://www.xiaohongshu.com/user/profile/..." /></div>
-      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">实时粉丝数 <span class="text-red-500">*</span></label>
-        <input type="text" id="bl_fans" placeholder="例如：8500、3万" /></div>
+        <input type="text" id="bl_name" /></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5" id="blProfileLabel"></label>
+        <input type="url" id="bl_profile" /></div>
+      <div><label class="block text-xs font-semibold text-gray-500 mb-1.5" id="blFansLabel"></label>
+        <input type="text" id="bl_fans" /></div>
     </div>
     <div class="flex gap-3">
       <button class="btn-secondary flex-1" onclick="closeModal('bloggerModal')">取消</button>
@@ -127,8 +128,40 @@
 </div>
 
 <script>
+const C = window.SITE_CONFIG;
 const DB_KEY    = 'xhs_game_promo_v2';
-const ADMIN_PWD = 'xhs2024';
+const ADMIN_PWD = C.adminPassword;
+
+// Apply config to DOM
+document.getElementById('headerLogo').textContent = C.logoText;
+document.title = C.logoText;
+// Identity cards
+document.getElementById('idCardAIcon').textContent  = C.creatorTypeA.icon;
+document.getElementById('idCardALabel').textContent  = C.creatorTypeA.label;
+document.getElementById('idCardADesc').innerHTML     = '浏览任务 · 报名参与<br>领取CDK · 提交直播内容';
+document.getElementById('idCardASub').textContent    = C.creatorTypeA.description;
+document.getElementById('idCardASub').className      = 'mt-3 text-xs font-medium text-' + C.creatorTypeA.color + '-500';
+document.getElementById('idCardBIcon').textContent   = C.creatorTypeB.icon;
+document.getElementById('idCardBLabel').textContent  = C.creatorTypeB.label;
+document.getElementById('idCardBDesc').innerHTML     = '浏览任务 · 报名参与<br>领取CDK · 提交种草内容';
+document.getElementById('idCardBSub').textContent    = C.creatorTypeB.description;
+document.getElementById('idCardBSub').className      = 'mt-3 text-xs font-medium text-' + C.creatorTypeB.color + '-500';
+// Streamer modal
+document.getElementById('stModalIcon').textContent   = C.creatorTypeA.icon;
+document.getElementById('stModalTitle').textContent  = C.creatorTypeA.label + '信息';
+document.getElementById('st_name').placeholder       = C.creatorTypeA.namePlaceholder;
+document.getElementById('stProfileLabel').innerHTML  = C.creatorTypeA.profileLabel + ' <span class="text-red-500">*</span>';
+document.getElementById('st_profile').placeholder    = C.creatorTypeA.profilePlaceholder;
+document.getElementById('stFansLabel').innerHTML      = C.creatorTypeA.fansLabel + ' <span class="text-red-500">*</span>';
+document.getElementById('st_fans').placeholder       = C.creatorTypeA.fansPlaceholder;
+// Blogger modal
+document.getElementById('blModalIcon').textContent   = C.creatorTypeB.icon;
+document.getElementById('blModalTitle').textContent  = C.creatorTypeB.label + '信息';
+document.getElementById('bl_name').placeholder       = C.creatorTypeB.namePlaceholder;
+document.getElementById('blProfileLabel').innerHTML  = C.creatorTypeB.profileLabel + ' <span class="text-red-500">*</span>';
+document.getElementById('bl_profile').placeholder    = C.creatorTypeB.profilePlaceholder;
+document.getElementById('blFansLabel').innerHTML      = C.creatorTypeB.fansLabel + ' <span class="text-red-500">*</span>';
+document.getElementById('bl_fans').placeholder       = C.creatorTypeB.fansPlaceholder;
 
 // Seed demo
 (function() {
@@ -155,6 +188,33 @@ function showToast(msg) {
 }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
+(function() {
+  const name = localStorage.getItem('creatorName');
+  const type = localStorage.getItem('creatorType');
+  if (!name || !type) return;
+  const el = document.getElementById('quickEntry');
+  document.getElementById('qeName').textContent = `${name} · ${type}`;
+  el.classList.remove('hidden');
+})();
+
+function quickGo() {
+  const type = localStorage.getItem('creatorType');
+  const params = new URLSearchParams(window.location.search);
+  const task = params.get('task');
+  const dest = type === C.creatorTypeA.label ? C.creatorTypeA.pageName : C.creatorTypeB.pageName;
+  window.location.href = task ? `${dest}?task=${task}` : dest;
+}
+
+(function autoRedirect() {
+  const name = localStorage.getItem('creatorName');
+  const type = localStorage.getItem('creatorType');
+  if (!name || !type) return;
+  const params = new URLSearchParams(window.location.search);
+  const task = params.get('task');
+  const dest = type === C.creatorTypeA.label ? C.creatorTypeA.pageName : C.creatorTypeB.pageName;
+  window.location.replace(task ? `${dest}?task=${task}` : dest);
+})();
+
 // ---- Admin ----
 function handleAdmin() {
   if (sessionStorage.getItem('admin_unlocked') === '1') { window.location.href = 'admin.html'; return; }
@@ -175,7 +235,7 @@ document.getElementById('adminPwdInput').addEventListener('keydown', e => { if(e
 function handleStreamer() {
   const name = localStorage.getItem('creatorName');
   const type = localStorage.getItem('creatorType');
-  if (name && type === '主播') { window.location.href = 'streamer.html'; return; }
+  if (name && type === C.creatorTypeA.label) { window.location.href = C.creatorTypeA.pageName; return; }
   document.getElementById('st_name').value    = name || '';
   document.getElementById('st_profile').value = localStorage.getItem('creatorProfile') || '';
   document.getElementById('st_fans').value    = localStorage.getItem('creatorFans') || '';
@@ -189,17 +249,17 @@ function saveStreamer() {
   if (!profile) { showToast('请填写主页链接'); return; }
   if (!fans) { showToast('请填写粉丝数'); return; }
   localStorage.setItem('creatorName', name);
-  localStorage.setItem('creatorType', '主播');
+  localStorage.setItem('creatorType', C.creatorTypeA.label);
   localStorage.setItem('creatorProfile', profile);
   localStorage.setItem('creatorFans', fans);
-  window.location.href = 'streamer.html';
+  window.location.href = C.creatorTypeA.pageName;
 }
 
 // ---- Blogger ----
 function handleBlogger() {
   const name = localStorage.getItem('creatorName');
   const type = localStorage.getItem('creatorType');
-  if (name && type === '博主') { window.location.href = 'blogger.html'; return; }
+  if (name && type === C.creatorTypeB.label) { window.location.href = C.creatorTypeB.pageName; return; }
   document.getElementById('bl_name').value    = name || '';
   document.getElementById('bl_profile').value = localStorage.getItem('creatorProfile') || '';
   document.getElementById('bl_fans').value    = localStorage.getItem('creatorFans') || '';
@@ -213,10 +273,10 @@ function saveBlogger() {
   if (!profile) { showToast('请填写主页链接'); return; }
   if (!fans) { showToast('请填写粉丝数'); return; }
   localStorage.setItem('creatorName', name);
-  localStorage.setItem('creatorType', '博主');
+  localStorage.setItem('creatorType', C.creatorTypeB.label);
   localStorage.setItem('creatorProfile', profile);
   localStorage.setItem('creatorFans', fans);
-  window.location.href = 'blogger.html';
+  window.location.href = C.creatorTypeB.pageName;
 }
 </script>
 </body>
