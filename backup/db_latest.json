@@ -1,6 +1,6 @@
 {
-  "backup_time": "2026-05-13T08:55:59.044Z",
-  "kv_version": 753,
+  "backup_time": "2026-05-13T09:15:13.379Z",
+  "kv_version": 754,
   "tasks": [
     {
       "id": "mo16tnf5qz4d",
@@ -5080,6 +5080,15 @@
       "uid": "6143295c000000001f03e4c2",
       "createdAt": "2026-05-13T08:55:55.631Z",
       "screenshotKey": "screenshot_acc_1778662555631"
+    },
+    {
+      "id": "acc_1778663712704",
+      "username": "肥鱼多多",
+      "passwordHash": "406a3732540376f082efde8cb833d32fe921b1084ca79481b75334a89c7ed37f",
+      "profile": "https://www.xiaohongshu.com/user/profile/6113e0ac000000000100a18e",
+      "uid": "6113e0ac000000000100a18e",
+      "screenshotUrl": "https://raw.githubusercontent.com/misaka0827/game-promo-platform/main/uploads/screenshot_1778663684854_jukvg4jdlr.jpg",
+      "createdAt": "2026-05-13T09:15:12.704Z"
     }
   ]
 }
