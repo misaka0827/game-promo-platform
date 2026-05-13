@@ -1,6 +1,6 @@
 {
-  "backup_time": "2026-05-13T07:27:00Z",
-  "kv_version": 732,
+  "backup_time": "2026-05-13T07:32:05.174Z",
+  "kv_version": 733,
   "tasks": [
     {
       "id": "mo16tnf5qz4d",
@@ -4900,6 +4900,15 @@
       "uid": "665636dc0000000003033714",
       "createdAt": "2026-05-13T07:25:47.459Z",
       "screenshotKey": "screenshot_acc_1778657147459"
+    },
+    {
+      "id": "acc_1778657522153",
+      "username": "Neeko和小橘怪",
+      "passwordHash": "8bf22aa81d5837b84ee1e97f64156d5d688aea17f1db704382505bbced99e983",
+      "profile": "https://www.xiaohongshu.com/user/profile/5b441ff84eacab6d03eec39a",
+      "uid": "5b441ff84eacab6d03eec39a",
+      "createdAt": "2026-05-13T07:32:02.153Z",
+      "screenshotKey": "screenshot_acc_1778657522153"
     }
   ]
 }
