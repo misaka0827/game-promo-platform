@@ -232,6 +232,20 @@ let creatorFans    = localStorage.getItem('creatorFans')    || '';
 
 // Init
 (function() {
+  // 新账号系统已登录：直接初始化，无需旧弹窗
+  if (_xhsUser.loggedIn) {
+    localStorage.setItem('creatorType', CREATOR_TYPE);
+    if (!creatorName && _xhsUser.username) {
+      creatorName = _xhsUser.username;
+      localStorage.setItem('creatorName', creatorName);
+    }
+    if (!creatorProfile && _xhsUser.profile) {
+      creatorProfile = _xhsUser.profile;
+      localStorage.setItem('creatorProfile', creatorProfile);
+    }
+    initPage();
+    return;
+  }
   const type = localStorage.getItem('creatorType');
   if (!creatorName || type !== CREATOR_TYPE) {
     document.getElementById('loginModal').classList.remove('hidden');
