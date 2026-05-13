@@ -1,6 +1,6 @@
 {
-  "backup_time": "2026-05-13T10:53:39.070Z",
-  "kv_version": 2,
+  "backup_time": "2026-05-13T11:11:52.415Z",
+  "kv_version": 7,
   "tasks": [
     {
       "id": "mo16tnf5qz4d",
@@ -5103,7 +5103,8 @@
       "profile": "https://www.xiaohongshu.com/user/profile/6143295c000000001f03e4c2",
       "uid": "6143295c000000001f03e4c2",
       "createdAt": "2026-05-13T08:55:55.631Z",
-      "screenshotKey": "screenshot_acc_1778662555631"
+      "screenshotKey": "screenshot_acc_1778662555631",
+      "verified": true
     },
     {
       "id": "acc_1778663712704",
@@ -5112,7 +5113,8 @@
       "profile": "https://www.xiaohongshu.com/user/profile/6113e0ac000000000100a18e",
       "uid": "6113e0ac000000000100a18e",
       "screenshotUrl": "https://raw.githubusercontent.com/misaka0827/game-promo-platform/main/uploads/screenshot_1778663684854_jukvg4jdlr.jpg",
-      "createdAt": "2026-05-13T09:15:12.704Z"
+      "createdAt": "2026-05-13T09:15:12.704Z",
+      "verified": true
     },
     {
       "id": "acc_1778664588075",
@@ -5137,7 +5139,8 @@
       "profile": "https://www.xiaohongshu.com/user/profile/5595609bf5a263756a78fa69",
       "uid": "5595609bf5a263756a78fa69",
       "screenshotUrl": "https://raw.githubusercontent.com/misaka0827/game-promo-platform/main/uploads/screenshot_1778667442744_bejdmnam1zj.jpg",
-      "createdAt": "2026-05-13T10:17:43.045Z"
+      "createdAt": "2026-05-13T10:17:43.045Z",
+      "verified": true
     },
     {
       "id": "acc_1778669618422",
@@ -5146,7 +5149,17 @@
       "profile": "https://www.xiaohongshu.com/user/profile/5e34fd930000000001007347",
       "uid": "5e34fd930000000001007347",
       "screenshotUrl": "https://raw.githubusercontent.com/misaka0827/game-promo-platform/main/uploads/screenshot_1778669609016_czqvduxqvo.jpg",
-      "createdAt": "2026-05-13T10:53:38.422Z"
+      "createdAt": "2026-05-13T10:53:38.422Z",
+      "verified": true
+    },
+    {
+      "id": "acc_1778670711651",
+      "username": "蟹鱼丸",
+      "passwordHash": "237c85a8a6dbdd531694413ac7750d302de1862db17d80d519e5c92752f37445",
+      "profile": "https://www.xiaohongshu.com/user/profile/5e7af87a00000000010056e2",
+      "uid": "5e7af87a00000000010056e2",
+      "screenshotUrl": "https://raw.githubusercontent.com/misaka0827/game-promo-platform/main/uploads/screenshot_1778670702306_tb4piqlkqug.jpg",
+      "createdAt": "2026-05-13T11:11:51.651Z"
     }
   ]
 }
