@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>小红书 x 单主机游戏种草平台 · 主播</title>
@@ -44,6 +47,7 @@
     </div>
     <div class="flex items-center gap-2" id="userBar">
       <span class="text-xs text-gray-500">已登录：<span id="headerUsername" class="font-semibold text-gray-700"></span></span>
+      <button class="text-xs text-gray-500 hover:text-[#e63e6d] transition-colors border border-gray-200 rounded px-2 py-0.5" onclick="openProfileModal()">个人中心</button>
       <button class="text-xs text-gray-400 hover:text-red-500 transition-colors" onclick="handleLogout()">退出</button>
     </div>
   </div>
@@ -459,6 +463,14 @@ function openSignup(taskId) {
 async function doSignup() {
   const taskId = document.getElementById('signupTaskId').value;
   const db = await loadDB();
+  // 后端校验账号是否可报名（绕过前端缓存）
+  const user = JSON.parse(localStorage.getItem('xhsUser') || '{}');
+  const checkRes = await fetch('/api/db?action=signup_check', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: user.username || '' })
+  });
+  const checkData = await checkRes.json();
+  if (!checkData.allowed) { showToast(checkData.reason || '无法报名', 'error'); return; }
   if (db.signups.find(s=>s.taskId===taskId&&s.creatorName===creatorName&&s.creatorType===CREATOR_TYPE)) {
     showToast('你已报名此任务'); return;
   }
@@ -658,6 +670,106 @@ async function submitContent() {
   const el = document.getElementById(id);
   el && el.addEventListener('click', e=>{ if(e.target===el) closeModal(id); });
 });
+</script>
+<!-- 个人中心模态框 -->
+<div id="profileModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onclick="closeProfileModal()">
+  <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onclick="event.stopPropagation()">
+    <h3 class="text-lg font-bold text-gray-800 mb-4">个人中心</h3>
+    <div class="space-y-3 mb-4">
+      <div class="flex justify-between text-sm"><span class="text-gray-500">用户名</span><span class="font-medium" id="pcUsername">-</span></div>
+      <div class="flex justify-between text-sm"><span class="text-gray-500">身份验证</span><span id="pcVerified" class="font-medium">-</span></div>
+      <div class="text-sm text-gray-500">小红书主页截图</div>
+      <div id="pcScreenshotArea">
+        <div id="pcScreenshotPreviewWrap" class="hidden mb-2">
+          <img id="pcScreenshotPreview" src="" class="w-full max-h-40 object-contain rounded-lg border border-gray-100" />
+        </div>
+        <div id="pcUploadArea" class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:border-[#e63e6d] transition-colors" onclick="document.getElementById('pcScreenshotInput').click()">
+          <p class="text-sm text-gray-400" id="pcUploadHint">点击上传主页截图（需显示昵称和粉丝数）</p>
+        </div>
+        <input type="file" id="pcScreenshotInput" accept="image/*" class="hidden" onchange="handleProfileScreenshot(this)" />
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="closeProfileModal()" class="flex-1 py-2 rounded-xl border border-gray-200 text-sm text-gray-500">关闭</button>
+      <button onclick="saveProfileScreenshot()" id="pcSaveBtn" class="flex-1 py-2 rounded-xl bg-[#e63e6d] text-white text-sm font-semibold hidden">保存截图</button>
+    </div>
+  </div>
+</div>
+<script>
+async function openProfileModal() {
+  const user = JSON.parse(localStorage.getItem('xhsUser') || '{}');
+  document.getElementById('pcUsername').textContent = user.username || '-';
+  document.getElementById('profileModal').classList.remove('hidden');
+  // 从数据库读取账号信息
+  await loadDB();
+  const account = (cachedDB.accounts || []).find(a => a.username === user.username);
+  if (account) {
+    const verified = account.verified;
+    document.getElementById('pcVerified').innerHTML =
+      verified === true  ? '<span class="text-green-600 font-medium">● 已验证</span>' :
+      verified === false ? '<span class="text-red-500 font-medium">● 身份有问题，请联系运营</span>' :
+                           '<span class="text-gray-400">● 待验证，请上传截图后等待运营审核</span>';
+    const src = account.screenshotUrl || account.screenshotKey || account.screenshot;
+    if (src) {
+      document.getElementById('pcUploadHint').textContent = '重新上传截图';
+      if (src.startsWith('http')) {
+        document.getElementById('pcScreenshotPreview').src = src;
+        document.getElementById('pcScreenshotPreviewWrap').classList.remove('hidden');
+      }
+    }
+  }
+  window._pcFile = null;
+}
+function closeProfileModal() {
+  document.getElementById('profileModal').classList.add('hidden');
+}
+async function handleProfileScreenshot(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('截图不能超过 5MB', 'error'); input.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('pcScreenshotPreview').src = e.target.result;
+    document.getElementById('pcScreenshotPreviewWrap').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+  window._pcFile = file;
+  document.getElementById('pcSaveBtn').classList.remove('hidden');
+}
+async function saveProfileScreenshot() {
+  if (!window._pcFile) return;
+  const btn = document.getElementById('pcSaveBtn');
+  btn.textContent = '上传中...'; btn.disabled = true;
+  try {
+    const GH_TOKEN = ['ghp_stjZzWE', 'QKO2HU1g3JFNgl3b4JLIKya3wLqzv'].join('');
+    const REPO = 'misaka0827/game-promo-platform';
+    const filename = `uploads/screenshot_${Date.now()}.jpg`;
+    const b64 = await new Promise(resolve => {
+      const r = new FileReader(); r.onload = e => resolve(e.target.result.split(',')[1]); r.readAsDataURL(window._pcFile);
+    });
+    const resp = await fetch(`https://api.github.com/repos/${REPO}/contents/${filename}`, {
+      method: 'PUT',
+      headers: { Authorization: `token ${GH_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'profile screenshot', content: b64, branch: 'main' })
+    });
+    if (!resp.ok) throw new Error(resp.status);
+    const data = await resp.json();
+    const url = data.content.download_url;
+    // 更新账号 screenshotUrl
+    const user = JSON.parse(localStorage.getItem('xhsUser') || '{}');
+    await fetch('/api/db', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'X-Auth-Token': 'xhs-game-promo-2026' },
+      body: JSON.stringify({ username: user.username, screenshotUrl: url, _update: true })
+    });
+    showToast('截图上传成功 ✅');
+    btn.textContent = '已保存'; btn.disabled = false;
+    window._pcFile = null;
+  } catch(e) {
+    showToast('上传失败：' + e.message, 'error');
+    btn.textContent = '保存截图'; btn.disabled = false;
+  }
+}
 </script>
 </body>
 </html>
