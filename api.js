@@ -45,8 +45,7 @@
   /** 写入数据库 */
   window.saveDB = async function (db) {
     try {
-      const current = await window.loadDB();
-      const newVersion = (current._version || _lastVersion || 0) + 1;
+      const newVersion = (_lastVersion >= 0 ? _lastVersion : 0) + 1;
       const toSave = Object.assign({}, db, { _version: newVersion });
 
       const res = await fetch(API_URL, {
