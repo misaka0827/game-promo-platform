@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>登录 · 小红书 x 单主机游戏种草平台</title>
@@ -77,7 +80,7 @@ function showToast(msg) {
 
 function showLoginError(msg) {
   const el = document.getElementById('loginError');
-  el.textContent = msg; el.classList.remove('hidden');
+  el.innerHTML = msg; el.classList.remove('hidden');
 }
 function hideLoginError() {
   document.getElementById('loginError').classList.add('hidden');
@@ -92,8 +95,16 @@ async function handleLogin() {
   const passwordHash = await hashPassword(password);
   await loadDB();
   const accounts = cachedDB.accounts || [];
+
+  // 先判断用户名是否存在
+  const existingAccount = accounts.find(a => a.username === username);
+  if (!existingAccount) {
+    showLoginError('该用户名尚未注册，请先 <a href="register.html" class="underline text-[#e63e6d]">点击注册</a>');
+    return;
+  }
+  // 用户名存在但密码不对
   const account = accounts.find(a => a.username === username && a.passwordHash === passwordHash);
-  if (!account) { showLoginError('用户名或密码错误'); return; }
+  if (!account) { showLoginError('密码错误，请重试'); return; }
 
   localStorage.setItem('xhsUser', JSON.stringify({
     username: account.username,
