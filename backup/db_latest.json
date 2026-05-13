@@ -1,6 +1,6 @@
 {
-  "backup_time": "2026-05-13T09:15:13.379Z",
-  "kv_version": 754,
+  "backup_time": "2026-05-13T10:17:43.716Z",
+  "kv_version": 2,
   "tasks": [
     {
       "id": "mo16tnf5qz4d",
@@ -3759,6 +3759,20 @@
       "opStatus": "pending",
       "status": "pending",
       "createdAt": 1778659851496
+    },
+    {
+      "id": "mp3vapf8e7d7",
+      "taskId": "mp2ahokfltp4",
+      "creatorName": "不停",
+      "creatorType": "主播",
+      "creatorWechat": "misaka0827",
+      "creatorProfile": "https://www.xiaohongshu.com/user/profile/5a92bade11be10281a26e838?xsec_token=ABkCnl2l_CbwflewJEk1y_TJx2dEY7D1HzgpByWE91Vdc%3D&xsec_source=pc_search",
+      "creatorFans": "1",
+      "note": "",
+      "makerStatus": "pending",
+      "opStatus": "pending",
+      "status": "pending",
+      "createdAt": 1778665134644
     }
   ],
   "contents": [
@@ -5089,6 +5103,31 @@
       "uid": "6113e0ac000000000100a18e",
       "screenshotUrl": "https://raw.githubusercontent.com/misaka0827/game-promo-platform/main/uploads/screenshot_1778663684854_jukvg4jdlr.jpg",
       "createdAt": "2026-05-13T09:15:12.704Z"
+    },
+    {
+      "id": "acc_1778664588075",
+      "username": "菠萝万象的Ben",
+      "passwordHash": "5471e2dbe89d1074260324e13c638105d981f413abe487ddda12fa114a34eda7",
+      "profile": "https://www.xiaohongshu.com/user/profile/56582b3c9eb5785404fd9c77",
+      "uid": "56582b3c9eb5785404fd9c77",
+      "createdAt": "2026-05-13T09:29:48.075Z"
+    },
+    {
+      "id": "acc_1778666733151",
+      "username": "小玩子",
+      "passwordHash": "7fd06f0e2a61fec4b93fcf78df8759e5e4e2a2da2f5a627cfad24b801416ebbb",
+      "profile": "https://www.xiaohongshu.com/user/profile/67cf7625000000000d00b739?xsec_token=YBCFq6ZuZXF9aIc2aaMugQql57twDIqcoVHxgfHPfpvlQ=&xsec_source=app_share&xhsshare=CopyLink&shareRedId=OD1FRjo7Nj42NzUyOTgwNjZHOTdGPDlC&apptime=1778666684&share_id=133fc13404bd48d9bd2376e4339685fc",
+      "uid": "67cf7625000000000d00b739",
+      "createdAt": "2026-05-13T10:05:33.151Z"
+    },
+    {
+      "id": "acc_1778667463045",
+      "username": "赵阵雨（游戏）",
+      "passwordHash": "28ecd6719578f48f97b5cc7802a10055cf3ab032fe270635c823486d732a3f81",
+      "profile": "https://www.xiaohongshu.com/user/profile/5595609bf5a263756a78fa69",
+      "uid": "5595609bf5a263756a78fa69",
+      "screenshotUrl": "https://raw.githubusercontent.com/misaka0827/game-promo-platform/main/uploads/screenshot_1778667442744_bejdmnam1zj.jpg",
+      "createdAt": "2026-05-13T10:17:43.045Z"
     }
   ]
 }
