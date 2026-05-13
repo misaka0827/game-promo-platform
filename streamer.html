@@ -258,6 +258,21 @@ let _datashotUrl   = '';
 
 // Init
 (function() {
+  // 新账号系统已登录：直接初始化，无需旧弹窗
+  if (_xhsUser.loggedIn) {
+    // 确保 creatorType 一致（新账号系统登录可能未写）
+    localStorage.setItem('creatorType', CREATOR_TYPE);
+    if (!creatorName && _xhsUser.username) {
+      creatorName = _xhsUser.username;
+      localStorage.setItem('creatorName', creatorName);
+    }
+    if (!creatorProfile && _xhsUser.profile) {
+      creatorProfile = _xhsUser.profile;
+      localStorage.setItem('creatorProfile', creatorProfile);
+    }
+    initPage();
+    return;
+  }
   const type = localStorage.getItem('creatorType');
   if (!creatorName || type !== CREATOR_TYPE) {
     document.getElementById('loginModal').classList.remove('hidden');
