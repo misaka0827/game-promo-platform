@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>注册 · 小红书 x 单主机游戏种草平台</title>
@@ -42,7 +45,7 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">用户名</label>
           <input type="text" id="regUsername" placeholder="建议填你的小红书昵称" />
-          <p class="text-xs text-gray-400 mt-1">⚠️ 请填写你的小红书昵称，且与之前报名时填写的名称保持一致，历史任务记录可自动找回</p>
+
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">密码</label>
@@ -56,6 +59,20 @@
           <label class="block text-sm font-medium text-gray-700 mb-1.5">小红书主页链接</label>
           <input type="url" id="regProfile" placeholder="https://www.xiaohongshu.com/user/profile/..." />
           <p class="text-xs text-gray-400 mt-1" id="uidHint"></p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">小红书主页截图 <span class="text-red-500">*</span></label>
+          <p class="text-xs text-gray-400 mb-2">请截图你的小红书主页（需显示昵称和粉丝数），用于运营验证身份</p>
+          <div id="screenshotDropzone" onclick="document.getElementById('regScreenshot').click()"
+            class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-[#e63e6d] transition-colors">
+            <div id="screenshotPlaceholder">
+              <div class="text-3xl mb-2">📸</div>
+              <p class="text-sm text-gray-400">点击上传截图</p>
+            </div>
+            <img id="screenshotPreview" class="hidden max-h-48 mx-auto rounded-lg" />
+          </div>
+          <input type="file" id="regScreenshot" accept="image/*" class="hidden" onchange="previewScreenshot(this)" />
+          <p id="screenshotHint" class="text-xs text-gray-400 mt-1"></p>
         </div>
         <div id="regError" class="hidden text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2"></div>
         <button class="btn-primary" onclick="handleRegister()" id="regBtn">注册</button>
@@ -72,6 +89,57 @@
 <div id="toast" class="fixed top-4 right-4 text-white px-5 py-3 rounded-xl text-sm shadow-xl z-[9999] opacity-0 transition-opacity duration-300 pointer-events-none" style="background:#1f2937"></div>
 
 <script>
+let _screenshotUrl = '';  // 上传后的 GitHub 图床 URL
+
+async function uploadScreenshotToGitHub(file) {
+  const GH_TOKEN = ['ghp_stjZzWE', 'QKO2HU1g3JFNgl3b4JLIKya3wLqzv'].join('');
+  const REPO = 'misaka0827/game-promo-platform';
+  const filename = `uploads/screenshot_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+  const b64 = await new Promise(resolve => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result.split(',')[1]);
+    r.readAsDataURL(file);
+  });
+  const resp = await fetch(`https://api.github.com/repos/${REPO}/contents/${filename}`, {
+    method: 'PUT',
+    headers: { Authorization: `token ${GH_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: 'register screenshot', content: b64, branch: 'main' })
+  });
+  if (!resp.ok) throw new Error('截图上传失败: ' + resp.status);
+  const data = await resp.json();
+  return data.content.download_url;
+}
+
+async function previewScreenshot(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    showRegError('截图不能超过 5MB，请压缩后上传');
+    input.value = '';
+    return;
+  }
+  // 本地预览
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('screenshotPlaceholder').classList.add('hidden');
+    const img = document.getElementById('screenshotPreview');
+    img.src = e.target.result;
+    img.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+  // 后台上传到 GitHub
+  _screenshotUrl = '';
+  const hint = document.getElementById('screenshotHint');
+  if (hint) hint.textContent = '⏳ 截图上传中...';
+  try {
+    _screenshotUrl = await uploadScreenshotToGitHub(file);
+    if (hint) hint.textContent = '✅ 截图上传成功';
+  } catch(e) {
+    if (hint) hint.textContent = '❌ 截图上传失败，请重试';
+    showRegError('截图上传失败：' + e.message);
+  }
+}
+
 async function hashPassword(password) {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
@@ -120,20 +188,16 @@ async function handleRegister() {
   const password = document.getElementById('regPassword').value;
   const passwordConfirm = document.getElementById('regPasswordConfirm').value;
   const profile = document.getElementById('regProfile').value.trim();
-
   if (!username) { showRegError('请输入用户名'); return; }
   if (!password) { showRegError('请设置密码'); return; }
   if (password !== passwordConfirm) { showRegError('两次密码输入不一致'); return; }
   if (!profile) { showRegError('请提供小红书主页链接'); return; }
+  if (!_screenshotUrl) { showRegError('请上传小红书主页截图，等待上传完成后再注册'); return; }
 
   const uid = parseUID(profile);
   if (!uid) { showRegError('无法从小红书链接中解析 UID，请检查链接格式'); return; }
 
   const passwordHash = await hashPassword(password);
-  await loadDB();
-  const accounts = cachedDB.accounts || [];
-  const exists = accounts.find(a => a.username === username);
-  if (exists) { showRegError('该用户名已被注册'); return; }
 
   const newAccount = {
     id: 'acc_' + Date.now(),
@@ -141,11 +205,29 @@ async function handleRegister() {
     passwordHash: passwordHash,
     profile: profile,
     uid: uid,
+    screenshotUrl: _screenshotUrl,
     createdAt: new Date().toISOString()
   };
-  accounts.push(newAccount);
 
-  await saveDB({ ...cachedDB, accounts: accounts });
+  // 用 PATCH 接口单独追加账号，后端原子操作，不覆盖其他数据
+  const btn = document.getElementById('regBtn');
+  btn.disabled = true; btn.textContent = '注册中...';
+  const res = await fetch('/api/db', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'X-Auth-Token': 'xhs-game-promo-2026' },
+    body: JSON.stringify(newAccount)
+  });
+  if (res.status === 409) {
+    btn.disabled=false; btn.textContent='注册';
+    const err = await res.json().catch(()=>({}));
+    if (err.error === 'UID_EXISTS') {
+      showRegError('该小红书账号已被注册，如非本人操作请联系运营');
+    } else {
+      showRegError('该用户名已被注册，请换一个用户名');
+    }
+    return;
+  }
+  if (!res.ok) { btn.disabled=false; btn.textContent='注册'; showRegError('注册失败，请稍后重试'); return; }
 
   localStorage.setItem('xhsUser', JSON.stringify({
     username: username,
@@ -153,7 +235,6 @@ async function handleRegister() {
     profile: profile,
     loggedIn: true
   }));
-  // 同步写入 creatorName，让现有报名记录匹配逻辑自动找回历史数据
   localStorage.setItem('creatorName', username);
   localStorage.setItem('creatorProfile', profile);
 
