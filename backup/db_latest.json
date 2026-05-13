@@ -1,6 +1,6 @@
 {
-  "backup_time": "2026-05-13T07:32:05.174Z",
-  "kv_version": 733,
+  "backup_time": "2026-05-13T08:55:59.044Z",
+  "kv_version": 753,
   "tasks": [
     {
       "id": "mo16tnf5qz4d",
@@ -3717,6 +3717,48 @@
       "opStatus": "approved",
       "status": "rejected",
       "createdAt": 1778655191783
+    },
+    {
+      "id": "mp3qsqeq7wug",
+      "taskId": "mowj9jptu099",
+      "creatorName": "Neeko和小橘怪",
+      "creatorType": "主播",
+      "creatorWechat": "neeko4583",
+      "creatorProfile": "https://www.xiaohongshu.com/user/profile/5b441ff84eacab6d03eec39a",
+      "creatorFans": "12.1万",
+      "note": "",
+      "makerStatus": "pending",
+      "opStatus": "pending",
+      "status": "pending",
+      "createdAt": 1778657577650
+    },
+    {
+      "id": "mp3s2hu4dugg",
+      "taskId": "motum9kfmc2q",
+      "creatorName": "霞柱Muichiro",
+      "creatorType": "博主",
+      "creatorWechat": "19926041006",
+      "creatorProfile": "https://www.xiaohongshu.com/user/profile/653a0143000000000600519d?xsec_token=YBpwv8L74nGYOl8OY7mcWSQD815_lgVmTdIBkk3muvHH4=&xsec_source=app_share&xhsshare=CopyLink&shareRedId=ODs1QTM2ODw2NzUyOTgwNjY5OTc5Nj9N&apptime=1778149987&share_id=0488577fcdd94a2b82e344228604af99",
+      "creatorFans": "3.1万",
+      "note": "",
+      "makerStatus": "pending",
+      "opStatus": "pending",
+      "status": "pending",
+      "createdAt": 1778659712716
+    },
+    {
+      "id": "mp3s5gx4vpdo",
+      "taskId": "mowj9jptu099",
+      "creatorName": "灰豆主机游戏",
+      "creatorType": "博主",
+      "creatorWechat": "978089289",
+      "creatorProfile": "https://www.xiaohongshu.com/user/profile/615af5b30000000002021e2d?xsec_token=ABZKm0EZNhhyCeFxDwZWCRvT1chIzhqPWTwa3Ez6X8ldM=&xsec_source=pc_note",
+      "creatorFans": "5.6万",
+      "note": "游戏实况",
+      "makerStatus": "pending",
+      "opStatus": "pending",
+      "status": "pending",
+      "createdAt": 1778659851496
     }
   ],
   "contents": [
@@ -4909,6 +4951,135 @@
       "uid": "5b441ff84eacab6d03eec39a",
       "createdAt": "2026-05-13T07:32:02.153Z",
       "screenshotKey": "screenshot_acc_1778657522153"
+    },
+    {
+      "id": "acc_1778658084347",
+      "username": "我都充钱了",
+      "passwordHash": "f85886320d35908d781a3a37e015c19033a4ccbe6821df5f2c55f547e27acecd",
+      "profile": "https://www.xiaohongshu.com/user/profile/628cd38e0000000021020b9d?xsec_token=YBgDe1J5B827E5kP5DiqSr2vHQwEVoccy6z9LX06Np7bc%3D&xsec_source=app_share&xhsshare=&shareRedId=ODg6Q0c4PE42NzUyOTgwNjg0OTk0Rz9N&apptime=1778658007&share_id=dfe299ab6f564374a94f479473a9d3e1&share_channel=wechat",
+      "uid": "628cd38e0000000021020b9d",
+      "createdAt": "2026-05-13T07:41:24.347Z"
+    },
+    {
+      "id": "acc_1778658141947",
+      "username": "猴可爱来了",
+      "passwordHash": "5f1b6e027ce6cbad8187601969ceca270189e59fc0bd7d69170d7a59beeb4aa2",
+      "profile": "https://www.xiaohongshu.com/user/profile/5e54aa6c0000000001000f4c?xhsshare=CopyLink&appuid=5e54aa6c0000000001000f4c&apptime=1719480284",
+      "uid": "5e54aa6c0000000001000f4c",
+      "createdAt": "2026-05-13T07:42:21.947Z"
+    },
+    {
+      "id": "acc_1778659185816",
+      "username": "Tokito",
+      "passwordHash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "profile": "https://www.xiaohongshu.com/user/profile/6594e6f30000000022000e60?xsec_token=YB6Fqtx31wlnYHKPjl1nQWbINrskt8ZldIv8ldbhnsCOE=&xsec_source=app_share&xhsshare=CopyLink&shareRedId=ODs1QTM2ODw2NzUyOTgwNjY5OTc5Nj9N&apptime=1778150269&share_id=e767889e0a2a4aa08ff1e038206982cf",
+      "uid": "6594e6f30000000022000e60",
+      "createdAt": "2026-05-13T07:59:45.816Z"
+    },
+    {
+      "id": "acc_1778659482307",
+      "username": "💎哈妮VIVID💎",
+      "passwordHash": "52cc8022626865b0317b0fa44d296da306555beafa799cb30472416ffaeb0140",
+      "profile": "https://www.xiaohongshu.com/user/profile/5d01e3a300000000160083b7",
+      "uid": "5d01e3a300000000160083b7",
+      "createdAt": "2026-05-13T08:04:42.307Z"
+    },
+    {
+      "id": "acc_1778659659567",
+      "username": "灰豆主机游戏",
+      "passwordHash": "fc93741eddd68d406c87b10773ed290808f4b15ae152936ab489cb58b00b153e",
+      "profile": "https://www.xiaohongshu.com/user/profile/615af5b30000000002021e2d?xsec_token=ABZKm0EZNhhyCeFxDwZWCRvT1chIzhqPWTwa3Ez6X8ldM=&xsec_source=pc_note",
+      "uid": "615af5b30000000002021e2d",
+      "createdAt": "2026-05-13T08:07:39.567Z"
+    },
+    {
+      "id": "acc_1778659894870",
+      "username": "勇者花七",
+      "passwordHash": "ee3a7a08a73fd1eee5790c1fa69660a6fbb312978957845b24a9c18f12fd7efa",
+      "profile": "https://www.xiaohongshu.com/user/profile/618112800000000002022842",
+      "uid": "618112800000000002022842",
+      "createdAt": "2026-05-13T08:11:34.870Z"
+    },
+    {
+      "id": "acc_1778659988204",
+      "username": "游戏狗",
+      "passwordHash": "4265427f0932822cdb4a47667ddb215254c82c5ed333d4635e520efe524dadac",
+      "profile": "https://www.xiaohongshu.com/user/profile/5c2ca00b000000000700ccbd",
+      "uid": "5c2ca00b000000000700ccbd",
+      "createdAt": "2026-05-13T08:13:08.204Z"
+    },
+    {
+      "id": "acc_1778660057586",
+      "username": "岚沨",
+      "passwordHash": "6c6cff2033b8d8be3936d5d0d69726d128f0948a234a9b8eab08dd2b1b33159a",
+      "profile": "https://www.xiaohongshu.com/user/profile/607939270000000001001392",
+      "uid": "607939270000000001001392",
+      "createdAt": "2026-05-13T08:14:17.586Z"
+    },
+    {
+      "id": "acc_1778660286804",
+      "username": "嘉宸CHEN",
+      "passwordHash": "532e902d31e83e5be2286fe049849b5ae51516bb61c5bf153c1a31dd28aa3f4d",
+      "profile": "https://www.xiaohongshu.com/user/profile/5cf07af300000000160086bd",
+      "uid": "5cf07af300000000160086bd",
+      "createdAt": "2026-05-13T08:18:06.804Z"
+    },
+    {
+      "id": "acc_1778660364879",
+      "username": "平A流小碗熊",
+      "passwordHash": "e401a2f533e853713eea21b878c1921c19fa9c8b887c1547c771ece46e13f766",
+      "profile": "https://www.xiaohongshu.com/user/profile/623edc44000000002102b085",
+      "uid": "623edc44000000002102b085",
+      "createdAt": "2026-05-13T08:19:24.879Z"
+    },
+    {
+      "id": "acc_1778660480177",
+      "username": "流金河",
+      "passwordHash": "90f26c3acf29e483833199f1a711253ba1a2b40a1249428782921b7a7597185c",
+      "profile": "https://www.xiaohongshu.com/user/profile/58d3b46150c4b403609e1da9",
+      "uid": "58d3b46150c4b403609e1da9",
+      "createdAt": "2026-05-13T08:21:20.177Z"
+    },
+    {
+      "id": "acc_1778660591358",
+      "username": "夜神学习委",
+      "passwordHash": "84f3760aca6f167560555096b5ebc4ab4c62ea97dd867f0d7fdddd87efd923df",
+      "profile": "https://www.xiaohongshu.com/user/profile/62daa14c000000001501ccc8",
+      "uid": "62daa14c000000001501ccc8",
+      "createdAt": "2026-05-13T08:23:11.358Z"
+    },
+    {
+      "id": "acc_1778660664129",
+      "username": "熊喵游戏",
+      "passwordHash": "686c51b5b8566a9432b5505d42a9c1cb8a65a5cd3d0249a2272d28664e55031a",
+      "profile": "https://www.xiaohongshu.com/user/profile/653cc3f50000000006006660?xsec_token=YBe2Iyy1dLzKB2c5SivRCcoR4Xx-mpILgzaxPYQejsslw=&xsec_source=app_share&xhsshare=WeixinSession&appuid=653cc3f50000000006006660&apptime=1778653664&share_id=8b86f51f332f43edb56c89270544cc9d",
+      "uid": "653cc3f50000000006006660",
+      "createdAt": "2026-05-13T08:24:24.129Z"
+    },
+    {
+      "id": "acc_1778660728945",
+      "username": "慧心DIY",
+      "passwordHash": "064aff3e766099e46dbc2676ec88bb0cbc4c19bd4a45aab9e4cf988a5f90c437",
+      "profile": "https://www.xiaohongshu.com/user/profile/5b8cc9d0d081470001e11af6",
+      "uid": "5b8cc9d0d081470001e11af6",
+      "createdAt": "2026-05-13T08:25:28.945Z"
+    },
+    {
+      "id": "acc_1778661152842",
+      "username": "官与梨",
+      "passwordHash": "b143ce203372e49a4a0a306261007f27c816c84173a8d17b10adbb547d252fd5",
+      "profile": "https://www.xiaohongshu.com/user/profile/5c39f004000000000702a700?xsec_token=YBnF4QEN9PZUPHg6KxbfGLFxgkAh7HI5-iefO0sxlgytE=&xsec_source=app_share&xhsshare=WeixinSession&appuid=5c39f004000000000702a700&apptime=1778661077&share_id=44b27e92569b42768c9eab3356af706a",
+      "uid": "5c39f004000000000702a700",
+      "createdAt": "2026-05-13T08:32:32.842Z"
+    },
+    {
+      "id": "acc_1778662555631",
+      "username": "AS玩家",
+      "passwordHash": "804b505a241111461a59f9a09c947bb80e0a70184aa70b8c36173c8b3d00c447",
+      "profile": "https://www.xiaohongshu.com/user/profile/6143295c000000001f03e4c2",
+      "uid": "6143295c000000001f03e4c2",
+      "createdAt": "2026-05-13T08:55:55.631Z",
+      "screenshotKey": "screenshot_acc_1778662555631"
     }
   ]
 }
