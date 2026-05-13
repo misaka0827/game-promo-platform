@@ -1,6 +1,6 @@
 {
-  "backup_time": "2026-05-13T11:11:52.415Z",
-  "kv_version": 7,
+  "backup_time": "2026-05-13T11:52:13.843Z",
+  "kv_version": 10,
   "tasks": [
     {
       "id": "mo16tnf5qz4d",
@@ -5159,7 +5159,25 @@
       "profile": "https://www.xiaohongshu.com/user/profile/5e7af87a00000000010056e2",
       "uid": "5e7af87a00000000010056e2",
       "screenshotUrl": "https://raw.githubusercontent.com/misaka0827/game-promo-platform/main/uploads/screenshot_1778670702306_tb4piqlkqug.jpg",
-      "createdAt": "2026-05-13T11:11:51.651Z"
+      "createdAt": "2026-05-13T11:11:51.651Z",
+      "verified": true
+    },
+    {
+      "id": "acc_1778672314789",
+      "username": "琥珀Heart",
+      "passwordHash": "31a88c1f2077dd4921e3240d8f0f54c6844809db7bead3237028110927c11dde",
+      "profile": "https://www.xiaohongshu.com/user/profile/5c59136900000000100070bb",
+      "uid": "5c59136900000000100070bb",
+      "createdAt": "2026-05-13T11:38:34.789Z"
+    },
+    {
+      "id": "acc_1778673133193",
+      "username": "一通",
+      "passwordHash": "5aa0735b57fb4b6ef6c76be1e14a6c88f38c688610839cc8844d9b39796a6f09",
+      "profile": "https://www.xiaohongshu.com/user/profile/5fa9ea9c0000000001000709",
+      "uid": "5fa9ea9c0000000001000709",
+      "screenshotUrl": "https://raw.githubusercontent.com/misaka0827/game-promo-platform/main/uploads/screenshot_1778673127976_94uo9pbw73.jpg",
+      "createdAt": "2026-05-13T11:52:13.193Z"
     }
   ]
 }
