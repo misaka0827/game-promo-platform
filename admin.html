@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>运营后台 · 单主机游戏推广</title>
@@ -235,17 +238,20 @@
   <!-- CREATORS -->
   <div id="pane-creators" class="hidden space-y-4">
     <div class="card">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">👤 创作者管理</h3>
-      <p class="text-xs text-gray-400 mb-4">已注册的创作者账号列表</p>
+      <h3 class="text-lg font-bold text-gray-800 mb-3">👤 创作者管理</h3>
+      <div class="flex items-center gap-3 mb-4">
+        <p class="text-xs text-gray-400 flex-1">已注册的创作者账号列表</p>
+        <button onclick="batchVerifyAll()" class="btn-green text-xs px-3 py-1.5 rounded-lg">✅ 批量验证</button>
+      </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-gray-200 text-left text-xs text-gray-500 font-semibold uppercase tracking-wide">
               <th class="py-2 px-3">用户名</th>
-              <th class="py-2 px-3">微信号</th>
               <th class="py-2 px-3">小红书链接</th>
               <th class="py-2 px-3">UID</th>
               <th class="py-2 px-3">注册时间</th>
+              <th class="py-2 px-3">身份验证</th>
               <th class="py-2 px-3">操作</th>
             </tr>
           </thead>
@@ -795,23 +801,118 @@ async function renderCreators() {
   const accounts = cachedDB.accounts || [];
   const tbody = document.getElementById('creatorsTableBody');
   if (!accounts.length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-gray-400 text-sm">暂无已注册创作者</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-gray-400 text-sm">暂无已注册创作者</td></tr>';
     return;
   }
   tbody.innerHTML = accounts.map(a => {
     const regDate = a.createdAt ? new Date(a.createdAt).toLocaleString('zh-CN') : '-';
-    return `<tr class="border-b border-gray-100 tr-hover">
-      <td class="py-2.5 px-3 font-medium text-gray-800">${a.username}</td>
-      <td class="py-2.5 px-3 text-xs text-gray-600">${a.wechat || '-'}</td>
-      <td class="py-2.5 px-3"><a href="${a.profile}" target="_blank" class="text-blue-500 hover:underline text-xs truncate block max-w-[200px]">${a.profile}</a></td>
-      <td class="py-2.5 px-3 text-xs text-gray-500 font-mono">${a.uid}</td>
+    const hasShot = !!(a.screenshotUrl||a.screenshotKey||a.screenshot);
+    let verifyBadge = '';
+    if (a.verified === true) verifyBadge = `<span class="text-xs font-medium text-green-600">● 已验证</span>`;
+    else if (a.verified === false) verifyBadge = `<span class="text-xs font-medium text-red-500">● 有问题</span>`;
+    else verifyBadge = `<span class="text-xs text-gray-400">● 未验证</span>`;
+    return `<tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+      <td class="py-2.5 px-3 font-medium text-gray-800 text-sm">${a.username}</td>
+      <td class="py-2.5 px-3"><a href="${a.profile}" target="_blank" class="text-blue-500 hover:underline text-xs truncate block max-w-[160px]">${a.profile||'-'}</a></td>
+      <td class="py-2.5 px-3 text-xs text-gray-400 font-mono">${a.uid||'-'}</td>
       <td class="py-2.5 px-3 text-xs text-gray-400">${regDate}</td>
-      <td class="py-2.5 px-3"><button class="btn-red text-xs py-1 px-3 rounded" onclick="resetAccountPassword('${a.id}')">重置密码</button></td>
+      <td class="py-2.5 px-3">${verifyBadge}</td>
+      <td class="py-2.5 px-3">
+        <div class="flex items-center gap-1.5">
+          ${hasShot ? `<button class="text-xs text-gray-500 hover:text-blue-600 underline view-screenshot-btn" data-id="${a.id}" data-src="${encodeURIComponent(a.screenshotUrl||a.screenshotKey||a.screenshot||'')}">截图</button><span class="text-gray-200">|</span>` : '<span class="text-xs text-gray-300 mr-1">无截图</span>'}
+          <button class="text-xs text-green-600 hover:text-green-800 font-medium toggle-verify-btn" data-id="${a.id}" data-verified="true">通过</button>
+          <span class="text-gray-200">|</span>
+          <button class="text-xs text-red-500 hover:text-red-700 font-medium toggle-verify-btn" data-id="${a.id}" data-verified="false">有问题</button>
+          <span class="text-gray-200">|</span>
+          <button class="text-xs text-gray-400 hover:text-gray-600 reset-pwd-btn" data-id="${a.id}">重置密码</button>
+        </div>
+      </td>
     </tr>`;
   }).join('');
 }
 
 /** 重置创作者密码 */
+document.addEventListener('click', function(e) {
+  const screenshotBtn = e.target.closest('.view-screenshot-btn');
+  if (screenshotBtn) {
+    viewScreenshot(screenshotBtn.dataset.id, decodeURIComponent(screenshotBtn.dataset.src || ''));
+    return;
+  }
+  const verifyBtn = e.target.closest('.toggle-verify-btn');
+  if (verifyBtn) {
+    toggleVerify(verifyBtn.dataset.id, verifyBtn.dataset.verified === 'true');
+    return;
+  }
+  const resetBtn = e.target.closest('.reset-pwd-btn');
+  if (resetBtn) {
+    resetAccountPassword(resetBtn.dataset.id);
+  }
+});
+
+async function batchVerifyAll() {
+  const targets = (cachedDB.accounts || []).filter(a => {
+    const hasShot = !!(a.screenshotUrl || a.screenshotKey || a.screenshot);
+    return hasShot && a.verified !== true && a.verified !== false;
+  });
+  if (!targets.length) { alert('没有符合条件的账号（有截图且未验证）'); return; }
+  if (!confirm(`将对以下 ${targets.length} 个有截图的账号通过验证：\n${targets.map(a=>a.username).join('、')}\n\n标记为「有问题」的账号不受影响，确认继续？`)) return;
+  let count = 0;
+  for (const a of targets) {
+    const res = await fetch('/api/db', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'X-Auth-Token': 'xhs-game-promo-2026' },
+      body: JSON.stringify({ username: a.username, verified: true, _update: true })
+    });
+    if (res.ok) { a.verified = true; count++; }
+  }
+  renderCreators();
+  showToast(`✅ 已批量验证 ${count} 个账号`);
+}
+
+async function viewScreenshot(accountId, srcOrKey) {
+  const modal = document.getElementById('screenshotModal');
+  const img = document.getElementById('screenshotImg');
+  img.src = '';
+  img.alt = '加载中...';
+  modal.classList.remove('hidden');
+
+  let src = srcOrKey || '';
+  // 如果是 GitHub URL 或 data: 直接用
+  if (src.startsWith('http') || src.startsWith('data:')) {
+    img.src = src;
+  } else if (src) {
+    // 旧格式：从 KV 独立 key 读取 base64
+    try {
+      const res = await fetch(`/api/db?screenshotKey=${encodeURIComponent(src)}`);
+      if (res.ok) img.src = await res.text();
+      else { modal.classList.add('hidden'); alert('截图不存在'); return; }
+    } catch(e) { modal.classList.add('hidden'); alert('加载失败：' + e.message); return; }
+  } else {
+    modal.classList.add('hidden'); alert('截图不存在'); return;
+  }
+  img.alt = '截图';
+}
+function closeScreenshotModal() {
+  document.getElementById('screenshotModal').classList.add('hidden');
+  document.getElementById('screenshotImg').src = '';
+}
+
+async function toggleVerify(accountId, verified) {
+  // 找到 username
+  const account = (cachedDB.accounts || []).find(a => a.id === accountId);
+  if (!account) return;
+  // 用 PATCH _update 原子更新，不依赖 cachedDB 状态
+  const res = await fetch('/api/db', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'X-Auth-Token': 'xhs-game-promo-2026' },
+    body: JSON.stringify({ username: account.username, verified, _update: true })
+  });
+  if (!res.ok) { showToast('操作失败', 'error'); return; }
+  account.verified = verified; // 本地同步
+  renderCreators();
+  showToast(verified ? `✅ ${account.username} 已通过验证` : `❌ ${account.username} 标记为有问题`);
+}
+
 async function resetAccountPassword(accountId) {
   const newPwd = prompt('请输入新密码：');
   if (!newPwd || !newPwd.trim()) return;
@@ -847,10 +948,27 @@ function loadSignups() {
         <th class="py-2 px-3 text-left">粉丝数</th><th class="py-2 px-3 text-left">微信号</th>
         <th class="py-2 px-3 text-left">主页</th>
         <th class="py-2 px-3 text-left">备注</th><th class="py-2 px-3 text-left">报名时间</th>
+        <th class="py-2 px-3 text-left">身份验证</th>
         <th class="py-2 px-3 text-left">状态</th><th class="py-2 px-3 text-center">操作</th>
       </tr></thead>
       <tbody>${signups.map(s=>{
         const badge={pending:'<span class="badge-pending px-2 py-0.5 rounded-full text-xs">待审核</span>',approved:'<span class="badge-approved px-2 py-0.5 rounded-full text-xs">已通过</span>',rejected:'<span class="badge-rejected px-2 py-0.5 rounded-full text-xs">已拒绝</span>'}[s.makerStatus]||'';
+        const account = (cachedDB.accounts||[]).find(a=>a.username===s.creatorName);
+        const hasShot = account && (account.screenshotUrl||account.screenshotKey||account.screenshot);
+        let verifyBadge = '';
+        if (!account) {
+          verifyBadge = '<span class="text-xs text-gray-300">未注册</span>';
+        } else if (account.verified === true) {
+          verifyBadge = hasShot
+            ? `<button class="text-xs font-medium text-green-600 hover:underline view-screenshot-btn" data-id="${account.id}" data-src="${encodeURIComponent(account.screenshotUrl||account.screenshotKey||account.screenshot||'')}">● 已验证</button>`
+            : '<span class="text-xs font-medium text-green-600">● 已验证</span>';
+        } else if (account.verified === false) {
+          verifyBadge = '<span class="text-xs font-medium text-red-500">● 有问题</span>';
+        } else {
+          verifyBadge = hasShot
+            ? `<button class="text-xs text-orange-500 hover:underline view-screenshot-btn" data-id="${account.id}" data-src="${encodeURIComponent(account.screenshotUrl||account.screenshotKey||account.screenshot||'')}">● 待验证</button>`
+            : '<span class="text-xs text-gray-400">● 未验证</span>';
+        }
         return `<tr class="border-b border-gray-50 tr-hover">
           <td class="py-2 px-3 font-semibold">${s.creatorName}</td>
           <td class="py-2 px-3"><span class="text-xs px-2 py-0.5 rounded-full ${s.creatorType==='主播'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'}">${s.creatorType}</span></td>
@@ -859,6 +977,7 @@ function loadSignups() {
           <td class="py-2 px-3">${s.creatorProfile?`<a href="${s.creatorProfile}" target="_blank" class="text-blue-500 underline text-xs">主页</a>`:'-'}</td>
           <td class="py-2 px-3 text-gray-400 max-w-[120px] truncate" title="${s.note||''}">${s.note||'-'}</td>
           <td class="py-2 px-3 text-xs text-gray-400">${new Date(s.createdAt).toLocaleDateString('zh-CN')}</td>
+          <td class="py-2 px-3">${verifyBadge}</td>
           <td class="py-2 px-3">${badge}</td>
           <td class="py-2 px-3 text-center">
             ${s.makerStatus==='pending'?`<button class="btn-green mr-1" onclick="reviewSignup('${s.id}','approved')">通过</button><button class="btn-red" onclick="reviewSignup('${s.id}','rejected')">拒绝</button>`:''}
@@ -1427,5 +1546,13 @@ async function exportFullReport() {
   el&&el.addEventListener('click',e=>{ if(e.target===el) closeModal(id); });
 });
 </script>
+<!-- 截图查看模态框 -->
+<div id="screenshotModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80" onclick="closeScreenshotModal()">
+  <div class="relative max-w-3xl max-h-screen p-2" onclick="event.stopPropagation()">
+    <button onclick="closeScreenshotModal()" class="absolute top-2 right-2 bg-white rounded-full w-8 h-8 flex items-center justify-center text-gray-700 font-bold text-lg shadow z-10">✕</button>
+    <img id="screenshotImg" src="" class="max-w-full max-h-[90vh] rounded-xl object-contain shadow-2xl" />
+  </div>
+</div>
 </body>
 </html>
+<!-- force-redeploy-1778673577 -->
