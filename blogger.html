@@ -436,15 +436,7 @@ function openSignup(taskId) {
 async function doSignup() {
   const taskId = document.getElementById('signupTaskId').value;
   const db = await loadDB();
-  const user = JSON.parse(localStorage.getItem('xhsUser') || '{}');
-  const checkUsername = user.username || creatorName || '';
-  if (!checkUsername) { showToast('请先登录账号后再报名', 'error'); return; }
-  const checkRes = await fetch('/api/db?action=signup_check', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: checkUsername })
-  });
-  const checkData = await checkRes.json();
-  if (!checkData.allowed) { showToast(checkData.reason || '报名失败，请重新登录后再试', 'error'); return; }
+
   if (db.signups.find(s=>s.taskId===taskId&&s.creatorName===creatorName&&s.creatorType===CREATOR_TYPE)) {
     showToast('你已报名此任务'); return;
   }
