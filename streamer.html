@@ -279,7 +279,7 @@ let _datashotUrl   = '';
   }
   const type = localStorage.getItem('creatorType');
   if (!creatorName || type !== CREATOR_TYPE) {
-    document.getElementById('loginModal').classList.remove('hidden');
+    window.location.replace('login.html');
   } else { initPage(); }
 })();
 
